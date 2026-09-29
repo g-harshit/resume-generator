@@ -189,15 +189,20 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 
 ### Phase 0 — Repo and local dev
 - [x] `git init`
-- [ ] `.gitignore`, `README.md`, `CLAUDE.md`
-- [ ] Toolchain: `uv` + Python 3.12 (system Python is 3.9), `corepack enable` for pnpm
-- [ ] `docker-compose.yml` with Postgres (dev DB + test DB)
-- [ ] Backend skeleton: FastAPI app, settings from `.env`, `/health`, SQLModel engine, Alembic
-- [ ] pytest against the Docker Postgres, one test per table, a transaction-per-test fixture
-- [ ] Web skeleton: Next.js + Tailwind, design tokens from the mockups (ivory ground,
-      deep-green accent, Instrument Serif display + IBM Plex Sans body)
-- [ ] pnpm workspace with `apps/web`, `packages/schema`, `packages/ui`
-- [ ] One command to run everything locally (`make dev` or a `Procfile`)
+- [x] `.gitignore`, `README.md`, `CLAUDE.md`
+- [x] Toolchain: `uv` + Python 3.12 (system Python is 3.9), pnpm via Homebrew
+      (`corepack enable` can't write to `/usr/local/bin` on this machine)
+- [x] `docker-compose.yml` with Postgres 18 on host port 5433 (`resume` + `resume_test`)
+- [x] Backend skeleton: FastAPI app, settings from `.env`, `/health` (touches the DB),
+      SQLModel engine, Alembic wired to app settings (`alembic check` clean)
+- [x] pytest against the Docker Postgres with a transaction-per-test fixture; refuses any
+      database not named `*_test`
+- [x] Web skeleton: Next.js 16 + Tailwind 4, design tokens from the mockups in
+      `globals.css` (`bg-ground`, `bg-accent`, `text-warn-ink`, …), Instrument Serif +
+      IBM Plex Sans; home page shows whether the API is reachable
+- [x] pnpm workspace (`apps/*`, `packages/*`) — `packages/schema` and `packages/ui` are
+      created when they get content (Phase 2 / when the extension needs shared UI)
+- [x] One command to run everything locally: `make dev` (API 8100, web 3100)
 
 ### Phase 1 — Email + password auth
 - [ ] `users` table + migration
@@ -314,10 +319,6 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 
 ---
 
-## Running locally (fill in as Phase 0 lands)
+## Running locally
 
-```bash
-docker compose up -d db
-cd backend && uv sync && uv run alembic upgrade head && uv run uvicorn app.main:app --reload
-pnpm install && pnpm --filter web dev
-```
+See [README.md](README.md): `make dev` after `pnpm install` and `uv sync`.
