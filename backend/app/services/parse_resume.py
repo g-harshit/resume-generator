@@ -2,13 +2,16 @@
 
 The model fills `ParsedResume`, a deliberately plain schema: no ids, no defaults,
 every field required (what OpenAI's strict structured output wants). Everything
-after that is ordinary code: dates are validated, conflicts resolved, and every
-bullet is checked against the file. The model is asked to copy, not write; a
+after that is ordinary code. Dates in particular: the model copies them exactly as
+written and `read_date` interprets them, because a model asked for "YYYY-MM" will
+confidently turn "Jul 2019 – 21" into 2021 and drop the month without saying so.
+Every bullet is checked against the file. The model is asked to copy, not write; a
 bullet we can't find in the file is flagged, because the profile is the only source
 of facts for every resume made from it.
 """
 
 import re
+from typing import NamedTuple
 
 from pydantic import BaseModel
 
@@ -45,9 +48,8 @@ class PExperience(BaseModel):
     company: str
     title: str
     location: str
-    start: str | None
-    end: str | None
-    current: bool
+    start: str  # as written: "Mar 2021", "03/2021", "2019"; "" if none
+    end: str  # as written, including "Present"; "" if none
     bullets: list[str]
 
 
@@ -56,8 +58,8 @@ class PEducation(BaseModel):
     degree: str
     field: str
     location: str
-    start: str | None
-    end: str | None
+    start: str
+    end: str
     details: str
 
 
@@ -69,15 +71,15 @@ class PSkillGroup(BaseModel):
 class PProject(BaseModel):
     name: str
     url: str
-    start: str | None
-    end: str | None
+    start: str
+    end: str
     bullets: list[str]
 
 
 class PCertification(BaseModel):
     name: str
     issuer: str
-    date: str | None
+    date: str
     url: str
 
 
@@ -106,15 +108,14 @@ Rules:
   improve anything. Each bullet is one achievement or responsibility, copied verbatim
   (drop only the bullet symbol). Join a bullet that was broken across lines.
 - Never invent or infer information that is not in the text. If something is not
-  there, use an empty string, an empty list, or null.
-- Dates: "YYYY-MM" when month and year are given, "YYYY" when only the year is.
-  If a date is ambiguous, abbreviated beyond recognition, or missing, use null and add
-  an entry to `unclear` quoting what the text says. Never guess a month.
-- `current` is true only when the text says the role is ongoing ("Present", "Now",
-  "Current"); then `end` is null.
+  there, use an empty string or an empty list.
+- Dates: copy each start and end date exactly as written ("Mar 2021", "03/2021",
+  "2019", "Present", "21"). Do not reformat, complete or correct them. For a range
+  like "Jul 2019 - 21", start is "Jul 2019" and end is "21". Empty string if none.
 - Keep skills as the person grouped them; if they are not grouped, use one group
   with an empty name. One skill per item.
-- `headline` is a title line under the name if there is one (e.g. "Backend Engineer").
+- `headline` is the job title under the name if there is one (e.g. "Backend
+  Engineer"), without the location or contact details, which have their own fields.
 - `summary` is an objective/summary/profile paragraph if there is one, verbatim.
 - Put anything you could not place or read confidently in `unclear`, with the section
   it belongs to and a short description quoting the text.
@@ -123,8 +124,69 @@ Rules:
 
 # --- after the model -------------------------------------------------------------
 
-_YEAR_MONTH = re.compile(r"^\d{4}(-(0[1-9]|1[0-2]))?$")
 _MIN_CHECKED_CHARS = 12  # too short to meaningfully look up ("Go", "SQL")
+
+_MONTHS = {
+    name: i + 1
+    for i, names in enumerate(
+        [
+            ("jan", "january"),
+            ("feb", "february"),
+            ("mar", "march"),
+            ("apr", "april"),
+            ("may",),
+            ("jun", "june"),
+            ("jul", "july"),
+            ("aug", "august"),
+            ("sep", "sept", "september"),
+            ("oct", "october"),
+            ("nov", "november"),
+            ("dec", "december"),
+        ]
+    )
+    for name in names
+}
+_SEASONS = {"spring", "summer", "fall", "autumn", "winter"}
+_PRESENT = {"present", "current", "currently", "now", "today", "ongoing", "till date", "to date"}
+
+
+class DateReading(NamedTuple):
+    value: str | None  # "YYYY" or "YYYY-MM"
+    current: bool  # the text said "Present" or similar
+    readable: bool  # False: there was text and we couldn't make a date of it
+
+
+def read_date(text: str) -> DateReading:
+    """Interpret a date exactly as a resume wrote it. Only unambiguous forms are
+    accepted; anything else is reported unreadable rather than guessed."""
+    t = re.sub(r"\s+", " ", text.strip().lower()).strip(" .,")
+    if not t:
+        return DateReading(None, False, True)
+    if t in _PRESENT:
+        return DateReading(None, True, True)
+
+    def ym(year: int, month: int | None = None) -> DateReading:
+        if not 1900 <= year <= 2100 or (month is not None and not 1 <= month <= 12):
+            return DateReading(None, False, False)
+        return DateReading(
+            f"{year:04d}" if month is None else f"{year:04d}-{month:02d}", False, True
+        )
+
+    if m := re.fullmatch(r"(\d{4})", t):
+        return ym(int(m[1]))
+    if m := re.fullmatch(r"(\d{4})[-/.](\d{1,2})", t):
+        return ym(int(m[1]), int(m[2]))
+    if m := re.fullmatch(r"(\d{1,2})[-/.](\d{4})", t):
+        return ym(int(m[2]), int(m[1]))
+    if m := re.fullmatch(r"([a-z]+)\.?,? ?(\d{4}|'\d{2}|’\d{2})", t):
+        word, year_text = m[1], m[2]
+        # '21 is an explicit abbreviation (apostrophe), unlike a bare "21".
+        year = int(year_text) if year_text[0].isdigit() else 2000 + int(year_text[1:])
+        if word in _MONTHS:
+            return ym(year, _MONTHS[word])
+        if word in _SEASONS:
+            return ym(year)
+    return DateReading(None, False, False)
 
 
 def _squash(s: str) -> str:
@@ -141,22 +203,22 @@ class _Converter:
     def warn(self, path: str, message: str) -> None:
         self.warnings.append({"path": path, "message": message})
 
-    def date(self, value: str | None, path: str) -> str | None:
-        if value is None or not value.strip():
-            return None
-        value = value.strip()
-        if _YEAR_MONTH.match(value):
-            return value
-        self.warn(path, f"We couldn't read the date “{value}”. Please enter it.")
-        return None
+    def date(self, text: str, path: str) -> DateReading:
+        reading = read_date(text)
+        if not reading.readable:
+            self.warn(path, f"We couldn't read the date “{text.strip()}”. Please enter it.")
+        return reading
 
-    def span(self, start, end, path: str) -> tuple[str | None, str | None]:
-        start = self.date(start, f"{path}.start")
-        end = self.date(end, f"{path}.end")
+    def span(
+        self, start_text: str, end_text: str, path: str
+    ) -> tuple[str | None, str | None, bool]:
+        start = self.date(start_text, f"{path}.start").value
+        end_reading = self.date(end_text, f"{path}.end")
+        end, current = end_reading.value, end_reading.current
         if start and end and end[: len(start)] < start[: len(end)]:
             self.warn(f"{path}.end", "The end date is before the start date. Please check it.")
             end = None
-        return start, end
+        return start, end, current
 
     def verbatim(self, text: str, path: str) -> str:
         text = text.strip()
@@ -181,12 +243,10 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
     experience = []
     for i, exp in enumerate(parsed.experience[:30]):
         path = f"experience.{i}"
-        start, end = c.span(exp.start, exp.end, path)
-        if exp.current and end:
-            end = None
-        if not start:
+        start, end, current = c.span(exp.start, exp.end, path)
+        if not exp.start.strip():
             c.warn(f"{path}.start", "No start date found for this role.")
-        if not exp.current and not end and exp.end is None:
+        if not exp.end.strip():
             c.warn(f"{path}.end", "No end date found. If you still work here, mark it current.")
         experience.append(
             {
@@ -195,14 +255,14 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
                 "location": exp.location[:200],
                 "start": start,
                 "end": end,
-                "current": exp.current,
+                "current": current,
                 "bullets": c.bullets(exp.bullets, path),
             }
         )
 
     education = []
     for i, edu in enumerate(parsed.education[:15]):
-        start, end = c.span(edu.start, edu.end, f"education.{i}")
+        start, end, _ = c.span(edu.start, edu.end, f"education.{i}")
         education.append(
             {
                 "institution": edu.institution[:200],
@@ -229,7 +289,7 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
 
     projects = []
     for i, prj in enumerate(parsed.projects[:20]):
-        start, end = c.span(prj.start, prj.end, f"projects.{i}")
+        start, end, _ = c.span(prj.start, prj.end, f"projects.{i}")
         projects.append(
             {
                 "name": prj.name[:200],
@@ -244,7 +304,7 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
         {
             "name": cert.name[:200],
             "issuer": cert.issuer[:200],
-            "date": c.date(cert.date, f"certifications.{i}.date"),
+            "date": c.date(cert.date, f"certifications.{i}.date").value,
             "url": cert.url[:500],
         }
         for i, cert in enumerate(parsed.certifications[:30])
