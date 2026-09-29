@@ -1,7 +1,29 @@
+import type { ResumeData } from "@rg/schema";
 import { API_URL } from "@/lib/config";
 
 export type User = { id: number; email: string; name: string };
 type TokenResponse = { token: string; user: User };
+
+export type ParseWarning = { path: string; message: string };
+
+export type Upload = {
+  id: number;
+  filename: string;
+  status: "pending" | "running" | "done" | "failed";
+  error: string | null;
+  warnings: ParseWarning[];
+  /** True when the user's profile currently holds this upload. */
+  applied: boolean;
+  created_at: string;
+};
+
+export type Profile = {
+  data: ResumeData;
+  version: number;
+  reviewed_at: string | null;
+  source_document_id: number | null;
+  updated_at: string;
+};
 
 /** A response the API sent back with an error status. `status` 0 never happens here:
  *  a network failure throws the browser's own TypeError instead. */
@@ -48,7 +70,10 @@ function messageFrom(status: number, body: unknown): string {
 
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
-  if (init.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+  // FormData sets its own multipart Content-Type (with the boundary); everything else is JSON.
+  if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
   const token = getToken();
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
@@ -70,4 +95,15 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
   me: () => request<User>("/auth/me"),
+
+  upload: (file: File) => {
+    const body = new FormData();
+    body.append("file", file);
+    return request<Upload>("/uploads", { method: "POST", body });
+  },
+  getUpload: (id: number) => request<Upload>(`/uploads/${id}`),
+  applyUpload: (id: number) => request<Upload>(`/uploads/${id}/apply`, { method: "POST" }),
+
+  /** null until the first upload has been read. */
+  getProfile: () => request<Profile | null>("/profile"),
 };

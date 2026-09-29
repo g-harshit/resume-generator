@@ -235,17 +235,37 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] Validation tests (dates, date order, current roles, unique ids, unknown fields, caps)
 
 ### Phase 3 — Upload and parse the draft resume
-- [ ] `Storage` interface; local-disk implementation under `backend/var/uploads`
-- [ ] `source_documents` table; `POST /uploads` (PDF/DOCX, ≤ 5 MB, magic-byte check)
-- [ ] Text extraction: PyMuPDF with reading-order sorting (handles two-column drafts),
-      python-docx for Word
-- [ ] AI provider interface + first provider + stub provider
-- [ ] `parse_resume`: extracted text → `ResumeData` via schema-constrained output;
-      assign ids; collect `parse_warnings` (unreadable dates, missing email/phone, empty sections)
-- [ ] Background job with status polling; job own DB session; stale-job timeout
-- [ ] Create or update the profile from the parse
-- [ ] Web: onboarding upload screen (mockup 1) with progress
-- [ ] Fixture resumes in `tests/fixtures/` (one-column PDF, two-column PDF, DOCX) — all invented people
+- [x] `Storage` interface; local-disk implementation under `backend/var/uploads` (random
+      file names; the user's filename never touches the disk)
+- [x] `source_documents` + `profiles` tables (migration `0002`, both `ON DELETE CASCADE`
+      from users; `tests/test_models.py` fails if a future user-owned table forgets)
+- [x] `POST /uploads`: PDF/DOCX decided from the bytes, ≤ 5 MB, 20 uploads/user/day
+      (each is a paid model call); `GET /uploads/{id}`, `/file` (the original), `/apply`
+- [x] Text extraction (`services/extract.py`): PyMuPDF with column detection — columns
+      found by left edge, a side column must hold ≥ 15% of the text (so right-aligned
+      dates stay with their role), full-width blocks (≥ 75% of the page) split segments;
+      python-docx including the page header (where contact details often live) and tables.
+      Scanned / password-protected / damaged files fail with a message saying what to do.
+- [x] AI provider interface (`ai_providers/`), **OpenAI** (Responses API structured output,
+      `store=False`, model = `OPENAI_PARSE_MODEL`, default `gpt-4o-mini`) + stub for tests
+- [x] `parse_resume`: the model fills a plain schema; code validates dates (unreadable →
+      null + warning, never guessed), resolves current/end conflicts, dedupes skills,
+      and **flags any bullet or summary it can't find in the file** (the model is told
+      to copy, and this checks it did)
+- [x] Background job (FastAPI BackgroundTasks) with its own session; stale after 10 min
+- [x] Profile created from the first parse; a new upload replaces an *unreviewed* profile
+      but never a reviewed one unless the user asks (`/apply`)
+- [x] Web: upload screen (mockup 1) with drag-and-drop, progress while reading, errors,
+      "what we read" summary and "things to check"
+- [x] Fixture resumes built in code (`tests/fixtures.py`: two-column PDF, dated one-column
+      PDF, blank PDF, DOCX with header + table) — all invented people
+- [x] Checked in the browser: upload → reading → clear failure without an API key; the
+      "what we read" screen with warnings. **Not yet run against the real OpenAI API**
+      (needs `OPENAI_API_KEY` in `backend/.env`).
+- Found on the way: a form submitted before the page's JavaScript loaded did a native
+  GET and put the password in the URL. Auth forms are now `method="post"`.
+- `SessionDep` closes the session when the handler returns (`scope="function"`), so a
+  background job never runs inside a request's transaction.
 
 ### Phase 4 — Profile review and editing
 - [ ] `GET/PUT /profile` with optimistic `version` check

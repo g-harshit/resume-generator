@@ -82,7 +82,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <p className="text-base leading-relaxed text-muted">{copy.lead}</p>
         </div>
 
-        <form onSubmit={onSubmit} className="flex flex-col gap-4">
+        {/* method="post": if someone submits before the page's JavaScript has loaded,
+            the browser falls back to a native submit, and a GET would put the password
+            in the URL (history, server logs). A POST keeps it out. */}
+        <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4">
           {mode === "register" && (
             <label className="flex flex-col gap-1.5 text-sm font-medium">
               Your name

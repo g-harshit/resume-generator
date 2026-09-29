@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app import models  # noqa: F401  (registers tables on SQLModel.metadata)
 from app.config import get_settings
-from app.routers import auth, health
+from app.routers import auth, health, profile, uploads
 
 settings = get_settings()
 
@@ -19,3 +19,5 @@ app.add_middleware(
 
 app.include_router(health.router)
 app.include_router(auth.router)
+app.include_router(uploads.router)
+app.include_router(profile.router)

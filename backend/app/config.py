@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://resume:resume@localhost:5433/resume"
 
     # Comma-separated. The web app in dev; the extension's origin is added in Phase 11.
-    cors_origins: str = "http://localhost:3100"
+    cors_origins: str = "http://localhost:3100,http://127.0.0.1:3100"
 
     # "development" or "production". Production refuses to start with dev-only defaults.
     environment: str = "development"
@@ -25,6 +25,17 @@ class Settings(BaseSettings):
     jwt_secret: str = DEV_JWT_SECRET
     # There is no refresh token yet, so this is how long a login lasts.
     access_token_days: int = 7
+
+    # "openai", or "stub" (canned answers; what the test suite uses).
+    ai_provider: str = "openai"
+    openai_api_key: str = ""
+    # Reads resumes and job descriptions. Configurable because model names change.
+    openai_parse_model: str = "gpt-4o-mini"
+
+    # Uploaded files, when stored on local disk (dev). R2 comes with deployment.
+    upload_dir: str = "var/uploads"
+    # Each parse is a paid model call, so uploads per account per day are capped.
+    uploads_per_day: int = 20
 
     @model_validator(mode="after")
     def _no_dev_secrets_in_production(self) -> "Settings":
