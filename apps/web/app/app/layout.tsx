@@ -6,6 +6,11 @@ import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { APP_NAME } from "@/lib/config";
 
+const NAV = [
+  { href: "/app", label: "Home" },
+  { href: "/app/profile", label: "Profile" },
+];
+
 function initials(name: string) {
   return name
     .split(/\s+/)
@@ -42,6 +47,23 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
         <Link href="/app" className="font-display text-3xl text-ink hover:text-ink md:px-3 md:pb-6">
           {APP_NAME}
         </Link>
+        <div className="flex gap-1 md:flex-col">
+          {NAV.map(({ href, label }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`flex h-11 items-center rounded-lg px-3 text-[15px] text-ink hover:text-ink ${
+                  active ? "border border-line bg-surface font-semibold" : "hover:bg-surface/60"
+                }`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </div>
         <div className="flex items-center gap-3 md:mt-auto md:flex-col md:items-stretch">
           <div className="flex items-center gap-2.5 md:px-2">
             <span

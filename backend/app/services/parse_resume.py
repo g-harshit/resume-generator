@@ -16,7 +16,7 @@ from typing import NamedTuple
 from pydantic import BaseModel
 
 from app.ai_providers import AIProvider
-from app.schemas.resume import ResumeData
+from app.schemas.resume import ResumeData, new_id
 
 # A resume is a few thousand characters. Past this it's not a resume (or it's a
 # portfolio with one attached) and we'd be paying to read a book.
@@ -204,75 +204,90 @@ def _squash(s: str) -> str:
 
 
 class _Converter:
+    """Builds `ResumeData` and collects notes. Ids are assigned here, not by the
+    model, so each note can point at the entry it is about (`target`) and still
+    points there after the user reorders or deletes other entries."""
+
     def __init__(self, source_text: str):
         self.source = _squash(source_text)
-        self.warnings: list[dict] = []
+        self.notes: list[dict] = []
 
-    def warn(self, path: str, message: str) -> None:
-        self.warnings.append({"path": path, "message": message})
+    def note(self, target: str, field: str | None, message: str) -> None:
+        self.notes.append({"target": target, "field": field, "message": message})
 
-    def date(self, text: str, path: str) -> DateReading:
+    def date(self, text: str, target: str, field: str) -> DateReading:
         reading = read_date(text)
         if not reading.readable:
-            self.warn(path, f"We couldn't read the date “{text.strip()}”. Please enter it.")
+            self.note(
+                target, field, f"We couldn't read the date “{text.strip()}”. Please enter it."
+            )
         return reading
 
     def span(
-        self, start_text: str, end_text: str, path: str
+        self, start_text: str, end_text: str, target: str
     ) -> tuple[str | None, str | None, bool]:
-        start = self.date(start_text, f"{path}.start").value
-        end_reading = self.date(end_text, f"{path}.end")
+        start = self.date(start_text, target, "start").value
+        end_reading = self.date(end_text, target, "end")
         end, current = end_reading.value, end_reading.current
         if start and end and end[: len(start)] < start[: len(end)]:
-            self.warn(f"{path}.end", "The end date is before the start date. Please check it.")
+            self.note(
+                target,
+                "end",
+                f"The end date “{end_text.strip()}” is before the start date. Please check it.",
+            )
             end = None
         return start, end, current
 
-    def verbatim(self, text: str, path: str) -> str:
+    def verbatim(self, text: str, target: str, field: str) -> str:
         text = text.strip()
         if len(text) >= _MIN_CHECKED_CHARS and _squash(text) not in self.source:
-            self.warn(
-                path,
+            self.note(
+                target,
+                field,
                 "We couldn't find this exact line in your file. Check it says what you meant.",
             )
         return text
 
-    def bullets(self, items: list[str], path: str) -> list[dict]:
-        return [
-            {"text": self.verbatim(t, f"{path}.bullets.{i}")[:2000]}
-            for i, t in enumerate(t for t in items if t.strip())
-        ][:30]
+    def bullets(self, items: list[str], limit: int) -> list[dict]:
+        out = []
+        for text in [t for t in items if t.strip()][:limit]:
+            bullet_id = new_id("b")
+            out.append({"id": bullet_id, "text": self.verbatim(text, bullet_id, "text")[:2000]})
+        return out
 
 
 def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, list[dict]]:
+    """The parsed profile, and notes about reading the file: things only the parse
+    can know (a date we couldn't read, a line we couldn't find). Whether the profile
+    is *complete* (a missing email, a role without dates) is `profile_checks`' job,
+    recomputed on every save, so it's not repeated here."""
     c = _Converter(source_text)
     b = parsed.basics
 
     experience = []
-    for i, exp in enumerate(parsed.experience[:30]):
-        path = f"experience.{i}"
-        start, end, current = c.span(exp.start, exp.end, path)
-        if not exp.start.strip():
-            c.warn(f"{path}.start", "No start date found for this role.")
-        if not exp.end.strip():
-            c.warn(f"{path}.end", "No end date found. If you still work here, mark it current.")
+    for exp in parsed.experience[:30]:
+        exp_id = new_id("exp")
+        start, end, current = c.span(exp.start, exp.end, exp_id)
         experience.append(
             {
+                "id": exp_id,
                 "company": exp.company[:200],
                 "title": exp.title[:200],
                 "location": exp.location[:200],
                 "start": start,
                 "end": end,
                 "current": current,
-                "bullets": c.bullets(exp.bullets, path),
+                "bullets": c.bullets(exp.bullets, 30),
             }
         )
 
     education = []
-    for i, edu in enumerate(parsed.education[:15]):
-        start, end, _ = c.span(edu.start, edu.end, f"education.{i}")
+    for edu in parsed.education[:15]:
+        edu_id = new_id("edu")
+        start, end, _ = c.span(edu.start, edu.end, edu_id)
         education.append(
             {
+                "id": edu_id,
                 "institution": edu.institution[:200],
                 "degree": edu.degree[:200],
                 "field": edu.field[:200],
@@ -296,28 +311,34 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
             skills.append({"group": group.group[:200], "items": items[:60]})
 
     projects = []
-    for i, prj in enumerate(parsed.projects[:20]):
-        start, end, _ = c.span(prj.start, prj.end, f"projects.{i}")
+    for prj in parsed.projects[:20]:
+        prj_id = new_id("prj")
+        start, end, _ = c.span(prj.start, prj.end, prj_id)
         projects.append(
             {
+                "id": prj_id,
                 "name": prj.name[:200],
                 "url": prj.url[:500],
                 "start": start,
                 "end": end,
-                "bullets": c.bullets(prj.bullets, f"projects.{i}")[:20],
+                "bullets": c.bullets(prj.bullets, 20),
             }
         )
 
-    certifications = [
-        {
-            "name": cert.name[:200],
-            "issuer": cert.issuer[:200],
-            "date": c.date(cert.date, f"certifications.{i}.date").value,
-            "url": cert.url[:500],
-        }
-        for i, cert in enumerate(parsed.certifications[:30])
-        if cert.name.strip()
-    ]
+    certifications = []
+    for cert in parsed.certifications[:30]:
+        if not cert.name.strip():
+            continue
+        cert_id = new_id("cert")
+        certifications.append(
+            {
+                "id": cert_id,
+                "name": cert.name[:200],
+                "issuer": cert.issuer[:200],
+                "date": c.date(cert.date, cert_id, "date").value,
+                "url": cert.url[:500],
+            }
+        )
 
     data = ResumeData.model_validate(
         {
@@ -333,7 +354,7 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
                     if link.url.strip()
                 ],
             },
-            "summary": c.verbatim(parsed.summary, "summary")[:2000],
+            "summary": c.verbatim(parsed.summary, "summary", "summary")[:2000],
             "experience": experience,
             "education": education,
             "skills": skills,
@@ -342,16 +363,11 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
         }
     )
 
-    if not data.basics.name:
-        c.warn("basics.name", "We couldn't find your name.")
-    if not data.basics.email:
-        c.warn("basics.email", "No email address found. Recruiters will need one.")
-    if not data.basics.phone:
-        c.warn("basics.phone", "No phone number found.")
+    # The model's own "couldn't place this" list: free text, not tied to an entry.
     for item in parsed.unclear:
-        c.warn(item.section, item.detail)
+        c.note("", None, item.detail)
 
-    return data, c.warnings
+    return data, c.notes
 
 
 def parse_resume(text: str, provider: AIProvider) -> tuple[ResumeData, list[dict]]:

@@ -26,6 +26,17 @@ STALE_AFTER = timedelta(minutes=10)
 _UNEXPECTED = "Something went wrong reading your resume. Please try again."
 
 
+def notes_of(doc: SourceDocument | None) -> list[dict]:
+    """The parse notes, in the current shape. Uploads read before notes pointed at
+    entry ids stored {"path", "message"}; those become general notes."""
+    if doc is None:
+        return []
+    return [
+        n if "target" in n else {"target": "", "field": None, "message": n.get("message", "")}
+        for n in (doc.parse_warnings or [])
+    ]
+
+
 def is_stale(doc: SourceDocument) -> bool:
     return (
         doc.parse_status in (ParseStatus.PENDING, ParseStatus.RUNNING)

@@ -268,11 +268,31 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
   background job never runs inside a request's transaction.
 
 ### Phase 4 — Profile review and editing
-- [ ] `GET/PUT /profile` with optimistic `version` check
-- [ ] Web: review screen (mockup 2) — original file preview beside the parsed form,
-      warnings highlighted, "Looks right" → `POST /profile/confirm`
-- [ ] Web: full profile editor (add/remove/reorder roles, bullets, skills, education, projects)
-- [ ] Autosave with debounce
+- [x] `GET/PUT /profile` with optimistic `version` check — one compare-and-set UPDATE, so
+      two tabs can't both win; a stale version gets 409 and the UI offers a reload.
+      `version: 0` creates a profile from scratch (no upload).
+- [x] `POST /profile/confirm` (needs the latest version and no *blocking* check: a name,
+      each role a title or company, …); `GET /uploads/{id}/text` for Word files
+- [x] Two kinds of "things to check", both pointing at an entry **by id** (positions go
+      stale the moment a role is moved):
+  - **checks** (`services/profile_checks.py`): what's missing *now*, recomputed on every
+    save, so they vanish when fixed
+  - **notes**: what only the parse knows (a date it couldn't read, quoting it; a line not
+    found in the file; what the model couldn't place). Shown until the profile is
+    confirmed; a date note settles once that date has a value. Where a note and a check
+    are about the same field, only the note shows (`toShow` in `lib/notes.ts`).
+- [x] Web: review screen (mockup 2) at `/app/profile` — the original beside the form
+      (PDF as-is; Word as the text we read), issues under the field they're about,
+      "Looks right — save my profile" → confirm
+- [x] Web: full editor — every section; add / remove / reorder (up/down buttons, not
+      drag, so it works by keyboard) roles, lines, links, education, skill groups,
+      projects, certifications; skills as chips (Enter or comma; pasting "Go, SQL" adds
+      both); dates as month (optional) + year, so year-only education works
+- [x] Autosave 800 ms after the last edit; saves never overlap and always send the latest;
+      a warning on closing the tab with unsaved edits
+- [x] Checked in the browser with a real OpenAI parse: the "“21”" note beside Tradewise's
+      end date, fixed by entering Feb 2021 (saved, note gone), a skill added, confirmed,
+      home shows "Your profile is ready"; phone width has no sideways scroll
 
 ### Phase 5 — Job description intake and matching
 - [ ] `job_descriptions` table; dedupe on `(user_id, content_hash)`

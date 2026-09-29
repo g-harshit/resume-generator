@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ResumeDropzone } from "@/components/resume-dropzone";
 import { api, type Profile, type Upload } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { warningPlace } from "@/lib/warnings";
+import Link from "next/link";
+import { toShow } from "@/lib/notes";
 
 const POLL_MS = 1500;
 
@@ -33,15 +34,8 @@ export default function AppHome() {
       setState({ kind: "empty" });
       return;
     }
-    // Show the warnings from what the profile was read from, and offer a newer upload
-    // that wasn't applied (the profile had already been reviewed).
-    const upload =
-      latest && !latest.applied
-        ? latest
-        : profile.source_document_id
-          ? await api.getUpload(profile.source_document_id).catch(() => null)
-          : null;
-    setState({ kind: "ready", profile, upload });
+    // Offer a newer upload that wasn't applied (the profile had already been reviewed).
+    setState({ kind: "ready", profile, upload: latest && !latest.applied ? latest : null });
   }, []);
 
   useEffect(() => {
@@ -105,8 +99,9 @@ export default function AppHome() {
   if (state.kind === "ready") {
     const { profile, upload } = state;
     const d = profile.data;
-    const pending = upload && !upload.applied ? upload : null;
-    const warnings = pending ? [] : (upload?.warnings ?? []);
+    const pending = upload;
+    const shown = toShow(d, profile.checks, profile.notes);
+    const toCheck = shown.general.length + shown.placed.length;
     const bullets = d.experience.reduce((n, e) => n + e.bullets.length, 0);
     const skills = d.skills.reduce((n, g) => n + g.items.length, 0);
 
@@ -160,25 +155,26 @@ export default function AppHome() {
           </dl>
         </section>
 
-        {warnings.length > 0 && (
-          <section aria-label="Things to check" className="flex flex-col gap-3 rounded-xl bg-warn-soft p-5 text-warn-ink">
-            <h2 className="font-semibold">
-              {warnings.length === 1 ? "1 thing to check" : `${warnings.length} things to check`}
-            </h2>
-            <ul className="flex flex-col gap-2 text-sm">
-              {warnings.map((w, i) => (
-                <li key={i}>
-                  <span className="font-medium">{warningPlace(w, d)}:</span> {w.message}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href="/app/profile"
+            className="inline-flex h-12 items-center rounded-[10px] bg-accent px-5 text-[15px] font-medium text-white hover:bg-accent-hover hover:text-white"
+          >
+            {profile.reviewed_at ? "Edit your profile" : "Review your profile"}
+          </Link>
+          {toCheck > 0 && (
+            <span className="rounded-full bg-warn-soft px-3 py-1.5 text-sm font-medium text-warn-ink">
+              {toCheck === 1 ? "1 thing to check" : `${toCheck} things to check`}
+            </span>
+          )}
+        </div>
 
-        <p className="text-sm text-muted">
-          Reviewing and editing your profile comes next. Want to start over with another file?
-        </p>
-        <ResumeDropzone onFile={start} />
+        <details className="group rounded-xl border border-line bg-surface p-5">
+          <summary className="cursor-pointer text-sm font-medium">Start over with a different file</summary>
+          <div className="mt-4">
+            <ResumeDropzone onFile={start} />
+          </div>
+        </details>
       </div>
     );
   }

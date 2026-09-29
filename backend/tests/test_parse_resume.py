@@ -66,8 +66,13 @@ def parsed(**overrides) -> ParsedResume:
     return ParsedResume(**(base | overrides))
 
 
-def paths(warnings):
-    return [w["path"] for w in warnings]
+def about(notes, target, field=None):
+    """Messages of the notes pointing at `target` (and `field`, if given)."""
+    return [
+        n["message"]
+        for n in notes
+        if n["target"] == target and (field is None or n["field"] == field)
+    ]
 
 
 def test_a_clean_parse_becomes_resume_data_with_ids():
@@ -81,8 +86,8 @@ def test_a_clean_parse_becomes_resume_data_with_ids():
 
 
 def test_a_bullet_broken_across_lines_still_counts_as_verbatim():
-    _, warnings = to_resume_data(parsed(), SOURCE)
-    assert not any(".bullets." in p for p in paths(warnings))
+    data, notes = to_resume_data(parsed(), SOURCE)
+    assert about(notes, data.experience[0].bullets[0].id) == []
 
 
 def test_a_bullet_that_is_not_in_the_file_is_flagged():
@@ -91,27 +96,30 @@ def test_a_bullet_that_is_not_in_the_file_is_flagged():
         .experience[0]
         .model_copy(update={"bullets": ["Led a team of 40 engineers across three continents."]})
     )
-    _, warnings = to_resume_data(parsed(experience=[exp]), SOURCE)
-    assert "experience.0.bullets.0" in paths(warnings)
+    data, notes = to_resume_data(parsed(experience=[exp]), SOURCE)
+    assert about(notes, data.experience[0].bullets[0].id, "text")
 
 
 def test_a_bare_two_digit_year_is_flagged_not_guessed():
     # What a real model did with "Jul 2019 – 21" when asked for YYYY-MM: "2021",
     # month dropped, no warning. Now it copies "21" and code refuses to guess.
-    data, warnings = to_resume_data(parsed(), SOURCE)
+    data, notes = to_resume_data(parsed(), SOURCE)
     cartwheel = data.experience[1]
     assert cartwheel.start == "2019-07" and cartwheel.end is None and not cartwheel.current
-    assert {
-        "path": "experience.1.end",
-        "message": "We couldn't read the date “21”. Please enter it.",
-    } in warnings
+    assert about(notes, cartwheel.id, "end") == ["We couldn't read the date “21”. Please enter it."]
+
+
+def test_notes_follow_the_entry_not_its_position():
+    data, notes = to_resume_data(parsed(), SOURCE)
+    moved = data.model_copy(update={"experience": list(reversed(data.experience))})
+    assert about(notes, moved.experience[0].id, "end")  # Cartwheel, now first
 
 
 def test_end_before_start_is_dropped_and_flagged():
     exp = parsed().experience[1].model_copy(update={"start": "May 2021", "end": "Jan 2020"})
-    data, warnings = to_resume_data(parsed(experience=[exp]), SOURCE)
+    data, notes = to_resume_data(parsed(experience=[exp]), SOURCE)
     assert data.experience[0].end is None
-    assert "experience.0.end" in paths(warnings)
+    assert "“Jan 2020” is before the start date" in about(notes, data.experience[0].id, "end")[0]
 
 
 @pytest.mark.parametrize(
@@ -150,10 +158,14 @@ def test_read_date_refuses_to_guess(text):
     assert read_date(text) == (None, False, False)
 
 
-def test_no_end_date_at_all_asks_whether_the_role_is_current():
+def test_what_profile_checks_can_recompute_is_not_a_parse_note():
+    # Missing contact details and dates are the live checks' job (test_profile.py);
+    # repeating them here would show the user the same thing twice.
     exp = parsed().experience[1].model_copy(update={"end": ""})
-    _, warnings = to_resume_data(parsed(experience=[exp]), SOURCE)
-    assert "experience.0.end" in paths(warnings)
+    basics = parsed().basics.model_copy(update={"email": "", "phone": ""})
+    data, notes = to_resume_data(parsed(experience=[exp], basics=basics), SOURCE)
+    assert about(notes, data.experience[0].id) == []
+    assert about(notes, "basics") == []
 
 
 def test_skills_are_trimmed_and_deduplicated():
@@ -162,14 +174,8 @@ def test_skills_are_trimmed_and_deduplicated():
 
 
 def test_what_the_model_found_unclear_is_passed_on():
-    _, warnings = to_resume_data(parsed(), SOURCE)
-    assert {"path": "experience.1.end", "message": "End date reads “Jul 2019 – 21”."} in warnings
-
-
-def test_missing_contact_details_are_flagged():
-    basics = parsed().basics.model_copy(update={"email": "", "phone": ""})
-    _, warnings = to_resume_data(parsed(basics=basics), SOURCE)
-    assert {"basics.email", "basics.phone"} <= set(paths(warnings))
+    _, notes = to_resume_data(parsed(), SOURCE)
+    assert about(notes, "") == ["End date reads “Jul 2019 – 21”."]
 
 
 def test_parse_resume_sends_the_text_to_the_provider():

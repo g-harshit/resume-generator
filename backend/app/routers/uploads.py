@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.database import SessionDep
 from app.models import ParseStatus, Profile, SourceDocument, User, utcnow
 from app.services.extract import DOCX, PDF, sniff_type
-from app.services.resume_import import is_stale, replace_profile, run_parse
+from app.services.resume_import import is_stale, notes_of, replace_profile, run_parse
 from app.services.storage import get_storage
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
@@ -25,7 +25,8 @@ class UploadOut(BaseModel):
     filename: str
     status: str
     error: str | None
-    warnings: list[dict]
+    # Notes from reading the file (see parse_resume.to_resume_data).
+    notes: list[dict]
     # True when this upload is what the user's profile currently holds.
     applied: bool
     created_at: datetime
@@ -39,7 +40,7 @@ def _out(session: Session, doc: SourceDocument) -> UploadOut:
         filename=doc.filename,
         status=ParseStatus.FAILED if stale else doc.parse_status,
         error=_TOOK_TOO_LONG if stale else doc.parse_error,
-        warnings=doc.parse_warnings or [],
+        notes=notes_of(doc),
         applied=profile is not None and profile.source_document_id == doc.id,
         created_at=doc.created_at,
     )
@@ -110,6 +111,18 @@ def get_file(document_id: int, user: CurrentUser, session: SessionDep) -> Respon
         media_type=doc.mime,
         headers={"Content-Disposition": "inline", "Cache-Control": "private, no-store"},
     )
+
+
+class TextOut(BaseModel):
+    text: str
+
+
+@router.get("/{document_id}/text")
+def get_text(document_id: int, user: CurrentUser, session: SessionDep) -> TextOut:
+    """The text we read from the file: what a Word upload is shown as (browsers can't
+    display .docx), and useful beside any parse."""
+    doc = _own(session, user, document_id)
+    return TextOut(text=doc.extracted_text or "")
 
 
 @router.post("/{document_id}/apply")

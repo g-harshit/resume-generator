@@ -4,14 +4,18 @@ import { API_URL } from "@/lib/config";
 export type User = { id: number; email: string; name: string };
 type TokenResponse = { token: string; user: User };
 
-export type ParseWarning = { path: string; message: string };
+/** Something noticed while reading the file, pointing at an entry by id. `target`
+ *  "" is a general note; "basics" / "summary" are those sections. */
+export type Note = { target: string; field: string | null; message: string };
+/** Something missing in the profile as it is now. Recomputed on every save. */
+export type Check = Note & { blocking: boolean };
 
 export type Upload = {
   id: number;
   filename: string;
   status: "pending" | "running" | "done" | "failed";
   error: string | null;
-  warnings: ParseWarning[];
+  notes: Note[];
   /** True when the user's profile currently holds this upload. */
   applied: boolean;
   created_at: string;
@@ -22,7 +26,12 @@ export type Profile = {
   version: number;
   reviewed_at: string | null;
   source_document_id: number | null;
+  /** "application/pdf" can be shown as-is; a Word file is shown as the text we read. */
+  source_mime: string | null;
   updated_at: string;
+  checks: Check[];
+  /** Only until the profile is confirmed. */
+  notes: Note[];
 };
 
 /** A response the API sent back with an error status. `status` 0 never happens here:
@@ -68,7 +77,7 @@ function messageFrom(status: number, body: unknown): string {
   return status >= 500 ? "Something went wrong on our side. Try again in a moment." : "Request failed";
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function send(path: string, init: RequestInit = {}): Promise<Response> {
   const headers = new Headers(init.headers);
   // FormData sets its own multipart Content-Type (with the boundary); everything else is JSON.
   if (init.body && !(init.body instanceof FormData) && !headers.has("Content-Type")) {
@@ -78,9 +87,15 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
   const res = await fetch(`${API_URL}${path}`, { ...init, headers });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) throw new ApiError(res.status, messageFrom(res.status, body));
-  return body as T;
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    throw new ApiError(res.status, messageFrom(res.status, body));
+  }
+  return res;
+}
+
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  return (await send(path, init)).json() as Promise<T>;
 }
 
 export const api = {
@@ -102,8 +117,16 @@ export const api = {
     return request<Upload>("/uploads", { method: "POST", body });
   },
   getUpload: (id: number) => request<Upload>(`/uploads/${id}`),
+  /** The original file, as a blob (it needs the auth header, so no plain URL). */
+  getUploadFile: async (id: number) => (await send(`/uploads/${id}/file`)).blob(),
+  getUploadText: (id: number) => request<{ text: string }>(`/uploads/${id}/text`),
   applyUpload: (id: number) => request<Upload>(`/uploads/${id}/apply`, { method: "POST" }),
 
   /** null until the first upload has been read. */
   getProfile: () => request<Profile | null>("/profile"),
+  /** `version` is the one last loaded (0 to create); a stale one gets a 409. */
+  saveProfile: (version: number, data: ResumeData) =>
+    request<Profile>("/profile", { method: "PUT", body: JSON.stringify({ version, data }) }),
+  confirmProfile: (version: number) =>
+    request<Profile>("/profile/confirm", { method: "POST", body: JSON.stringify({ version }) }),
 };

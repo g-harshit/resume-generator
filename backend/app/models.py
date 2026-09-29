@@ -69,7 +69,7 @@ class SourceDocument(SQLModel, table=True):
     parse_error: str | None = Field(default=None, sa_column=Column(Text))
     extracted_text: str | None = Field(default=None, sa_column=Column(Text))
     parsed: dict | None = Field(default=None, sa_column=Column(JSONB))
-    # [{"path": "experience.1.end", "message": "..."}] — things the user should check.
+    # Notes from reading the file: [{"target": entry id, "field", "message"}].
     parse_warnings: list | None = Field(default=None, sa_column=Column(JSONB))
 
     created_at: datetime = Field(

@@ -46,7 +46,7 @@ def test_upload_reads_the_resume_and_creates_the_profile(client, auth):
     status = client.get(f"/uploads/{doc_id}", headers=auth).json()
     assert status["status"] == "done"
     assert status["applied"] is True
-    assert {"path": "basics.phone", "message": "No phone number found."} in status["warnings"]
+    assert status["notes"] == []
 
     profile = client.get("/profile", headers=auth).json()
     assert profile["data"]["basics"]["name"] == "Asha Rao"
