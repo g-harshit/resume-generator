@@ -1,0 +1,427 @@
+{
+  "$defs": {
+    "Basics": {
+      "additionalProperties": false,
+      "properties": {
+        "email": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "headline": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "links": {
+          "items": {
+            "$ref": "#/$defs/Link"
+          },
+          "maxItems": 10,
+          "type": "array"
+        },
+        "location": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "phone": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "headline",
+        "email",
+        "phone",
+        "location",
+        "links"
+      ],
+      "title": "Basics",
+      "type": "object"
+    },
+    "Bullet": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 2000,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Bullet",
+      "type": "object"
+    },
+    "Certification": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "issuer": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "url": {
+          "default": "",
+          "maxLength": 500,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "issuer",
+        "date",
+        "url"
+      ],
+      "title": "Certification",
+      "type": "object"
+    },
+    "Education": {
+      "additionalProperties": false,
+      "properties": {
+        "degree": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "details": {
+          "default": "",
+          "maxLength": 2000,
+          "type": "string"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "field": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "institution": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "location": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "institution",
+        "degree",
+        "field",
+        "location",
+        "start",
+        "end",
+        "details"
+      ],
+      "title": "Education",
+      "type": "object"
+    },
+    "Experience": {
+      "additionalProperties": false,
+      "properties": {
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/Bullet"
+          },
+          "maxItems": 30,
+          "type": "array"
+        },
+        "company": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "current": {
+          "default": false,
+          "type": "boolean"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "location": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "title": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "company",
+        "title",
+        "location",
+        "start",
+        "end",
+        "current",
+        "bullets"
+      ],
+      "title": "Experience",
+      "type": "object"
+    },
+    "Link": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "label": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "url": {
+          "maxLength": 500,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "url"
+      ],
+      "title": "Link",
+      "type": "object"
+    },
+    "Project": {
+      "additionalProperties": false,
+      "properties": {
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/Bullet"
+          },
+          "maxItems": 20,
+          "type": "array"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "url": {
+          "default": "",
+          "maxLength": 500,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "url",
+        "start",
+        "end",
+        "bullets"
+      ],
+      "title": "Project",
+      "type": "object"
+    },
+    "SkillGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "group": {
+          "default": "",
+          "maxLength": 200,
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 40,
+          "minLength": 1,
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "maxLength": 80,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 60,
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "group",
+        "items"
+      ],
+      "title": "SkillGroup",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "basics": {
+      "$ref": "#/$defs/Basics"
+    },
+    "certifications": {
+      "items": {
+        "$ref": "#/$defs/Certification"
+      },
+      "maxItems": 30,
+      "type": "array"
+    },
+    "education": {
+      "items": {
+        "$ref": "#/$defs/Education"
+      },
+      "maxItems": 15,
+      "type": "array"
+    },
+    "experience": {
+      "items": {
+        "$ref": "#/$defs/Experience"
+      },
+      "maxItems": 30,
+      "type": "array"
+    },
+    "projects": {
+      "items": {
+        "$ref": "#/$defs/Project"
+      },
+      "maxItems": 20,
+      "type": "array"
+    },
+    "skills": {
+      "items": {
+        "$ref": "#/$defs/SkillGroup"
+      },
+      "maxItems": 20,
+      "type": "array"
+    },
+    "summary": {
+      "default": "",
+      "maxLength": 2000,
+      "type": "string"
+    }
+  },
+  "required": [
+    "basics",
+    "summary",
+    "experience",
+    "education",
+    "skills",
+    "projects",
+    "certifications"
+  ],
+  "title": "ResumeData",
+  "type": "object"
+}
