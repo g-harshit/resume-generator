@@ -178,14 +178,22 @@ def read_date(text: str) -> DateReading:
         return ym(int(m[1]), int(m[2]))
     if m := re.fullmatch(r"(\d{1,2})[-/.](\d{4})", t):
         return ym(int(m[2]), int(m[1]))
-    if m := re.fullmatch(r"([a-z]+)\.?,? ?(\d{4}|'\d{2}|’\d{2})", t):
+    # A month or season name and a year, in either order, separated by any of
+    # space . , - / ("April-2022", "Mar/2021", "2022-Apr", "Jul '19").
+    sep = r"[\s.,/-]*"
+    year_pattern = r"(\d{4}|['’]\d{2})"
+    if m := re.fullmatch(rf"([a-z]+){sep}{year_pattern}", t):
         word, year_text = m[1], m[2]
-        # '21 is an explicit abbreviation (apostrophe), unlike a bare "21".
-        year = int(year_text) if year_text[0].isdigit() else 2000 + int(year_text[1:])
-        if word in _MONTHS:
-            return ym(year, _MONTHS[word])
-        if word in _SEASONS:
-            return ym(year)
+    elif m := re.fullmatch(rf"(\d{{4}}){sep}([a-z]+)", t):
+        year_text, word = m[1], m[2]
+    else:
+        return DateReading(None, False, False)
+    # '21 is an explicit abbreviation (apostrophe), unlike a bare "21".
+    year = int(year_text) if year_text[0].isdigit() else 2000 + int(year_text[1:])
+    if word in _MONTHS:
+        return ym(year, _MONTHS[word])
+    if word in _SEASONS:
+        return ym(year)
     return DateReading(None, False, False)
 
 

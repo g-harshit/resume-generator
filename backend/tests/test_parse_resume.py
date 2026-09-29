@@ -125,6 +125,13 @@ def test_end_before_start_is_dropped_and_flagged():
         ("March, 2021", "2021-03", False),
         ("Sept. 2020", "2020-09", False),
         ("Jul '19", "2019-07", False),
+        ("April-2022", "2022-04", False),
+        ("Apr-2022", "2022-04", False),
+        ("Mar/2021", "2021-03", False),
+        ("Jan - 2020", "2020-01", False),
+        ("2022-Apr", "2022-04", False),
+        ("2022 April", "2022-04", False),
+        ("Apr’22", "2022-04", False),
         ("Summer 2020", "2020", False),
         ("Present", None, True),
         ("till date", None, True),
@@ -136,7 +143,9 @@ def test_read_date_accepts_unambiguous_forms(text, value, current):
     assert (reading.value, reading.current, reading.readable) == (value, current, True)
 
 
-@pytest.mark.parametrize("text", ["21", "13/2021", "Foo 2021", "2021-13", "Q3 2021", "1850"])
+@pytest.mark.parametrize(
+    "text", ["21", "13/2021", "Foo 2021", "2021-13", "Q3 2021", "1850", "Apr-22", "April"]
+)
 def test_read_date_refuses_to_guess(text):
     assert read_date(text) == (None, False, False)
 
