@@ -1,6 +1,10 @@
 from functools import lru_cache
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DEV_JWT_SECRET = "dev-only-not-a-secret-never-use-in-production"
+JWT_SECRET_MIN_BYTES = 32  # HS256 wants a key at least as long as its output
 
 
 class Settings(BaseSettings):
@@ -13,6 +17,22 @@ class Settings(BaseSettings):
 
     # Comma-separated. The web app in dev; the extension's origin is added in Phase 11.
     cors_origins: str = "http://localhost:3100"
+
+    # "development" or "production". Production refuses to start with dev-only defaults.
+    environment: str = "development"
+
+    # Signs login tokens. Anyone holding it can mint a token for any account.
+    jwt_secret: str = DEV_JWT_SECRET
+    # There is no refresh token yet, so this is how long a login lasts.
+    access_token_days: int = 7
+
+    @model_validator(mode="after")
+    def _no_dev_secrets_in_production(self) -> "Settings":
+        if self.environment != "development" and self.jwt_secret == DEV_JWT_SECRET:
+            raise ValueError("JWT_SECRET must be set outside development")
+        if len(self.jwt_secret.encode()) < JWT_SECRET_MIN_BYTES:
+            raise ValueError(f"JWT_SECRET must be at least {JWT_SECRET_MIN_BYTES} bytes")
+        return self
 
     @property
     def cors_origin_list(self) -> list[str]:

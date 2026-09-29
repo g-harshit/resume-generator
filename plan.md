@@ -205,12 +205,24 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] One command to run everything locally: `make dev` (API 8100, web 3100)
 
 ### Phase 1 — Email + password auth
-- [ ] `users` table + migration
-- [ ] argon2 hashing, JWT (short-lived access token), `get_current_user` dependency
-- [ ] `/auth/register`, `/auth/login`, `/auth/me`; duplicate email → 409; case-insensitive email
-- [ ] Web: `/login`, `/register`, auth context, token in localStorage, protected `/app/*`
-- [ ] Only a 401 signs the user out (a network error or 5xx retries instead)
-- [ ] Tests: register, login, wrong password, protected route without token
+- [x] `users` table + migration `0001` (email stored lower-cased, unique index)
+- [x] argon2 hashing, JWT, `CurrentUser` dependency (`app/auth.py`)
+  - A login lasts `ACCESS_TOKEN_DAYS` (7). There is no refresh token yet, so "short-lived"
+    would mean signing people out constantly; revisit when adding refresh/revocation.
+  - `JWT_SECRET` must be set and ≥ 32 bytes outside development — the app refuses to start.
+  - Unknown email and wrong password return the same 401 and do the same hashing work,
+    so neither the message nor the timing tells an attacker which emails have accounts.
+- [x] `/auth/register`, `/auth/login`, `/auth/me`; duplicate email → 409 (also under a
+      concurrent double sign-up); case-insensitive, trimmed email
+- [x] Web: `/login`, `/register` (shared `AuthForm`), `AuthProvider`/`useAuth`, token in
+      localStorage, `/app/*` redirects to `/login?next=…`; `next` only accepts same-site paths
+- [x] Only a 401 signs the user out (a network error or 5xx retries `/auth/me` for a minute)
+- [x] Tests (16): register, hashing, case-insensitive email, duplicates, validation, login,
+      wrong password vs unknown email, missing/garbage/expired/forged tokens, deleted
+      account, production secret guard
+- [x] Checked in the browser: sign up → `/app`, reload stays signed in, sign out → `/app`
+      bounces to login, wrong password shows the error, sign in returns to `/app`,
+      phone-width layout
 
 ### Phase 2 — Resume schema
 - [ ] Pydantic `ResumeData` + id generation helpers

@@ -1,5 +1,5 @@
+import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
-import { ApiStatus } from "./api-status";
 
 export default function Home() {
   return (
@@ -12,7 +12,7 @@ export default function Home() {
         Upload your resume once. Paste a job description — or open it in Chrome — and get an
         ATS-friendly resume tailored to it, using only what&apos;s true about you.
       </p>
-      <ApiStatus />
+      <HomeActions />
     </main>
   );
 }
