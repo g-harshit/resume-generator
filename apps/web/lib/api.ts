@@ -49,7 +49,7 @@ export type Preview = { html: string; pages: number };
 /** What tailoring did to one line (by bullet id, or "summary"). */
 export type LineHistory = {
   original: string;
-  status: "kept" | "reworded" | "reverted";
+  status: "kept" | "reworded" | "reverted" | "condensed" | "written";
   /** What the model wrote, when it wasn't allowed to stand. */
   attempted: string | null;
   reason: string | null;
@@ -77,11 +77,26 @@ export type CoverLetter = {
   generated_at: string;
 };
 
+export type Section = "summary" | "experience" | "education" | "skills" | "projects" | "certifications";
+
+/** Margins, hidden sections and the page goal: how the resume sits on the page. */
+export type Layout = { margins: "normal" | "narrow"; hidden: Section[]; pages: number | null };
+
 export type ResumeFull = ResumeSummary & {
   content: ResumeData;
   provenance: Record<string, LineHistory>;
   match: Job["match"];
   cover_letter: CoverLetter | null;
+  layout: Layout;
+};
+
+/** What a fit or a shortening did, for telling the person. */
+export type FitResult = {
+  resume: ResumeFull;
+  pages_before: number;
+  pages_after: number;
+  steps: string[];
+  notes: string[];
 };
 
 export type Profile = {
@@ -230,11 +245,21 @@ export const api = {
   previewResume: (id: number, template: string) =>
     request<Preview>(`/resumes/${id}/preview?template=${encodeURIComponent(template)}`),
   /** The person's own edits; `version` is the one last loaded (a stale one gets 409). */
-  saveResume: (id: number, version: number, content: ResumeData, template: string) =>
+  saveResume: (id: number, version: number, content: ResumeData, template: string, layout: Layout) =>
     request<ResumeFull>(`/resumes/${id}`, {
       method: "PUT",
-      body: JSON.stringify({ version, content, template }),
+      body: JSON.stringify({ version, content, template, layout }),
     }),
+  /** AI edits. Each takes the version being edited; an edit in between gets a 409. */
+  writeSummary: (id: number, version: number) =>
+    request<ResumeFull>(`/resumes/${id}/summary`, { method: "POST", body: JSON.stringify({ version }) }),
+  condenseEntry: (id: number, version: number, entryId: string, bullets: number) =>
+    request<FitResult>(`/resumes/${id}/condense`, {
+      method: "POST",
+      body: JSON.stringify({ version, entry_id: entryId, bullets }),
+    }),
+  fitToPages: (id: number, version: number, pages: number) =>
+    request<FitResult>(`/resumes/${id}/fit`, { method: "POST", body: JSON.stringify({ version, pages }) }),
   /** Tailor again from the profile as it is now; replaces this resume's edits. */
   retailorResume: (id: number) => request<ResumeFull>(`/resumes/${id}/retailor`, { method: "POST" }),
   /** Write (or rewrite) the cover letter from this resume: waits for the model, ~15–30 s. */

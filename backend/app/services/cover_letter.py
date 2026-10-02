@@ -114,7 +114,7 @@ def facts_text(resume: ResumeData) -> str:
 # What models reach for when they embellish. In a sentence about the person, each is a
 # claim unless the resume itself uses the word. Deterministic, so it doesn't depend on
 # the second check noticing.
-_EMBELLISHMENTS = [
+EMBELLISHMENTS = [
     "track record", "proven", "strong experience", "extensive experience", "deep expertise",
     "expertise in", "demonstrat", "reflecting my", "reflects my", "commitment to", "passion",
     "ensuring", "ensure", "robust", "scalab", "reliabilit", "efficien", "seamless",
@@ -136,10 +136,15 @@ def check_sentence(text: str, facts: str, posting: str, terms: list[str]) -> str
         return f"used a number that isn't in your resume ({', '.join(sorted(extra))})"
     if claimed := new_terms(text, facts, terms):
         return f"mentioned {', '.join(claimed)}, which isn't in your resume"
-    lower, facts_lower = text.lower(), facts.lower()
-    if found := [w for w in _EMBELLISHMENTS if w in lower and w not in facts_lower]:
-        return f"described your work in words your resume doesn't use (“{found[0].strip()}…”)"
+    if found := embellishments(text, facts):
+        return f"described your work in words your resume doesn't use (“{found[0]}…”)"
     return None
+
+
+def embellishments(text: str, allowed_in: str) -> list[str]:
+    """Words from EMBELLISHMENTS in `text` that `allowed_in` doesn't itself use."""
+    lower, allowed = text.lower(), allowed_in.lower()
+    return [w.strip() for w in EMBELLISHMENTS if w in lower and w not in allowed]
 
 
 def _verify(

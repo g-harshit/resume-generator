@@ -161,7 +161,7 @@ def skill_terms(profile: ResumeData, job: dict) -> list[str]:
 
 def check_summary(new: str, profile: ResumeData, terms: list[str]) -> str | None:
     """Like `check_rewording`, against the whole profile rather than one line."""
-    whole = _profile_prose(profile)
+    whole = profile_prose(profile)
     if extra := new_numbers(new, whole):
         return f"added a number that isn't in your profile ({', '.join(sorted(extra))})"
     if extra := new_terms(new, whole, terms):
@@ -171,7 +171,7 @@ def check_summary(new: str, profile: ResumeData, terms: list[str]) -> str | None
     return None
 
 
-def _profile_prose(profile: ResumeData) -> str:
+def profile_prose(profile: ResumeData) -> str:
     parts = [profile.basics.headline, profile.summary]
     for e in profile.experience:
         parts += [e.title, *(b.text for b in e.bullets)]
@@ -369,13 +369,20 @@ def verify(
             {
                 "id": "summary",
                 "context": "The summary. ORIGINAL is everything in the person's profile.",
-                "original": _profile_prose(profile),
+                "original": profile_prose(profile),
                 "rewritten": resume.summary,
             }
         )
-    if not items:
-        return
+    for entry_id, added in check_pairs(items, provider).items():
+        _revert(resume, provenance, entry_id, f"added something your original doesn't say: {added}")
 
+
+def check_pairs(items: list[dict], provider: AIProvider) -> dict[str, str]:
+    """The second check, for any {id, context, original, rewritten} pairs: id → what
+    the rewrite adds, for each one that adds something. A pair with no verdict is
+    returned as failing: unchecked isn't approved."""
+    if not items:
+        return {}
     result = provider.extract(
         task="verify_tailoring",
         instructions=VERIFY_INSTRUCTIONS,
@@ -385,15 +392,9 @@ def verify(
     flagged = {v.id: v.added for v in result.verdicts if v.adds_information}
     answered = {v.id for v in result.verdicts}
     for item in items:
-        # No verdict for a line counts as "adds information": unchecked isn't approved.
-        if item["id"] in flagged or item["id"] not in answered:
-            added = flagged.get(item["id"]) or "it couldn't be checked"
-            _revert(
-                resume,
-                provenance,
-                item["id"],
-                f"added something your original doesn't say: {added}",
-            )
+        if item["id"] not in answered:
+            flagged[item["id"]] = "it couldn't be checked"
+    return {i["id"]: flagged[i["id"]] for i in items if i["id"] in flagged}
 
 
 def _line_context(profile: ResumeData) -> dict[str, str]:
@@ -458,7 +459,7 @@ def repair(
             "id": k,
             "context": context.get(k, ""),
             "original": p["original"],
-            **({"facts": _profile_prose(profile)} if k == "summary" else {}),
+            **({"facts": profile_prose(profile)} if k == "summary" else {}),
             "rejected": p["attempted"],
             "why": p["reason"],
         }

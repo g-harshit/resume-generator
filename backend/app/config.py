@@ -62,6 +62,8 @@ class Settings(BaseSettings):
     jobs_per_day: int = 50
     resumes_per_day: int = 30
     cover_letters_per_day: int = 20
+    # Summaries, condensing and fit-to-pages: each is a few model calls.
+    resume_ai_edits_per_day: int = 60
 
     @model_validator(mode="after")
     def _no_dev_secrets_in_production(self) -> "Settings":

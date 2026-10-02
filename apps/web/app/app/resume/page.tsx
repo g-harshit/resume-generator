@@ -6,8 +6,9 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { PagePreview } from "@/components/page-preview";
 import { ResumeContentEditor } from "@/components/resume/content-editor";
+import { FitPanel } from "@/components/resume/fit-panel";
 import { AtsChecks, MatchPanel, type SkillAdded } from "@/components/resume/panels";
-import { api, type Preview, type ResumeFull, saveFile, type TemplateInfo } from "@/lib/api";
+import { api, type FitResult, type Layout, type Preview, type ResumeFull, saveFile, type TemplateInfo } from "@/lib/api";
 import { newId } from "@/lib/ids";
 import { type SaveState, useAutosave } from "@/lib/use-autosave";
 
@@ -67,7 +68,8 @@ function SaveStatus({ save }: { save: SaveState }) {
   );
 }
 
-type Draft = { content: ResumeData; template: string };
+type Draft = { content: ResumeData; template: string; layout: Layout };
+type FitReport = { steps: string[]; notes: string[]; pagesBefore: number; pagesAfter: number };
 
 function Editor({ resume, templates, profile: initialProfile }: Loaded) {
   const id = resume.id;
@@ -79,11 +81,15 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
   const [busy, setBusy] = useState<"pdf" | "retailor" | null>(null);
   const [confirmRetailor, setConfirmRetailor] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  // AI edits to length: what's running, what it did, and what to go back to.
+  const [aiBusy, setAiBusy] = useState<string | null>(null);
+  const [report, setReport] = useState<FitReport | null>(null);
+  const [undo, setUndo] = useState<{ draft: Draft; provenance: ResumeFull["provenance"] } | null>(null);
 
-  const { data, setData, save, flush, replace } = useAutosave<Draft, ResumeFull>({
-    initial: { content: resume.content, template: resume.template },
+  const { data, setData, save, flush, replace, version: currentVersion } = useAutosave<Draft, ResumeFull>({
+    initial: { content: resume.content, template: resume.template, layout: resume.layout },
     version: resume.version,
-    save: (version, d) => api.saveResume(id, version, d.content, d.template),
+    save: (version, d) => api.saveResume(id, version, d.content, d.template, d.layout),
     onSaved: (saved) => {
       setMatch(saved.match);
       setSavedVersion(saved.version);
@@ -91,6 +97,44 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
   });
   const setContent = (update: (c: ResumeData) => ResumeData) =>
     setData((d) => ({ ...d, content: update(d.content) }));
+  const setLayout = (update: (l: Layout) => Layout) => setData((d) => ({ ...d, layout: update(d.layout) }));
+
+  function adopt(fresh: ResumeFull) {
+    replace({ content: fresh.content, template: fresh.template, layout: fresh.layout }, fresh.version);
+    setProvenance(fresh.provenance);
+    setMatch(fresh.match);
+    setSavedVersion(fresh.version);
+  }
+
+  /** Run an AI edit on the saved resume; the server returns the new version. */
+  async function aiEdit(what: string, run: (version: number) => Promise<ResumeFull | FitResult>) {
+    setAiBusy(what);
+    setProblem(null);
+    try {
+      if (!(await flush())) return;
+      const before = { draft: data, provenance };
+      const out = await run(currentVersion());
+      if ("pages_after" in out) {
+        adopt(out.resume);
+        setReport({ steps: out.steps, notes: out.notes, pagesBefore: out.pages_before, pagesAfter: out.pages_after });
+      } else {
+        adopt(out);
+      }
+      setUndo(before);
+    } catch (err) {
+      setProblem(err instanceof TypeError ? "Can't reach the server." : (err as Error).message);
+    } finally {
+      setAiBusy(null);
+    }
+  }
+
+  function undoAi() {
+    if (!undo) return;
+    setData(() => undo.draft);
+    setProvenance(undo.provenance);
+    setUndo(null);
+    setReport(null);
+  }
 
   // The preview is rendered on the server from what's saved, so it follows saves.
   useEffect(() => {
@@ -119,11 +163,7 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     setProblem(null);
     try {
       if (!(await flush())) return;
-      const fresh = await api.retailorResume(id);
-      replace({ content: fresh.content, template: fresh.template }, fresh.version);
-      setProvenance(fresh.provenance);
-      setMatch(fresh.match);
-      setSavedVersion(fresh.version);
+      adopt(await api.retailorResume(id));
     } catch (err) {
       setProblem(err instanceof TypeError ? "Can't reach the server." : (err as Error).message);
     } finally {
@@ -225,7 +265,18 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
       )}
 
       <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)_minmax(0,320px)]">
-        <ResumeContentEditor data={data.content} setData={setContent} profile={profile} provenance={provenance} />
+        <ResumeContentEditor
+          data={data.content}
+          setData={setContent}
+          profile={profile}
+          provenance={provenance}
+          summaryAi={{
+            busy: aiBusy === "summary",
+            disabled: aiBusy !== null,
+            write: () => aiEdit("summary", (v) => api.writeSummary(id, v)),
+            undo: undo && aiBusy === null && provenance.summary?.status === "written" ? undoAi : null,
+          }}
+        />
 
         <section aria-label="Preview" className="order-first flex flex-col gap-2 lg:order-none xl:sticky xl:top-6 xl:self-start">
           <span className="text-sm text-muted">
@@ -241,6 +292,19 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
         </section>
 
         <div className="flex flex-col gap-3 lg:col-span-2 xl:col-span-1">
+          <FitPanel
+            data={data.content}
+            layout={data.layout}
+            pages={preview?.pages ?? null}
+            busy={aiBusy}
+            report={report}
+            onUndo={undo ? undoAi : null}
+            actions={{
+              setLayout,
+              fit: (pages) => aiEdit("fit", (v) => api.fitToPages(id, v, pages)),
+              condense: (entryId, bullets) => aiEdit(entryId, (v) => api.condenseEntry(id, v, entryId, bullets)),
+            }}
+          />
           {match ? (
             <MatchPanel match={match} profile={profile} onSkillAdded={skillAdded} />
           ) : (

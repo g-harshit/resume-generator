@@ -21,9 +21,11 @@ from app.models import (
 from app.rendering.catalog import BY_SLUG
 from app.rendering.render import render_html, render_letter_html, render_pdf
 from app.routers.templates import PreviewOut, pdf_filename
+from app.schemas.layout import Layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
 from app.services.cover_letter import write_cover_letter
+from app.services.fit import FitError, condense, count_pages, fit_to_pages, write_summary
 from app.services.match import match_job
 from app.services.tailor import tailor
 
@@ -57,6 +59,7 @@ class ResumeOut(ResumeSummary):
     provenance: dict
     match: dict | None
     cover_letter: dict | None
+    layout: Layout
 
 
 def _own(session: Session, user: User, resume_id: int) -> Resume:
@@ -103,7 +106,12 @@ def _out(session: Session, resume: Resume) -> ResumeOut:
         provenance=resume.provenance,
         match=match,
         cover_letter=resume.cover_letter,
+        layout=_layout(resume),
     )
+
+
+def _layout(resume: Resume) -> Layout:
+    return Layout.model_validate(resume.layout or {})
 
 
 def _title(job: JobDescription) -> str:
@@ -198,6 +206,8 @@ class SaveIn(BaseModel):
     version: int
     content: ResumeData
     template: str = Field(max_length=40)
+    # Optional, so a client that doesn't know about layout leaves it alone.
+    layout: Layout | None = None
 
 
 # Autosave fires every few seconds while someone types. Saves within this long of the
@@ -224,7 +234,13 @@ def save_resume(resume_id: int, body: SaveIn, user: CurrentUser, session: Sessio
     result = session.exec(
         update(Resume)
         .where(Resume.id == resume.id, Resume.version == body.version)
-        .values(content=data, template=body.template, version=Resume.version + 1, updated_at=now)
+        .values(
+            content=data,
+            template=body.template,
+            version=Resume.version + 1,
+            updated_at=now,
+            **({"layout": body.layout.model_dump()} if body.layout else {}),
+        )
     )
     if result.rowcount != 1:
         session.rollback()
@@ -310,6 +326,165 @@ def delete_resume(resume_id: int, user: CurrentUser, session: SessionDep) -> Res
     session.delete(_own(session, user, resume_id))
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# --- fitting to the page ------------------------------------------------------------
+
+
+class AiEditIn(BaseModel):
+    # The version the editor holds: the model takes seconds, and an autosave in between
+    # must not be overwritten (409 instead).
+    version: int
+
+
+class CondenseIn(AiEditIn):
+    entry_id: str = Field(max_length=40)
+    bullets: int = Field(ge=1, le=10)
+
+
+class FitIn(AiEditIn):
+    pages: int = Field(ge=1, le=3)
+
+
+class FitOut(BaseModel):
+    resume: ResumeOut
+    pages_before: int
+    pages_after: int
+    steps: list[str]
+    notes: list[str]
+
+
+def _ai_edit_start(session: Session, user: User, resume_id: int, version: int):
+    resume = _own(session, user, resume_id)
+    if resume.version != version:
+        raise _conflict()
+    job = _job(session, resume)
+    rate_limit.check(
+        session,
+        "resume_ai",
+        str(user.id),
+        get_settings().resume_ai_edits_per_day,
+        timedelta(days=1),
+        "You've used a lot of AI edits today. Please try again tomorrow.",
+    )
+    return resume, job.parsed if job else {}
+
+
+def _ai_edit_save(
+    session: Session,
+    user: User,
+    resume: Resume,
+    started_at_version: int,
+    content: ResumeData,
+    provenance: dict,
+    layout: Layout | None = None,
+) -> None:
+    data = content.model_dump(mode="json")
+    result = session.exec(
+        update(Resume)
+        .where(Resume.id == resume.id, Resume.version == started_at_version)
+        .values(
+            content=data,
+            provenance=provenance,
+            version=Resume.version + 1,
+            updated_at=utcnow(),
+            **({"layout": layout.model_dump()} if layout else {}),
+        )
+    )
+    if result.rowcount != 1:  # edited while the model was working
+        session.rollback()
+        raise _conflict()
+    session.add(ResumeRevision(resume_id=resume.id, content=data, reason=RevisionReason.AI_EDIT))
+    rate_limit.record(session, "resume_ai", str(user.id))  # commits
+    session.refresh(resume)
+
+
+@router.post("/{resume_id}/summary")
+def write_resume_summary(
+    resume_id: int, body: AiEditIn, user: CurrentUser, session: SessionDep
+) -> ResumeOut:
+    """Write (or rewrite) the summary from the resume's own facts."""
+    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    content = ResumeData.model_validate(resume.content)
+    try:
+        summary = write_summary(content, job, get_ai_provider())
+    except FitError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    provenance = {
+        **resume.provenance,
+        "summary": {
+            "original": content.summary,
+            "status": "written",
+            "attempted": None,
+            "reason": None,
+        },
+    }
+    content.summary = summary
+    _ai_edit_save(session, user, resume, body.version, content, provenance)
+    return _out(session, resume)
+
+
+@router.post("/{resume_id}/condense")
+def condense_entry(
+    resume_id: int, body: CondenseIn, user: CurrentUser, session: SessionDep
+) -> FitOut:
+    """Shorten one role or project to at most `bullets` lines."""
+    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    content = ResumeData.model_validate(resume.content)
+    if not any(e.id == body.entry_id for e in [*content.experience, *content.projects]):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "That role or project isn't in this resume.")
+    layout = _layout(resume)
+    before = count_pages(content, resume.template, layout)
+    try:
+        shorter, new_lines, notes = condense(
+            content, {body.entry_id: body.bullets}, job, get_ai_provider()
+        )
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    _ai_edit_save(session, user, resume, body.version, shorter, {**resume.provenance, **new_lines})
+    return FitOut(
+        resume=_out(session, resume),
+        pages_before=before,
+        pages_after=count_pages(shorter, resume.template, layout),
+        steps=[],
+        notes=notes,
+    )
+
+
+@router.post("/{resume_id}/fit")
+def fit(resume_id: int, body: FitIn, user: CurrentUser, session: SessionDep) -> FitOut:
+    """Make the resume fit `pages`: narrower margins first, then fewer lines for older
+    roles (the newest keeps the most), re-rendering after each round. 20-60 s."""
+    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    try:
+        result = fit_to_pages(
+            ResumeData.model_validate(resume.content),
+            _layout(resume),
+            resume.template,
+            body.pages,
+            job,
+            get_ai_provider(),
+        )
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    _ai_edit_save(
+        session,
+        user,
+        resume,
+        body.version,
+        result.resume,
+        {**resume.provenance, **result.provenance},
+        result.layout,
+    )
+    return FitOut(
+        resume=_out(session, resume),
+        pages_before=result.pages_before,
+        pages_after=result.pages_after,
+        steps=result.steps,
+        notes=result.notes,
+    )
 
 
 # --- cover letter ------------------------------------------------------------------
@@ -402,7 +577,9 @@ def preview(
     resume_id: int, user: CurrentUser, session: SessionDep, template: str | None = None
 ) -> PreviewOut:
     resume = _own(session, user, resume_id)
-    html = render_html(ResumeData.model_validate(resume.content), _template(resume, template))
+    html = render_html(
+        ResumeData.model_validate(resume.content), _template(resume, template), _layout(resume)
+    )
     return PreviewOut(html=html, pages=render_pdf(html).pages)
 
 
@@ -412,7 +589,7 @@ def pdf(
 ) -> Response:
     resume = _own(session, user, resume_id)
     data = ResumeData.model_validate(resume.content)
-    rendered = render_pdf(render_html(data, _template(resume, template)))
+    rendered = render_pdf(render_html(data, _template(resume, template), _layout(resume)))
     return Response(
         rendered.content,
         media_type="application/pdf",

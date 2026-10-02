@@ -15,6 +15,7 @@ import jinja2
 from markupsafe import Markup
 
 from app.rendering.catalog import BY_SLUG
+from app.schemas.layout import Layout
 from app.schemas.resume import ResumeData
 
 _DIR = Path(__file__).parent / "templates"
@@ -91,9 +92,19 @@ def _css(name: str) -> Markup:
     return Markup((_DIR / name).read_text())
 
 
-def render_html(data: ResumeData, slug: str) -> str:
+# "Narrow" margins: the same on all four sides, and a little less space between
+# sections. Comes after the template's own CSS, so it wins.
+_NARROW_CSS = Markup(
+    "@page { margin: 9mm 10mm; }\n"
+    "@media screen { .page { padding: 9mm 10mm; } }\n"
+    ".section { margin-top: 0.6em; } .entry { margin-top: 0.4em; } .head { margin-bottom: 0.6em; }"
+)
+
+
+def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> str:
     if slug not in BY_SLUG:
         raise UnknownTemplate(slug)
+    layout = layout or Layout()
     return (
         _env()
         .get_template("resume.html.j2")
@@ -107,6 +118,8 @@ def render_html(data: ResumeData, slug: str) -> str:
             date_range=date_range,
             format_date=format_date,
             link_for=link_for,
+            hidden=set(layout.hidden),
+            layout_css=_NARROW_CSS if layout.margins == "narrow" else Markup(""),
         )
     )
 

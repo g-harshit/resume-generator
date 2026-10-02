@@ -172,6 +172,8 @@ class Resume(SQLModel, table=True):
     # {"text": letter body, "removed": [{"text", "reason"}], "generated_at"}; null until
     # one is written (services/cover_letter.py).
     cover_letter: dict | None = Field(default=None, sa_column=Column(JSONB, nullable=True))
+    # Margins, hidden sections and the page goal (schemas/layout.py); null = defaults.
+    layout: dict | None = Field(default=None, sa_column=Column(JSONB, nullable=True))
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )
@@ -185,6 +187,7 @@ class RevisionReason:
     EDIT = "edit"
     RETAILOR = "retailor"
     COPY = "copy"  # made by duplicating another resume
+    AI_EDIT = "ai_edit"  # summary written, a role condensed, or fitted to pages
 
 
 class ResumeRevision(SQLModel, table=True):

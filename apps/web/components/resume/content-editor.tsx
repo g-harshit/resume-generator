@@ -11,6 +11,16 @@ type Props = {
   /** The profile as it is now: where lines left out of this resume come from. */
   profile: ResumeData | null;
   provenance: Record<string, LineHistory>;
+  /** Write the summary with AI (from this resume's facts), and undo that. */
+  summaryAi?: { busy: boolean; disabled: boolean; write: () => void; undo: (() => void) | null };
+};
+
+const ORIGIN_LABEL: Record<LineHistory["status"], string> = {
+  kept: "Edited",
+  reworded: "Reworded for this job",
+  reverted: "Edited",
+  condensed: "Merged from your lines",
+  written: "Written from your resume",
 };
 
 function Card({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
@@ -45,15 +55,20 @@ function LineOrigin({
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
       <span className="font-medium text-accent-ink">
-        {history.status === "reworded" ? "Reworded for this job" : "Edited"}
+        {ORIGIN_LABEL[history.status]}
       </span>
-      <details className="text-muted">
-        <summary className="cursor-pointer">See original</summary>
-        <p className="mt-1 text-ink">{history.original || "(empty)"}</p>
-      </details>
-      <button type="button" onClick={onUseOriginal} className="text-accent underline-offset-2 hover:underline">
-        Use original
-      </button>
+      {history.original && (
+        <details className="text-muted">
+          <summary className="cursor-pointer">See original</summary>
+          <p className="mt-1 text-ink">{history.original}</p>
+        </details>
+      )}
+      {/* A merged line's original is several lines: re-add them from the unticked list. */}
+      {history.status !== "condensed" && history.original && (
+        <button type="button" onClick={onUseOriginal} className="text-accent underline-offset-2 hover:underline">
+          Use original
+        </button>
+      )}
     </div>
   );
 }
@@ -130,7 +145,7 @@ function Lines({
   );
 }
 
-export function ResumeContentEditor({ data, setData, profile, provenance }: Props) {
+export function ResumeContentEditor({ data, setData, profile, provenance, summaryAi }: Props) {
   const profileRole = (id: string) => profile?.experience.find((e) => e.id === id);
   const profileProject = (id: string) => profile?.projects.find((p) => p.id === id);
   const leftOutProjects = (profile?.projects ?? []).filter((p) => !data.projects.some((x) => x.id === p.id));
@@ -161,6 +176,24 @@ export function ResumeContentEditor({ data, setData, profile, provenance }: Prop
           history={provenance.summary}
           onUseOriginal={() => setData((d) => ({ ...d, summary: provenance.summary!.original }))}
         />
+        {summaryAi && (
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={summaryAi.write}
+              disabled={summaryAi.disabled}
+              className="h-9 rounded-lg border border-line-strong px-3 text-[13px] hover:bg-sunken disabled:opacity-50"
+            >
+              {summaryAi.busy ? "Writing…" : data.summary.trim() ? "Rewrite with AI" : "Write with AI"}
+            </button>
+            {summaryAi.undo && (
+              <button type="button" onClick={summaryAi.undo} className="text-[13px] text-accent underline-offset-2 hover:underline">
+                Undo
+              </button>
+            )}
+            <span className="text-xs text-muted">Only from what&apos;s in this resume.</span>
+          </div>
+        )}
       </Card>
 
       {data.experience.map((e, i) => (

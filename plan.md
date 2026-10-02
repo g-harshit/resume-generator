@@ -495,6 +495,17 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       from the same second survive) and cancels other links. `/forgot-password`,
       `/reset-password`. Email via SMTP (`services/mailer.py`); **unset, the email is
       written to the API log** — real sending needs SMTP settings.
+- [x] Fit to N pages (`services/fit.py`, the editor's "Length" panel): past one page the
+      editor asks how many pages the person wants. Then: margins (normal / narrow, all
+      four sides), which sections to include (`resumes.layout`: hidden sections stay in
+      the content, just not on the page), "Fit to N pages for me" (narrow margins first;
+      then rounds of fewer lines per role by recency — newest keeps the most, e.g.
+      5/3/2 — re-rendering the PDF to count pages), "Shorten a role" to N lines, and
+      "Write / Rewrite with AI" for the summary. Every AI edit has Undo. Merged lines
+      name the lines they came from and pass the same rule checks + second check as
+      tailoring; a role whose merge fails keeps its own top lines instead. A real run
+      had a summary say "previously … using Go" of roles that used Java — now the prompt
+      and the check both forbid tying a skill to the wrong role or time.
 - [ ] Email verification — not built: adds friction before the product proves itself;
       the reset flow already proves control of the address when it matters.
 
