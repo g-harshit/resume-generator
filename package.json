@@ -6,6 +6,9 @@
     "dev:web": "pnpm --filter web dev",
     "build:web": "pnpm --filter web build",
     "lint:web": "pnpm --filter web lint",
-    "gen:schema": "cd backend && uv run python -m app.schemas.export && cd .. && pnpm --filter @rg/schema gen"
+    "gen:schema": "cd backend && uv run python -m app.schemas.export && cd .. && pnpm --filter @rg/schema gen",
+    "build:extension": "pnpm --filter @rg/extension build",
+    "dev:extension": "pnpm --filter @rg/extension dev",
+    "test:extension": "pnpm --filter @rg/extension test"
   }
 }

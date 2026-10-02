@@ -3,6 +3,8 @@ packages:
   - "packages/*"
 
 allowBuilds:
+  # The extension's bundler (WXT/Vite) needs esbuild's native binary.
+  esbuild: true
   sharp: false
   unrs-resolver: false
 

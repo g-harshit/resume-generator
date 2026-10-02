@@ -24,3 +24,11 @@ def test_hosted_postgres_urls_use_psycopg3():
     assert normalise_db_url("postgres://u:p@h/db") == "postgresql+psycopg://u:p@h/db"
     assert normalise_db_url("postgresql://u:p@h/db") == "postgresql+psycopg://u:p@h/db"
     assert normalise_db_url("postgresql+psycopg://u:p@h/db") == "postgresql+psycopg://u:p@h/db"
+
+
+def test_cors_allows_the_chrome_extension(client):
+    origin = "chrome-extension://pjddbiflcebndfljpckcgkigckfpmndm"
+    r = client.options(
+        "/auth/me", headers={"Origin": origin, "Access-Control-Request-Method": "GET"}
+    )
+    assert r.headers.get("access-control-allow-origin") == origin

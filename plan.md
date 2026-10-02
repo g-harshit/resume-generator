@@ -438,16 +438,31 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 - [x] Checked in the browser: list, duplicate (opens the copy), delete with confirm
 
 ### Phase 11 — Chrome extension
-- [ ] WXT app in `apps/extension`, side panel, permissions: `activeTab`, `scripting`,
-      `sidePanel`, `storage` only (no all-sites host permission)
-- [ ] JD extraction, in order: JSON-LD `JobPosting` → site-specific selectors
-      (LinkedIn, Naukri, Indeed, Greenhouse, Lever, Workday) → readable main text →
-      "Use my selection"
-- [ ] Auth handoff: sign-in opens the website; the site sends the token to the extension
-      via `externally_connectable` + `chrome.runtime.sendMessage`
-- [ ] Screens: signed out, job detected, resume ready (mockups 7–9)
-- [ ] CORS for the extension origin on the API
-- [ ] Load unpacked locally; Chrome Web Store listing comes later
+- [x] WXT (React, MV3) app in `apps/extension`, side panel. Permissions: `sidePanel`,
+      `storage`, `activeTab`, `scripting` — **no host permissions up front**. activeTab
+      covers the tab where the icon was clicked; other sites are asked for per site
+      (`optional_host_permissions`) when the person clicks "Allow on this site".
+- [x] JD extraction (`lib/extract.ts`, injected with `scripting.executeScript`, so
+      self-contained), in order: JSON-LD `JobPosting` (incl. `@graph`, malformed JSON
+      skipped) → site containers (LinkedIn, Naukri, Indeed, Greenhouse, Lever, Workday) →
+      the page's main job-like text block (not the whole page) → "Use my selection".
+      vitest + jsdom tests for each path.
+- [x] Auth handoff: "Sign in" opens the website's `/extension/connect`, which (after
+      login) sends the token with `chrome.runtime.sendMessage(EXTENSION_ID, …)`. Only our
+      website's origin may send (`externally_connectable`, and checked again in the
+      background script); the token lives in `chrome.storage.local`; a 401 signs the
+      extension out. The page says plainly when the extension isn't installed.
+- [x] Fixed extension ID `pjddbiflcebndfljpckcgkigckfpmndm` from a public key in the
+      manifest (the private key was never kept: not needed in dev, and the Web Store signs
+      published builds itself). The API's CORS allows that origin.
+- [x] Screens (mockups 7–9): signed out; job found (title, company, a snippet, "Use my
+      selection", template choice, "Tailor my resume"); resume ready (match, skills not in
+      the profile, Download PDF, Open in editor). Follows the person across tabs.
+- [x] `make extension` builds to `apps/extension/.output/chrome-mv3`; README says how to
+      load it unpacked. `make lint` / `make test` include the extension.
+- **Not yet tried in a real Chrome** — the built-in browser can't load extensions. Needs
+  someone to load it unpacked and run it on real LinkedIn / Naukri / company pages.
+- Chrome Web Store listing: later (needs a developer account, name, icon, privacy policy).
 
 ### Later (not in the first build)
 - [ ] Google OAuth login (email + password stays as the fallback)

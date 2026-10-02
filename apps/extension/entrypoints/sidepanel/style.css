@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/* The website's design tokens (apps/web/app/globals.css), so the panel looks like the
+   same product. System fonts: an extension page can't load Google Fonts. */
+@theme {
+  --color-ground: #f7f6f2;
+  --color-surface: #ffffff;
+  --color-sunken: #efede6;
+  --color-line: #dedad0;
+  --color-line-strong: #d3cec2;
+  --color-ink: #17181c;
+  --color-muted: #5b5e66;
+  --color-accent: #2f5d50;
+  --color-accent-hover: #1f463c;
+  --color-accent-soft: #e3ede8;
+  --color-accent-ink: #1f463c;
+  --color-warn: #c66a1e;
+  --color-warn-soft: #fbebdd;
+  --color-warn-ink: #7a3e0e;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Iowan Old Style", Georgia, serif;
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  a {
+    color: var(--color-accent);
+  }
+}

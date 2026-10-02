@@ -15,8 +15,12 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql+psycopg://resume:resume@localhost:5433/resume"
 
-    # Comma-separated. The web app in dev; the extension's origin is added in Phase 11.
-    cors_origins: str = "http://localhost:3100,http://127.0.0.1:3100"
+    # Comma-separated: the web app, and the Chrome extension (its ID is fixed by the
+    # public key in apps/extension/wxt.config.ts).
+    cors_origins: str = (
+        "http://localhost:3100,http://127.0.0.1:3100,"
+        "chrome-extension://pjddbiflcebndfljpckcgkigckfpmndm"
+    )
 
     # "development" or "production". Production refuses to start with dev-only defaults.
     environment: str = "development"

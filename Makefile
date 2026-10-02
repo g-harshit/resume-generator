@@ -1,5 +1,5 @@
 # Everything you need to run the project locally. `make dev` is the usual entry point.
-.PHONY: db api web dev migrate test lint
+.PHONY: db api web dev migrate test lint extension
 
 db:          ## start Postgres (docker) and wait until it accepts connections
 	docker compose up -d --wait db
@@ -16,9 +16,14 @@ dev: db      ## API + web together
 migrate:
 	cd backend && uv run alembic upgrade head
 
-test: db
-	cd backend && uv run pytest
-
 lint:
 	cd backend && uv run ruff check . && uv run ruff format --check .
 	pnpm --filter web lint
+	pnpm --filter @rg/extension compile
+
+test: db
+	cd backend && uv run pytest
+	pnpm --filter @rg/extension test
+
+extension:   ## build the Chrome extension into apps/extension/.output/chrome-mv3
+	pnpm --filter @rg/extension build

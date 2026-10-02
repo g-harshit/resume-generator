@@ -24,3 +24,19 @@ Other commands: `make test`, `make lint`, `make migrate`.
 
 Settings come from the environment or `backend/.env` (see `backend/.env.example`);
 the defaults work with the Docker database.
+
+## The Chrome extension
+
+```bash
+make extension
+```
+
+Then in Chrome: open `chrome://extensions`, turn on **Developer mode**, click **Load
+unpacked** and choose `apps/extension/.output/chrome-mv3`. Its ID is always
+`pjddbiflcebndfljpckcgkigckfpmndm` (fixed by the public key in
+`apps/extension/wxt.config.ts`), which is what the API's CORS and the website's
+`/extension/connect` page expect.
+
+Click the toolbar icon on a job posting to open the side panel; "Sign in" opens the
+website's connect page, which hands your login to the extension. `pnpm dev:extension`
+runs it with hot reload in a separate Chrome profile.
