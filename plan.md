@@ -396,13 +396,35 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - Tailoring is synchronous (~20–40 s). Move to a background job if it proves too slow.
 
 ### Phase 8 — Editor
-- [ ] Web: three-pane editor (mockup 5)
-  - left: sections, include/exclude per bullet, reorder, edit text, "See original" / "Undo"
-  - middle: live preview (server-rendered HTML in an iframe)
-  - right: match panel, gaps with "I have this", ATS checks
-- [ ] "I have this" → asks where it was used → saves to the profile → offers to re-tailor
-- [ ] Template switcher; autosave writes a revision
-- [ ] Download PDF and DOCX
+- [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)
+  - left: summary; per role, **every line from the profile** — ticked ones in the
+    resume (edit, reorder, untick), unticked ones "left out for this job" (tick to
+    add back); projects and skills the same way. Each changed line shows "Reworded for
+    this job" / "Edited" with **See original** and **Use original**. Names, titles,
+    employers, dates and education are read-only here: they're facts and live in the
+    profile.
+  - middle: live preview, re-rendered from what's saved after each autosave
+  - right: job match (ring, covered, missing with **I have this**), ATS checks (contact
+    in body, every role dated, every role has a line, page count)
+- [x] **I have this** → "Where did you use it?" (a role, a project, or just the skills
+      list) → for a role, the person writes the line themselves → `POST /profile/skills`
+      saves skill + line to the profile (row-locked), and the editor adds the same line
+      (same id) to this resume. Nothing inferred, nothing generated.
+- [x] **Re-tailor** (`POST /resumes/{id}/retailor`): rebuilds from the profile as it is
+      now, after a confirm (it replaces this resume's edits; the old version stays in its
+      history). Compare-and-set against the version it started from, so an autosave during
+      the 20-40 s model call is never thrown away (409 instead). Counts towards the daily
+      cap, which now counts tailoring runs rather than resumes.
+- [x] Template switcher; `PUT /resumes/{id}` with optimistic `version` (migration `0005`).
+      Autosave writes a revision, but saves within 10 minutes of the last *edit* revision
+      update it instead, so typing doesn't create hundreds of rows.
+- [x] Autosave extracted to `lib/use-autosave.ts`; the profile editor and the resume
+      editor share it (debounce, no overlapping saves, latest-data-wins, 409 → conflict)
+- [x] Download PDF (saves pending edits first). DOCX is Phase 9.
+- [x] Checked in the browser: ticked a left-out line (saved), "I have this" for
+      Kubernetes with a line under Paylane (profile and resume both updated, match 6/9 →
+      7/9), "Use original" on the summary, preview following each save; the profile
+      editor still autosaves on the shared hook.
 
 ### Phase 9 — DOCX export
 - [ ] python-docx builder per template (same section order, real headings, no tables)

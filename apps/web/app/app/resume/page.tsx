@@ -5,43 +5,34 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { PagePreview } from "@/components/page-preview";
-import {
-  api,
-  type LineHistory,
-  type Preview,
-  type ResumeFull,
-  saveFile,
-  type TemplateInfo,
-  type TermMatch,
-} from "@/lib/api";
+import { ResumeContentEditor } from "@/components/resume/content-editor";
+import { AtsChecks, MatchPanel, type SkillAdded } from "@/components/resume/panels";
+import { api, type Preview, type ResumeFull, saveFile, type TemplateInfo } from "@/lib/api";
+import { newId } from "@/lib/ids";
+import { type SaveState, useAutosave } from "@/lib/use-autosave";
 
 export default function ResumePage() {
   // useSearchParams (?id=) needs a Suspense boundary.
   return (
     <Suspense fallback={<p role="status" className="text-muted">Loading…</p>}>
-      <ResumeView />
+      <Loader />
     </Suspense>
   );
 }
 
-function ResumeView() {
+type Loaded = { resume: ResumeFull; templates: TemplateInfo[]; profile: ResumeData | null };
+
+function Loader() {
   const id = Number(useSearchParams().get("id"));
-  const [resume, setResume] = useState<ResumeFull | null>(null);
-  const [templates, setTemplates] = useState<TemplateInfo[]>([]);
-  const [template, setTemplate] = useState<string | null>(null);
-  const [preview, setPreview] = useState<Preview | null>(null);
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
     let cancelled = false;
-    Promise.all([api.getResume(id), api.listTemplates()])
-      .then(([r, t]) => {
-        if (cancelled) return;
-        setResume(r);
-        setTemplates(t);
-        setTemplate(r.template);
+    Promise.all([api.getResume(id), api.listTemplates(), api.getProfile()])
+      .then(([resume, templates, profile]) => {
+        if (!cancelled) setLoaded({ resume, templates, profile: profile?.data ?? null });
       })
       .catch((err) => !cancelled && setError((err as Error).message));
     return () => {
@@ -49,37 +40,118 @@ function ResumeView() {
     };
   }, [id]);
 
+  if (!id) {
+    return (
+      <p className="text-muted">
+        No resume chosen. <Link href="/app/resumes">See your resumes</Link>.
+      </p>
+    );
+  }
+  if (error) return <p role="alert" className="text-warn-ink">{error}</p>;
+  if (!loaded) return <p role="status" className="text-muted">Loading…</p>;
+  return <Editor key={loaded.resume.id} {...loaded} />;
+}
+
+function SaveStatus({ save }: { save: SaveState }) {
+  const text = {
+    saved: "All changes saved",
+    unsaved: "Unsaved changes…",
+    saving: "Saving…",
+    error: save.kind === "error" ? `Couldn't save: ${save.message}` : "",
+    conflict: "Changed somewhere else",
+  }[save.kind];
+  return (
+    <span role="status" className={`text-sm ${save.kind === "error" || save.kind === "conflict" ? "text-warn-ink" : "text-muted"}`}>
+      {text}
+    </span>
+  );
+}
+
+type Draft = { content: ResumeData; template: string };
+
+function Editor({ resume, templates, profile: initialProfile }: Loaded) {
+  const id = resume.id;
+  const [provenance, setProvenance] = useState(resume.provenance);
+  const [match, setMatch] = useState(resume.match);
+  const [profile, setProfile] = useState(initialProfile);
+  const [savedVersion, setSavedVersion] = useState(resume.version);
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [busy, setBusy] = useState<"pdf" | "retailor" | null>(null);
+  const [confirmRetailor, setConfirmRetailor] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  const { data, setData, save, flush, replace } = useAutosave<Draft, ResumeFull>({
+    initial: { content: resume.content, template: resume.template },
+    version: resume.version,
+    save: (version, d) => api.saveResume(id, version, d.content, d.template),
+    onSaved: (saved) => {
+      setMatch(saved.match);
+      setSavedVersion(saved.version);
+    },
+  });
+  const setContent = (update: (c: ResumeData) => ResumeData) =>
+    setData((d) => ({ ...d, content: update(d.content) }));
+
+  // The preview is rendered on the server from what's saved, so it follows saves.
   useEffect(() => {
-    if (!id || !template) return;
     let cancelled = false;
     api
-      .previewResume(id, template)
+      .previewResume(id, data.template)
       .then((p) => !cancelled && setPreview(p))
-      .catch((err) => !cancelled && setError((err as Error).message));
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [id, template]);
-
-  if (!id) return <p className="text-muted">No resume chosen. <Link href="/app/resumes">See your resumes</Link>.</p>;
-  if (error) return <p role="alert" className="text-warn-ink">{error}</p>;
-  if (!resume || !template) return <p role="status" className="text-muted">Loading…</p>;
+  }, [id, data.template, savedVersion]);
 
   async function download() {
-    setDownloading(true);
+    setBusy("pdf");
     try {
-      saveFile(await api.resumePdf(id, template!));
+      if (await flush()) saveFile(await api.resumePdf(id, data.template));
     } finally {
-      setDownloading(false);
+      setBusy(null);
     }
   }
 
+  async function retailor() {
+    setConfirmRetailor(false);
+    setBusy("retailor");
+    setProblem(null);
+    try {
+      if (!(await flush())) return;
+      const fresh = await api.retailorResume(id);
+      replace({ content: fresh.content, template: fresh.template }, fresh.version);
+      setProvenance(fresh.provenance);
+      setMatch(fresh.match);
+      setSavedVersion(fresh.version);
+    } catch (err) {
+      setProblem(err instanceof TypeError ? "Can't reach the server." : (err as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function skillAdded({ skill, entryId, bullet, profile: updated }: SkillAdded) {
+    setProfile(updated);
+    setContent((c) => {
+      const has = c.skills.some((g) => g.items.some((s) => s.toLowerCase() === skill.toLowerCase()));
+      const skills = has
+        ? c.skills
+        : c.skills.length
+          ? c.skills.map((g, i) => (i === c.skills.length - 1 ? { ...g, items: [...g.items, skill] } : g))
+          : [{ id: newId("sk"), group: "", items: [skill] }];
+      const addLine = <E extends { id: string; bullets: { id: string; text: string }[] }>(entries: E[]) =>
+        bullet && entryId ? entries.map((e) => (e.id === entryId ? { ...e, bullets: [...e.bullets, bullet] } : e)) : entries;
+      return { ...c, skills, experience: addLine(c.experience), projects: addLine(c.projects) };
+    });
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-5">
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex min-w-0 flex-col gap-1">
           <span className="text-sm text-muted">
-            <Link href="/app/resumes">My resumes</Link> /
+            <Link href="/app/resumes">My resumes</Link> / <SaveStatus save={save} />
           </span>
           <h1 className="font-display text-3xl sm:text-4xl">{resume.title}</h1>
         </div>
@@ -87,11 +159,8 @@ function ResumeView() {
           <label className="flex items-center gap-2 text-sm text-muted">
             Template
             <select
-              value={template}
-              onChange={(e) => {
-                setPreview(null);
-                setTemplate(e.target.value);
-              }}
+              value={data.template}
+              onChange={(e) => setData((d) => ({ ...d, template: e.target.value }))}
               className="h-11 rounded-lg border border-line-strong bg-surface px-2.5 text-sm text-ink"
             >
               {templates.map((t) => (
@@ -103,127 +172,79 @@ function ResumeView() {
           </label>
           <button
             type="button"
+            onClick={() => setConfirmRetailor(true)}
+            disabled={busy !== null || !resume.job_id}
+            className="h-11 rounded-[10px] border border-line-strong bg-surface px-4 text-sm hover:bg-sunken disabled:opacity-50"
+          >
+            {busy === "retailor" ? "Re-tailoring… (20–40 s)" : "Re-tailor"}
+          </button>
+          <button
+            type="button"
             onClick={download}
-            disabled={downloading}
+            disabled={busy !== null}
             className="h-11 rounded-[10px] bg-accent px-4 text-[15px] font-medium text-white hover:bg-accent-hover disabled:opacity-50"
           >
-            {downloading ? "Making PDF…" : "Download PDF"}
+            {busy === "pdf" ? "Making PDF…" : "Download PDF"}
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="grid gap-7 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
-        <section aria-label="Preview" className="flex flex-col gap-2">
-          <span className="text-sm text-muted">
-            {preview ? `${preview.pages} page${preview.pages > 1 ? "s" : ""} · A4` : "Laying out…"}
+      {confirmRetailor && (
+        <div role="alertdialog" aria-label="Re-tailor this resume?" className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+          <span className="flex-1">
+            Re-tailoring builds this resume again from your profile as it is now. Your edits here
+            are replaced (the current version stays in its history).
           </span>
-          <div className="overflow-hidden rounded-lg border border-line">
+          <button type="button" onClick={retailor} className="h-10 rounded-lg bg-accent px-3 font-medium text-white">
+            Re-tailor
+          </button>
+          <button type="button" onClick={() => setConfirmRetailor(false)} className="h-10 rounded-lg px-3 text-muted hover:bg-sunken">
+            Cancel
+          </button>
+        </div>
+      )}
+      {(problem || save.kind === "conflict") && (
+        <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-warn-soft px-4 py-3 text-sm text-warn-ink">
+          <span className="flex-1">
+            {save.kind === "conflict"
+              ? "This resume was changed somewhere else (another tab?). Your latest edits here weren't saved."
+              : problem}
+          </span>
+          {save.kind === "conflict" && (
+            <button type="button" onClick={() => window.location.reload()} className="h-10 rounded-lg border border-warn bg-surface px-3">
+              Reload the latest
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)_minmax(0,320px)]">
+        <ResumeContentEditor data={data.content} setData={setContent} profile={profile} provenance={provenance} />
+
+        <section aria-label="Preview" className="order-first flex flex-col gap-2 lg:order-none xl:sticky xl:top-6 xl:self-start">
+          <span className="text-sm text-muted">
+            {preview ? `${preview.pages} page${preview.pages > 1 ? "s" : ""} · A4 · updates as you save` : "Laying out…"}
+          </span>
+          <div className="overflow-hidden rounded-lg border border-line bg-surface">
             {preview ? (
               <PagePreview html={preview.html} title={`${resume.title}, preview`} bare />
             ) : (
-              <div className="aspect-[794/1123] bg-surface" />
+              <div className="aspect-[794/1123]" />
             )}
           </div>
         </section>
 
-        <div className="flex min-w-0 flex-col gap-4">
-          {resume.match && <MatchPanel match={resume.match} />}
-          <Changes content={resume.content} provenance={resume.provenance} />
+        <div className="flex flex-col gap-3 lg:col-span-2 xl:col-span-1">
+          {match ? (
+            <MatchPanel match={match} profile={profile} onSkillAdded={skillAdded} />
+          ) : (
+            <p className="rounded-xl border border-line bg-surface p-4 text-sm text-muted">
+              The job this resume was made for is gone, so there&apos;s nothing to match against.
+            </p>
+          )}
+          <AtsChecks data={data.content} pages={preview?.pages ?? null} />
         </div>
       </div>
     </div>
-  );
-}
-
-function MatchPanel({ match }: { match: NonNullable<ResumeFull["match"]> }) {
-  const missing = [...match.must_have, ...match.nice_to_have].filter((m) => !m.covered);
-  return (
-    <section aria-label="Job match" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-5">
-      <div className="flex items-baseline justify-between">
-        <h2 className="font-semibold">Job keywords in this resume</h2>
-        <span className="text-xl font-semibold">
-          {match.covered}/{match.total}
-        </span>
-      </div>
-      {missing.length > 0 && (
-        <div className="flex flex-col gap-2 rounded-lg bg-warn-soft p-3 text-warn-ink">
-          <span className="text-sm font-semibold">Not in your profile</span>
-          <ul className="flex flex-wrap gap-1.5">
-            {missing.map((m: TermMatch) => (
-              <li key={m.term} className="rounded-full border border-dashed border-warn bg-surface px-2.5 py-0.5 text-[13px]">
-                {m.term}
-              </li>
-            ))}
-          </ul>
-          <span className="text-[13px] leading-normal">
-            We only use what&apos;s in your profile. If you have these,{" "}
-            <Link href="/app/profile">add them there</Link> and tailor again.
-          </span>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function Changes({ content, provenance }: { content: ResumeData; provenance: Record<string, LineHistory> }) {
-  const lines = new Map<string, string>([
-    ["summary", content.summary],
-    ...[...content.experience, ...content.projects].flatMap((e) =>
-      e.bullets.map((b) => [b.id, b.text] as [string, string]),
-    ),
-  ]);
-  const entries = Object.entries(provenance);
-  const reworded = entries.filter(([, p]) => p.status === "reworded");
-  const reverted = entries.filter(([, p]) => p.status === "reverted");
-
-  return (
-    <section aria-label="What we changed" className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-5">
-      <div className="flex flex-col gap-1">
-        <h2 className="font-semibold">What we changed</h2>
-        <p className="text-[13px] leading-normal text-muted">
-          Every reworded line was checked against your original: no new numbers, tools or claims.
-        </p>
-      </div>
-
-      {reworded.length === 0 && reverted.length === 0 && (
-        <p className="text-sm text-muted">Nothing was reworded: your lines are as you wrote them, chosen and ordered for this job.</p>
-      )}
-
-      {reworded.length > 0 && (
-        <ul className="flex flex-col gap-3">
-          {reworded.map(([id, p]) => (
-            <li key={id} className="flex flex-col gap-1 rounded-lg bg-accent-soft/60 p-3 text-sm">
-              {id === "summary" && <span className="text-xs font-semibold tracking-wide text-accent-ink uppercase">Summary</span>}
-              <span>{lines.get(id)}</span>
-              <details className="text-[13px] text-muted">
-                <summary className="cursor-pointer">{id === "summary" ? "Your previous summary" : "Your original"}</summary>
-                <p className="mt-1">{p.original || "(none)"}</p>
-              </details>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {reverted.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">Kept in your words ({reverted.length})</h3>
-          <ul className="flex flex-col gap-2">
-            {reverted.map(([id, p]) => (
-              <li key={id} className="text-[13px] leading-normal">
-                <details>
-                  <summary className="cursor-pointer">
-                    {id === "summary" ? "Summary" : (lines.get(id) ?? p.original)}
-                  </summary>
-                  <p className="mt-1 text-muted">
-                    The rewording {p.reason}:
-                    <span className="mt-0.5 block italic">“{p.attempted}”</span>
-                  </p>
-                </details>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </section>
   );
 }

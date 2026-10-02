@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel, Field
+from sqlalchemy import update
 from sqlmodel import Session, func, select
 
 from app.ai_providers import AIProviderError, get_ai_provider
@@ -36,6 +37,7 @@ class ResumeSummary(BaseModel):
     id: int
     title: str
     template: str
+    version: int
     job_id: int | None
     created_at: datetime
     updated_at: datetime
@@ -71,6 +73,7 @@ def _summary(resume: Resume, match: dict | None) -> dict:
         "id": resume.id,
         "title": resume.title,
         "template": resume.template,
+        "version": resume.version,
         "job_id": resume.job_description_id,
         "created_at": resume.created_at,
         "updated_at": resume.updated_at,
@@ -93,6 +96,46 @@ def _title(job: JobDescription) -> str:
     return " — ".join(x for x in (job.title, job.company) if x) or "Untitled job"
 
 
+def _reviewed_profile(session: Session, user: User) -> Profile:
+    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
+    if profile is None or profile.reviewed_at is None:
+        # Everything in a resume comes from the profile, so it has to have been checked.
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "Review and confirm your profile first: every resume is built from it.",
+        )
+    return profile
+
+
+def _check_daily_cap(session: Session, user: User) -> None:
+    """Tailoring runs (new resumes and re-tailors) per day: each is several model calls."""
+    since = utcnow() - timedelta(days=1)
+    runs = session.exec(
+        select(func.count())
+        .select_from(ResumeRevision)
+        .join(Resume, Resume.id == ResumeRevision.resume_id)
+        .where(
+            Resume.user_id == user.id,
+            ResumeRevision.created_at > since,
+            ResumeRevision.reason.in_([RevisionReason.TAILOR, RevisionReason.RETAILOR]),
+        )
+    ).one()
+    if runs >= get_settings().resumes_per_day:
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "You've tailored a lot of resumes today. Please try again tomorrow.",
+        )
+
+
+def _tailor(profile: Profile, job: JobDescription) -> tuple[ResumeData, dict]:
+    try:
+        return tailor(
+            ResumeData.model_validate(profile.data), job.parsed, job.raw_text, get_ai_provider()
+        )
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+
+
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> ResumeOut:
     """Tailor the profile to a job. Waits for the model (usually 10-30 s)."""
@@ -101,32 +144,9 @@ def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> Res
     job = session.get(JobDescription, body.job_id)
     if job is None or job.user_id != user.id:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Job not found")
-    profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
-    if profile is None or profile.reviewed_at is None:
-        # Everything in a resume comes from the profile, so it has to have been checked.
-        raise HTTPException(
-            status.HTTP_409_CONFLICT,
-            "Review and confirm your profile first: every resume is built from it.",
-        )
-
-    since = utcnow() - timedelta(days=1)
-    recent = session.exec(
-        select(func.count())
-        .select_from(Resume)
-        .where(Resume.user_id == user.id, Resume.created_at > since)
-    ).one()
-    if recent >= get_settings().resumes_per_day:
-        raise HTTPException(
-            status.HTTP_429_TOO_MANY_REQUESTS,
-            "You've made a lot of resumes today. Please try again tomorrow.",
-        )
-
-    try:
-        content, provenance = tailor(
-            ResumeData.model_validate(profile.data), job.parsed, job.raw_text, get_ai_provider()
-        )
-    except AIProviderError as exc:
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    profile = _reviewed_profile(session, user)
+    _check_daily_cap(session, user)
+    content, provenance = _tailor(profile, job)
 
     data = content.model_dump(mode="json")
     resume = Resume(
@@ -157,6 +177,100 @@ def list_resumes(user: CurrentUser, session: SessionDep) -> list[ResumeSummary]:
 @router.get("/{resume_id}")
 def get_resume(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOut:
     return _out(session, _own(session, user, resume_id))
+
+
+class SaveIn(BaseModel):
+    # The version the editor last loaded; a stale one gets 409, as for profiles.
+    version: int
+    content: ResumeData
+    template: str = Field(max_length=40)
+
+
+# Autosave fires every few seconds while someone types. Saves within this long of the
+# last "edit" revision update it rather than adding one, so the history stays useful.
+EDIT_REVISION_WINDOW = timedelta(minutes=10)
+
+
+def _conflict() -> HTTPException:
+    return HTTPException(
+        status.HTTP_409_CONFLICT,
+        "This resume was changed somewhere else (another tab?). Reload to see the latest.",
+    )
+
+
+@router.put("/{resume_id}")
+def save_resume(resume_id: int, body: SaveIn, user: CurrentUser, session: SessionDep) -> ResumeOut:
+    """The person's own edits. Unlike tailoring, nothing here is checked against the
+    profile: it's their resume and their words."""
+    resume = _own(session, user, resume_id)
+    if body.template not in BY_SLUG:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "No such template")
+    data = body.content.model_dump(mode="json")
+    now = utcnow()
+    result = session.exec(
+        update(Resume)
+        .where(Resume.id == resume.id, Resume.version == body.version)
+        .values(content=data, template=body.template, version=Resume.version + 1, updated_at=now)
+    )
+    if result.rowcount != 1:
+        session.rollback()
+        raise _conflict()
+
+    latest = session.exec(
+        select(ResumeRevision)
+        .where(ResumeRevision.resume_id == resume.id)
+        .order_by(ResumeRevision.created_at.desc())
+    ).first()
+    if (
+        latest is not None
+        and latest.reason == RevisionReason.EDIT
+        and now - latest.created_at < EDIT_REVISION_WINDOW
+    ):
+        latest.content = data
+        session.add(latest)
+    else:
+        session.add(ResumeRevision(resume_id=resume.id, content=data, reason=RevisionReason.EDIT))
+    session.commit()
+    session.refresh(resume)
+    return _out(session, resume)
+
+
+@router.post("/{resume_id}/retailor")
+def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOut:
+    """Tailor again from the profile as it is now (say, after adding a skill). The
+    edits made to this resume are replaced; the previous version stays in its history."""
+    resume = _own(session, user, resume_id)
+    job = (
+        session.get(JobDescription, resume.job_description_id)
+        if resume.job_description_id
+        else None
+    )
+    if job is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "The job this resume was made for is gone.")
+    profile = _reviewed_profile(session, user)
+    _check_daily_cap(session, user)
+    started_at_version = resume.version
+    content, provenance = _tailor(profile, job)  # 20-40 s; the editor may save meanwhile
+
+    data = content.model_dump(mode="json")
+    result = session.exec(
+        update(Resume)
+        .where(Resume.id == resume.id, Resume.version == started_at_version)
+        .values(
+            content=data,
+            provenance=provenance,
+            profile_version=profile.version,
+            version=Resume.version + 1,
+            updated_at=utcnow(),
+        )
+    )
+    if result.rowcount != 1:  # edited while tailoring: don't throw those edits away
+        session.rollback()
+        raise _conflict()
+    session.add(ResumeRevision(resume_id=resume.id, content=data, reason=RevisionReason.RETAILOR))
+    session.commit()
+    session.refresh(resume)
+    return _out(session, resume)
 
 
 def _template(resume: Resume, override: str | None) -> str:

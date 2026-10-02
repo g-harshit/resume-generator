@@ -59,6 +59,7 @@ export type ResumeSummary = {
   id: number;
   title: string;
   template: string;
+  version: number;
   job_id: number | null;
   created_at: string;
   updated_at: string;
@@ -210,6 +211,14 @@ export const api = {
   getResume: (id: number) => request<ResumeFull>(`/resumes/${id}`),
   previewResume: (id: number, template: string) =>
     request<Preview>(`/resumes/${id}/preview?template=${encodeURIComponent(template)}`),
+  /** The person's own edits; `version` is the one last loaded (a stale one gets 409). */
+  saveResume: (id: number, version: number, content: ResumeData, template: string) =>
+    request<ResumeFull>(`/resumes/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ version, content, template }),
+    }),
+  /** Tailor again from the profile as it is now; replaces this resume's edits. */
+  retailorResume: (id: number) => request<ResumeFull>(`/resumes/${id}/retailor`, { method: "POST" }),
   resumePdf: (id: number, template: string) =>
     pdfDownload(`/resumes/${id}/pdf?template=${encodeURIComponent(template)}`),
 
@@ -218,6 +227,13 @@ export const api = {
   previewTemplate: (slug: string) => request<Preview>(`/templates/${slug}/preview`),
   /** The user's profile in this template as a PDF, with the file name the API chose. */
   templatePdf: (slug: string) => pdfDownload(`/templates/${slug}/pdf`),
+
+  /** "I have this": a skill, and optionally where it was used with the person's own line. */
+  addSkill: (skill: string, entryId?: string, line?: string) =>
+    request<{ profile: Profile; bullet: { id: string; text: string } | null }>("/profile/skills", {
+      method: "POST",
+      body: JSON.stringify({ skill, entry_id: entryId ?? null, line: line ?? null }),
+    }),
 
   confirmProfile: (version: number) =>
     request<Profile>("/profile/confirm", { method: "POST", body: JSON.stringify({ version }) }),

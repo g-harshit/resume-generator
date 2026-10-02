@@ -1,14 +1,15 @@
 from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy import update
 from sqlmodel import Session, select
 
 from app.auth import CurrentUser
 from app.database import SessionDep
 from app.models import Profile, SourceDocument, User, utcnow
-from app.schemas.resume import ResumeData
+from app.schemas.resume import Bullet, ResumeData, SkillGroup
+from app.services.match import normalise
 from app.services.profile_checks import blocking, profile_checks
 from app.services.resume_import import notes_of
 
@@ -122,3 +123,63 @@ def confirm_profile(body: ConfirmIn, user: CurrentUser, session: SessionDep) -> 
     session.commit()
     session.refresh(profile)
     return _out(session, profile)
+
+
+class AddSkillIn(BaseModel):
+    skill: str = Field(min_length=1, max_length=80)
+    # Where it was used: an experience or project id. Then `line` — written by the
+    # person, never generated — says how, and goes into that entry.
+    entry_id: str | None = None
+    line: str | None = Field(default=None, max_length=2000)
+
+
+class AddSkillOut(BaseModel):
+    profile: ProfileOut
+    # The line added to the profile, with its id, so the resume can include the same one.
+    bullet: Bullet | None
+
+
+@router.post("/skills")
+def add_skill(body: AddSkillIn, user: CurrentUser, session: SessionDep) -> AddSkillOut:
+    """ "I have this" for a skill a job asks for. The person says so, and says where;
+    nothing is inferred. Saved into the profile, so every later resume knows it."""
+    profile = session.exec(
+        select(Profile).where(Profile.user_id == user.id).with_for_update()
+    ).first()
+    if profile is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "There's no profile yet.")
+    data = ResumeData.model_validate(profile.data)
+    skill = body.skill.strip()
+
+    bullet = None
+    if body.entry_id:
+        line = (body.line or "").strip()
+        if len(line) < 10:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
+                "Write a line about how you used it there.",
+            )
+        entry = next((e for e in [*data.experience, *data.projects] if e.id == body.entry_id), None)
+        if entry is None:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "That role or project isn't in your profile."
+            )
+        bullet = Bullet(text=line)
+        entry.bullets.append(bullet)
+
+    if normalise(skill) not in {normalise(s) for s in data.all_skills()}:
+        group = next((g for g in data.skills if not g.group), None) or next(
+            (g for g in data.skills if g.group.lower() == "other"), None
+        )
+        if group is None:
+            group = SkillGroup(group="Other" if data.skills else "", items=[])
+            data.skills.append(group)
+        group.items.append(skill)
+
+    profile.data = ResumeData.model_validate(data.model_dump()).model_dump(mode="json")
+    profile.version += 1
+    profile.updated_at = utcnow()
+    session.add(profile)
+    session.commit()
+    session.refresh(profile)
+    return AddSkillOut(profile=_out(session, profile), bullet=bullet)

@@ -162,6 +162,8 @@ class Resume(SQLModel, table=True):
     # "attempted", "reason"} — what tailoring changed, and what it wasn't allowed to.
     provenance: dict = Field(sa_column=Column(JSONB, nullable=False))
     profile_version: int
+    # Bumped on every save; a save must name the version it edited (as for profiles).
+    version: int = Field(default=1, sa_column_kwargs={"server_default": "1"})
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )
