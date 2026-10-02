@@ -159,14 +159,17 @@ def skill_terms(profile: ResumeData, job: dict) -> list[str]:
     return out
 
 
-def check_summary(new: str, profile: ResumeData, terms: list[str]) -> str | None:
-    """Like `check_rewording`, against the whole profile rather than one line."""
+def check_summary(
+    new: str, profile: ResumeData, terms: list[str], max_chars: int = 600
+) -> str | None:
+    """Like `check_rewording`, against the whole profile rather than one line. The
+    length cap stops a "summary" that is really the profile pasted in."""
     whole = profile_prose(profile)
     if extra := new_numbers(new, whole):
         return f"added a number that isn't in your profile ({', '.join(sorted(extra))})"
     if extra := new_terms(new, whole, terms):
         return f"mentioned {', '.join(extra)}, which isn't in your profile"
-    if "\n" in new.strip() or len(new) > 600:
+    if "\n" in new.strip() or len(new) > max_chars:
         return "wasn't a short summary paragraph"
     return None
 

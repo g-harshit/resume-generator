@@ -500,8 +500,11 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       four sides), which sections to include (`resumes.layout`: hidden sections stay in
       the content, just not on the page), "Fit to N pages for me" (narrow margins first;
       then rounds of fewer lines per role by recency — newest keeps the most, e.g.
-      5/3/2 — re-rendering the PDF to count pages), "Shorten a role" to N lines, and
-      "Write / Rewrite with AI" for the summary. Every AI edit has Undo. Merged lines
+      5/3/2 — re-rendering the PDF to count pages), lines per role up or down (down
+      merges with AI; up adds back the person's own lines, undoing a merge if needed), and
+      "Write / Rewrite with AI" for the summary at a chosen length (shorter / same /
+      longer — checked by word count, one retry). The panel is always shown, with a
+      1/2-page dropdown, so a resume can grow as well as shrink. Every AI edit has Undo. Merged lines
       name the lines they came from and pass the same rule checks + second check as
       tailoring; a role whose merge fails keeps its own top lines instead. A real run
       had a summary say "previously … using Go" of roles that used Java — now the prompt

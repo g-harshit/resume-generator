@@ -50,6 +50,8 @@ export type Preview = { html: string; pages: number };
 export type LineHistory = {
   original: string;
   status: "kept" | "reworded" | "reverted" | "condensed" | "written";
+  /** For a "condensed" line: the ids of the person's lines it was merged from. */
+  sources?: string[];
   /** What the model wrote, when it wasn't allowed to stand. */
   attempted: string | null;
   reason: string | null;
@@ -80,6 +82,8 @@ export type CoverLetter = {
 export type Section = "summary" | "experience" | "education" | "skills" | "projects" | "certifications";
 
 /** Margins, hidden sections and the page goal: how the resume sits on the page. */
+export type SummaryLength = "shorter" | "same" | "longer";
+
 export type Layout = { margins: "normal" | "narrow"; hidden: Section[]; pages: number | null };
 
 export type ResumeFull = ResumeSummary & {
@@ -251,8 +255,9 @@ export const api = {
       body: JSON.stringify({ version, content, template, layout }),
     }),
   /** AI edits. Each takes the version being edited; an edit in between gets a 409. */
-  writeSummary: (id: number, version: number) =>
-    request<ResumeFull>(`/resumes/${id}/summary`, { method: "POST", body: JSON.stringify({ version }) }),
+  /** Write the summary from this resume's facts: shorter, about as long, or longer than now. */
+  writeSummary: (id: number, version: number, length: SummaryLength) =>
+    request<ResumeFull>(`/resumes/${id}/summary`, { method: "POST", body: JSON.stringify({ version, length }) }),
   condenseEntry: (id: number, version: number, entryId: string, bullets: number) =>
     request<FitResult>(`/resumes/${id}/condense`, {
       method: "POST",

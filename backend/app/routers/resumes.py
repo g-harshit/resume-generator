@@ -25,7 +25,14 @@ from app.schemas.layout import Layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
 from app.services.cover_letter import write_cover_letter
-from app.services.fit import FitError, condense, count_pages, fit_to_pages, write_summary
+from app.services.fit import (
+    FitError,
+    SummaryLength,
+    condense,
+    count_pages,
+    fit_to_pages,
+    write_summary,
+)
 from app.services.match import match_job
 from app.services.tailor import tailor
 
@@ -337,6 +344,10 @@ class AiEditIn(BaseModel):
     version: int
 
 
+class SummaryIn(AiEditIn):
+    length: SummaryLength = "same"
+
+
 class CondenseIn(AiEditIn):
     entry_id: str = Field(max_length=40)
     bullets: int = Field(ge=1, le=10)
@@ -401,13 +412,14 @@ def _ai_edit_save(
 
 @router.post("/{resume_id}/summary")
 def write_resume_summary(
-    resume_id: int, body: AiEditIn, user: CurrentUser, session: SessionDep
+    resume_id: int, body: SummaryIn, user: CurrentUser, session: SessionDep
 ) -> ResumeOut:
-    """Write (or rewrite) the summary from the resume's own facts."""
+    """Write (or rewrite) the summary from the resume's own facts: shorter, about the
+    same length, or longer than the one there now."""
     resume, job = _ai_edit_start(session, user, resume_id, body.version)
     content = ResumeData.model_validate(resume.content)
     try:
-        summary = write_summary(content, job, get_ai_provider())
+        summary = write_summary(content, job, get_ai_provider(), body.length)
     except FitError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
     except AIProviderError as exc:

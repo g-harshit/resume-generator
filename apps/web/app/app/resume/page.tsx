@@ -128,6 +128,44 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     }
   }
 
+  type Line = { id: string; text: string };
+  /**
+   * How a role or project can grow: its lines now, the person's own lines not in it
+   * (nor merged into one of its lines), and — when merged lines are in the way — the
+   * lines it would have with every merge undone.
+   */
+  function growth(entryId: string) {
+    const entry =
+      data.content.experience.find((e) => e.id === entryId) ?? data.content.projects.find((p) => p.id === entryId);
+    const own: Line[] =
+      profile?.experience.find((e) => e.id === entryId)?.bullets ??
+      profile?.projects.find((p) => p.id === entryId)?.bullets ??
+      [];
+    const current = entry?.bullets ?? [];
+    const used = new Set(current.flatMap((b) => [b.id, ...(provenance[b.id]?.sources ?? [])]));
+    const unused = own.filter((b) => !used.has(b.id));
+    const unmerged = current.filter((b) => provenance[b.id]?.status !== "condensed");
+    const unmergedIds = new Set(unmerged.map((b) => b.id));
+    const restored = [...unmerged, ...own.filter((b) => !unmergedIds.has(b.id))];
+    return { current, unused, restored, max: Math.max(current.length + unused.length, restored.length) };
+  }
+  const maxLines = Object.fromEntries(
+    [...data.content.experience, ...data.content.projects].map((e) => [e.id, growth(e.id).max]),
+  );
+
+  /** More lines, all the person's own: unused ones first, then by undoing merges. */
+  function addLines(entryId: string, target: number) {
+    const { current, unused, restored } = growth(entryId);
+    const next: Line[] =
+      current.length + unused.length >= target
+        ? [...current, ...unused.slice(0, target - current.length)]
+        : restored.slice(0, target);
+    const bullets = next.map((b) => ({ id: b.id, text: b.text }));
+    const set = <E extends { id: string; bullets: Line[] }>(entries: E[]) =>
+      entries.map((e) => (e.id === entryId ? { ...e, bullets } : e));
+    setContent((c) => ({ ...c, experience: set(c.experience), projects: set(c.projects) }));
+  }
+
   function undoAi() {
     if (!undo) return;
     setData(() => undo.draft);
@@ -273,7 +311,7 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
           summaryAi={{
             busy: aiBusy === "summary",
             disabled: aiBusy !== null,
-            write: () => aiEdit("summary", (v) => api.writeSummary(id, v)),
+            write: (length) => aiEdit("summary", (v) => api.writeSummary(id, v, length)),
             undo: undo && aiBusy === null && provenance.summary?.status === "written" ? undoAi : null,
           }}
         />
@@ -299,10 +337,12 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
             busy={aiBusy}
             report={report}
             onUndo={undo ? undoAi : null}
+            maxLines={maxLines}
             actions={{
               setLayout,
               fit: (pages) => aiEdit("fit", (v) => api.fitToPages(id, v, pages)),
               condense: (entryId, bullets) => aiEdit(entryId, (v) => api.condenseEntry(id, v, entryId, bullets)),
+              addLines,
             }}
           />
           {match ? (

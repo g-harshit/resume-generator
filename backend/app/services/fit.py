@@ -15,6 +15,7 @@ person's own lines:
 import json
 import logging
 from dataclasses import dataclass, field
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -193,8 +194,8 @@ class Summary(BaseModel):
 
 
 SUMMARY_INSTRUCTIONS = """\
-Write a 2-3 sentence summary for the top of this person's resume, aimed at the JOB,
-using only facts from their RESUME. Lead with who they are and what they've done that
+Write a summary for the top of this person's resume, as long as LENGTH says, aimed
+at the JOB, using only facts from their RESUME. Lead with who they are and what they've done that
 the job cares about. No skill, number, title, scale or quality the resume doesn't
 state — and don't mention a skill the job asks for unless the resume lists it. No
 clichés ("results-driven", "passionate", "proven track record"). Don't tie a skill,
@@ -203,14 +204,34 @@ there. If PREVIOUS is given, write something different from it.
 """
 
 
-def write_summary(resume: ResumeData, job: dict, provider: AIProvider) -> str:
-    """A summary only the resume's facts support. Two tries, then FitError."""
+SummaryLength = Literal["shorter", "same", "longer"]
+
+# How long to make it, relative to PREVIOUS when there is one.
+_LENGTH_ASK: dict[str, tuple[str, str]] = {
+    # length: (with a previous summary, without one)
+    "shorter": ("Make it clearly shorter than PREVIOUS: one or two sentences.", "One sentence."),
+    "same": ("Keep it about as long as PREVIOUS.", "Two or three sentences."),
+    "longer": (
+        "Make it longer than PREVIOUS: three or four sentences, under 120 words, using more "
+        "of the resume's facts (still only its facts).",
+        "Three or four sentences, under 120 words.",
+    ),
+}
+
+
+def write_summary(
+    resume: ResumeData, job: dict, provider: AIProvider, length: SummaryLength = "same"
+) -> str:
+    """A summary only the resume's facts support. Two tries, then FitError. A draft that's
+    honest but misses the length asked for gets the second try, and is used if that one
+    does no better."""
     terms = skill_terms(resume, job)
     # Everything about the person, employers and education included: a checker shown
     # only skills and lines rejected naming their own employers as "new information".
     # Not the old summary: it isn't a source of facts for its replacement.
     facts = facts_text(resume.model_copy(update={"summary": ""}))
-    previous, why = resume.summary, ""
+    previous = resume.summary.strip()
+    why, rejected, honest = "", "", ""
     for _ in range(2):
         draft = provider.extract(
             task="tailor",
@@ -225,13 +246,14 @@ def write_summary(resume: ResumeData, job: dict, provider: AIProvider) -> str:
                         exclude={"basics": {"email", "phone", "links"}, "summary": True},
                     ),
                     "previous": previous,
-                    **({"rejected_because": why} if why else {}),
+                    "length": _LENGTH_ASK[length][0 if resume.summary.strip() else 1],
+                    **({"rejected_draft": rejected, "rejected_because": why} if why else {}),
                 },
                 ensure_ascii=False,
             ),
             schema=Summary,
         ).text.strip()
-        why = check_summary(draft, resume, terms) or (
+        why = check_summary(draft, resume, terms, 900 if length == "longer" else 600) or (
             f"used “{found[0]}”" if (found := embellishments(draft, facts)) else ""
         )
         if not why:
@@ -252,13 +274,31 @@ def write_summary(resume: ResumeData, job: dict, provider: AIProvider) -> str:
             )
             why = flagged.get("summary", "")
             if not why:
-                return draft
-        previous = draft
+                why = _wrong_length(draft, previous, length)
+                if not why:
+                    return draft
+                honest = draft
+        rejected = draft
         log.info("summary draft rejected: %s", why)
+    if honest:
+        return honest
     raise FitError(
         "We couldn't write a summary using only what's in your resume this time. Try again, "
         "or write one yourself."
     )
+
+
+def _wrong_length(draft: str, previous: str, length: SummaryLength) -> str:
+    """Why the draft isn't the length asked for, or ''. Measured against the summary it
+    replaces; with none there, any length passes."""
+    if not previous or length == "same":
+        return ""
+    words, before = len(draft.split()), len(previous.split())
+    if length == "shorter" and words > 0.8 * before:
+        return f"it has {words} words; it should be clearly shorter than {before}"
+    if length == "longer" and words < 1.2 * before:
+        return f"it has {words} words; it should be clearly longer than {before}"
+    return ""
 
 
 # --- fitting to N pages -------------------------------------------------------------------

@@ -205,6 +205,27 @@ def test_a_summary_that_embellishes_gets_a_second_try():
     assert "rejected_because" in json.loads(stub.calls[-2]["text"])
 
 
+@pytest.mark.parametrize(
+    ("length", "drafts", "expected"),
+    [
+        # Asked for shorter, the first draft is as long: a second try, which is shorter.
+        ("shorter", ["Backend engineer building payment systems in Go.", "Backend engineer."], 1),
+        ("longer", ["Backend engineer.", "Backend engineer building payment systems in Go."], 1),
+        # Neither try gets the length right: the honest draft is still better than nothing.
+        ("shorter", ["Backend engineer building payment systems in Go."] * 2, 1),
+    ],
+)
+def test_a_summary_is_written_at_the_length_asked_for(length, drafts, expected):
+    profile = PROFILE.model_copy(update={"summary": "Backend engineer building payment systems."})
+    replies = iter(drafts)
+    stub.answer("tailor", lambda text: Summary(text=next(replies)))
+    stub.answer("verify_tailoring", approve_all)
+    assert write_summary(profile, JOB, StubProvider(), length) == drafts[expected]
+    asked = json.loads(stub.calls[0]["text"])["length"]
+    assert asked.startswith("Make it clearly shorter" if length == "shorter" else "Make it longer")
+    assert "clearly" in json.loads(stub.calls[-2]["text"])["rejected_because"]
+
+
 def test_a_summary_that_keeps_inventing_is_refused():
     stub.answer(
         "tailor", lambda text: Summary(text="Backend engineer with 12 years on Kubernetes.")
@@ -291,6 +312,8 @@ def test_summary_endpoint(client, auth, resume):
     assert r.status_code == 200, r.text
     out = r.json()
     assert out["content"]["summary"] == "Backend engineer building payment systems in Go."
+    asked = json.loads(stub.calls[-2]["text"])  # the summary call, before its check
+    assert asked["length"].startswith("Keep it about as long")
     assert out["provenance"]["summary"]["status"] == "written"
 
 

@@ -1,7 +1,8 @@
 "use client";
 
 import type { Bullet, Project, ResumeData } from "@rg/schema";
-import type { LineHistory } from "@/lib/api";
+import { useState } from "react";
+import type { LineHistory, SummaryLength } from "@/lib/api";
 import { newId } from "@/lib/ids";
 import { ItemControls, move, removeAt, replaceAt, TextArea } from "@/components/profile/fields";
 
@@ -12,7 +13,7 @@ type Props = {
   profile: ResumeData | null;
   provenance: Record<string, LineHistory>;
   /** Write the summary with AI (from this resume's facts), and undo that. */
-  summaryAi?: { busy: boolean; disabled: boolean; write: () => void; undo: (() => void) | null };
+  summaryAi?: { busy: boolean; disabled: boolean; write: (length: SummaryLength) => void; undo: (() => void) | null };
 };
 
 const ORIGIN_LABEL: Record<LineHistory["status"], string> = {
@@ -145,6 +146,65 @@ function Lines({
   );
 }
 
+/** Write the summary with AI, at a length the person picks. */
+function SummaryAi({
+  has,
+  busy,
+  disabled,
+  write,
+  undo,
+}: NonNullable<Props["summaryAi"]> & { has: boolean }) {
+  const [length, setLength] = useState<SummaryLength>("same");
+  // With a summary there, lengths are relative to it; without one, they're absolute.
+  const choices: [SummaryLength, string][] = has
+    ? [["shorter", "Shorter"], ["same", "Same length"], ["longer", "Longer"]]
+    : [["shorter", "Short"], ["same", "Medium"], ["longer", "Long"]];
+  return (
+    <div className="flex flex-col gap-2 border-t border-sunken pt-3">
+      <fieldset className="flex flex-wrap items-center gap-2">
+        <legend className="sr-only">Length of the {has ? "new " : ""}summary</legend>
+        <span aria-hidden className="text-[13px] text-muted">Length</span>
+        <div className="flex overflow-hidden rounded-lg border border-line-strong text-[13px]">
+          {choices.map(([value, label]) => (
+            <label
+              key={value}
+              className={`cursor-pointer px-2.5 py-1.5 has-[:focus-visible]:outline-2 ${
+                length === value ? "bg-accent-soft font-medium text-accent-ink" : "hover:bg-sunken"
+              }`}
+            >
+              <input
+                type="radio"
+                name="summary-length"
+                value={value}
+                checked={length === value}
+                onChange={() => setLength(value)}
+                className="sr-only"
+              />
+              {label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => write(length)}
+          disabled={disabled}
+          className="h-9 rounded-lg border border-line-strong px-3 text-[13px] hover:bg-sunken disabled:opacity-50"
+        >
+          {busy ? "Writing…" : has ? "Rewrite with AI" : "Write with AI"}
+        </button>
+        {undo && (
+          <button type="button" onClick={undo} className="text-[13px] text-accent underline-offset-2 hover:underline">
+            Undo
+          </button>
+        )}
+        <span className="text-xs text-muted">Only from what&apos;s in this resume.</span>
+      </div>
+    </div>
+  );
+}
+
 export function ResumeContentEditor({ data, setData, profile, provenance, summaryAi }: Props) {
   const profileRole = (id: string) => profile?.experience.find((e) => e.id === id);
   const profileProject = (id: string) => profile?.projects.find((p) => p.id === id);
@@ -176,24 +236,7 @@ export function ResumeContentEditor({ data, setData, profile, provenance, summar
           history={provenance.summary}
           onUseOriginal={() => setData((d) => ({ ...d, summary: provenance.summary!.original }))}
         />
-        {summaryAi && (
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={summaryAi.write}
-              disabled={summaryAi.disabled}
-              className="h-9 rounded-lg border border-line-strong px-3 text-[13px] hover:bg-sunken disabled:opacity-50"
-            >
-              {summaryAi.busy ? "Writing…" : data.summary.trim() ? "Rewrite with AI" : "Write with AI"}
-            </button>
-            {summaryAi.undo && (
-              <button type="button" onClick={summaryAi.undo} className="text-[13px] text-accent underline-offset-2 hover:underline">
-                Undo
-              </button>
-            )}
-            <span className="text-xs text-muted">Only from what&apos;s in this resume.</span>
-          </div>
-        )}
+        {summaryAi && <SummaryAi has={data.summary.trim() !== ""} {...summaryAi} />}
       </Card>
 
       {data.experience.map((e, i) => (
