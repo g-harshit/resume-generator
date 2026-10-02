@@ -176,6 +176,7 @@ class RevisionReason:
     TAILOR = "tailor"
     EDIT = "edit"
     RETAILOR = "retailor"
+    COPY = "copy"  # made by duplicating another resume
 
 
 class ResumeRevision(SQLModel, table=True):

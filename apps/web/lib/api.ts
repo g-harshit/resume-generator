@@ -61,6 +61,9 @@ export type ResumeSummary = {
   template: string;
   version: number;
   job_id: number | null;
+  company: string;
+  job_title: string;
+  source: "paste" | "extension" | null;
   created_at: string;
   updated_at: string;
   covered: number | null;
@@ -219,6 +222,8 @@ export const api = {
     }),
   /** Tailor again from the profile as it is now; replaces this resume's edits. */
   retailorResume: (id: number) => request<ResumeFull>(`/resumes/${id}/retailor`, { method: "POST" }),
+  duplicateResume: (id: number) => request<ResumeFull>(`/resumes/${id}/duplicate`, { method: "POST" }),
+  deleteResume: (id: number) => send(`/resumes/${id}`, { method: "DELETE" }).then(() => undefined),
   resumePdf: (id: number, template: string) =>
     pdfDownload(`/resumes/${id}/pdf?template=${encodeURIComponent(template)}`),
 

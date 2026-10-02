@@ -429,9 +429,13 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 (Phase 3); this was only about exporting. Revisit if users or ATS portals ask for .docx.
 
 ### Phase 10 — My resumes
-- [ ] Web: list (mockup 6) — job, company, template, match, source, updated
-- [ ] Open, download, duplicate, re-tailor, delete
-- [ ] Profile card with outstanding warnings (e.g. missing phone)
+- [x] Web: `/app/resumes` (mockup 6) — job (the resume's own title, so a copy reads
+      "(copy)"), company, template, keyword match, source (pasted / extension), updated
+- [x] Open, PDF, Duplicate (`POST /resumes/{id}/duplicate`: no model call, so not in the
+      daily cap; revision reason `copy`), Re-tailor, Delete (`DELETE /resumes/{id}`, with
+      an inline confirm; revisions go with it, the job stays)
+- [x] Profile card: counts, last updated, "not confirmed yet", and what's left to check
+- [x] Checked in the browser: list, duplicate (opens the copy), delete with confirm
 
 ### Phase 11 — Chrome extension
 - [ ] WXT app in `apps/extension`, side panel, permissions: `activeTab`, `scripting`,

@@ -182,3 +182,56 @@ def test_a_skill_already_in_the_profile_is_not_added_twice(client, auth, ready):
 )
 def test_i_have_this_needs_a_real_line_and_a_real_place(client, auth, ready, body, status):  # noqa: F811
     assert add_skill(client, auth, **body).status_code == status
+
+
+# --- my resumes: list, duplicate, delete -------------------------------------------------
+
+
+def test_the_list_says_which_job_each_resume_is_for(client, auth, resume):
+    [row] = client.get("/resumes", headers=auth).json()
+    assert (row["company"], row["job_title"], row["source"]) == (
+        "Northwind Labs",
+        "Senior Backend Engineer",
+        "paste",
+    )
+    assert row["covered"] is not None and row["total"] > 0
+
+
+def test_duplicate_makes_an_independent_copy(client, auth, resume, session):
+    r = client.post(f"/resumes/{resume['id']}/duplicate", headers=auth)
+    assert r.status_code == 201
+    copy = r.json()
+    assert copy["id"] != resume["id"]
+    assert copy["title"] == resume["title"] + " (copy)"
+    assert copy["content"] == resume["content"] and copy["provenance"] == resume["provenance"]
+    assert revisions(session, copy["id"]) == ["copy"]
+
+    content = copy["content"]
+    content["summary"] = "Only in the copy."
+    save(client, auth, copy, content=content)
+    original = client.get(f"/resumes/{resume['id']}", headers=auth).json()
+    assert original["content"]["summary"] != "Only in the copy."
+
+
+def test_duplicating_doesnt_count_towards_the_daily_cap(client, auth, resume, monkeypatch):
+    from app.config import get_settings
+
+    monkeypatch.setattr(get_settings(), "resumes_per_day", 1)
+    assert client.post(f"/resumes/{resume['id']}/duplicate", headers=auth).status_code == 201
+
+
+def test_delete_removes_the_resume_and_its_history_but_not_the_job(client, auth, resume, session):
+    assert client.delete(f"/resumes/{resume['id']}", headers=auth).status_code == 204
+    assert client.get(f"/resumes/{resume['id']}", headers=auth).status_code == 404
+    assert revisions(session, resume["id"]) == []
+    assert client.get(f"/jobs/{resume['job_id']}", headers=auth).status_code == 200
+
+
+def test_someone_elses_resume_cant_be_deleted_or_copied(client, auth, resume):
+    other = client.post(
+        "/auth/register",
+        json={"email": "ravi@example.com", "password": "correct horse", "name": "Ravi"},
+    ).json()["token"]
+    headers = {"Authorization": f"Bearer {other}"}
+    assert client.delete(f"/resumes/{resume['id']}", headers=headers).status_code == 404
+    assert client.post(f"/resumes/{resume['id']}/duplicate", headers=headers).status_code == 404

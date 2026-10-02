@@ -39,6 +39,10 @@ class ResumeSummary(BaseModel):
     template: str
     version: int
     job_id: int | None
+    # About the job it was made for; empty / null if the job is gone.
+    company: str
+    job_title: str
+    source: str | None  # "paste" | "extension"
     created_at: datetime
     updated_at: datetime
     # How many of the job's skills this resume shows; null if the job is gone.
@@ -59,22 +63,28 @@ def _own(session: Session, user: User, resume_id: int) -> Resume:
     return resume
 
 
+def _job(session: Session, resume: Resume) -> JobDescription | None:
+    if resume.job_description_id is None:
+        return None
+    return session.get(JobDescription, resume.job_description_id)
+
+
 def _match(session: Session, resume: Resume) -> dict | None:
-    job = (
-        session.get(JobDescription, resume.job_description_id)
-        if resume.job_description_id
-        else None
-    )
+    job = _job(session, resume)
     return match_job(ResumeData.model_validate(resume.content), job.parsed) if job else None
 
 
-def _summary(resume: Resume, match: dict | None) -> dict:
+def _summary(session: Session, resume: Resume, match: dict | None) -> dict:
+    job = _job(session, resume)
     return {
         "id": resume.id,
         "title": resume.title,
         "template": resume.template,
         "version": resume.version,
         "job_id": resume.job_description_id,
+        "company": job.company if job else "",
+        "job_title": job.title if job else "",
+        "source": job.source if job else None,
         "created_at": resume.created_at,
         "updated_at": resume.updated_at,
         "covered": match["covered"] if match else None,
@@ -85,7 +95,7 @@ def _summary(resume: Resume, match: dict | None) -> dict:
 def _out(session: Session, resume: Resume) -> ResumeOut:
     match = _match(session, resume)
     return ResumeOut(
-        **_summary(resume, match),
+        **_summary(session, resume, match),
         content=ResumeData.model_validate(resume.content),
         provenance=resume.provenance,
         match=match,
@@ -171,7 +181,7 @@ def list_resumes(user: CurrentUser, session: SessionDep) -> list[ResumeSummary]:
     resumes = session.exec(
         select(Resume).where(Resume.user_id == user.id).order_by(Resume.updated_at.desc())
     ).all()
-    return [ResumeSummary(**_summary(r, _match(session, r))) for r in resumes]
+    return [ResumeSummary(**_summary(session, r, _match(session, r))) for r in resumes]
 
 
 @router.get("/{resume_id}")
@@ -240,11 +250,7 @@ def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOu
     """Tailor again from the profile as it is now (say, after adding a skill). The
     edits made to this resume are replaced; the previous version stays in its history."""
     resume = _own(session, user, resume_id)
-    job = (
-        session.get(JobDescription, resume.job_description_id)
-        if resume.job_description_id
-        else None
-    )
+    job = _job(session, resume)
     if job is None:
         raise HTTPException(status.HTTP_409_CONFLICT, "The job this resume was made for is gone.")
     profile = _reviewed_profile(session, user)
@@ -271,6 +277,35 @@ def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOu
     session.commit()
     session.refresh(resume)
     return _out(session, resume)
+
+
+@router.post("/{resume_id}/duplicate", status_code=status.HTTP_201_CREATED)
+def duplicate(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOut:
+    """A copy to try something different on. No model call, so not part of the cap."""
+    source = _own(session, user, resume_id)
+    copy = Resume(
+        user_id=user.id,
+        job_description_id=source.job_description_id,
+        template=source.template,
+        title=f"{source.title} (copy)"[:300],
+        content=source.content,
+        provenance=source.provenance,
+        profile_version=source.profile_version,
+    )
+    session.add(copy)
+    session.flush()
+    session.add(ResumeRevision(resume_id=copy.id, content=copy.content, reason=RevisionReason.COPY))
+    session.commit()
+    session.refresh(copy)
+    return _out(session, copy)
+
+
+@router.delete("/{resume_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_resume(resume_id: int, user: CurrentUser, session: SessionDep) -> Response:
+    """Deletes the resume and its history. The job it was made for stays."""
+    session.delete(_own(session, user, resume_id))
+    session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 def _template(resume: Resume, override: str | None) -> str:
