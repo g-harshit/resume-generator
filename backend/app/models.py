@@ -169,6 +169,9 @@ class Resume(SQLModel, table=True):
     profile_version: int
     # Bumped on every save; a save must name the version it edited (as for profiles).
     version: int = Field(default=1, sa_column_kwargs={"server_default": "1"})
+    # {"text": letter body, "removed": [{"text", "reason"}], "generated_at"}; null until
+    # one is written (services/cover_letter.py).
+    cover_letter: dict | None = Field(default=None, sa_column=Column(JSONB, nullable=True))
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )

@@ -170,6 +170,12 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
               ))}
             </select>
           </label>
+          <Link
+            href={`/app/cover-letter?id=${id}`}
+            className="inline-flex h-11 items-center rounded-[10px] border border-line-strong bg-surface px-4 text-sm text-ink hover:bg-sunken hover:text-ink"
+          >
+            Cover letter
+          </Link>
           <button
             type="button"
             onClick={() => setConfirmRetailor(true)}

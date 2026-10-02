@@ -19,9 +19,11 @@ from app.models import (
     utcnow,
 )
 from app.rendering.catalog import BY_SLUG
-from app.rendering.render import render_html, render_pdf
+from app.rendering.render import render_html, render_letter_html, render_pdf
 from app.routers.templates import PreviewOut, pdf_filename
 from app.schemas.resume import ResumeData
+from app.services import rate_limit
+from app.services.cover_letter import write_cover_letter
 from app.services.match import match_job
 from app.services.tailor import tailor
 
@@ -54,6 +56,7 @@ class ResumeOut(ResumeSummary):
     content: ResumeData
     provenance: dict
     match: dict | None
+    cover_letter: dict | None
 
 
 def _own(session: Session, user: User, resume_id: int) -> Resume:
@@ -99,6 +102,7 @@ def _out(session: Session, resume: Resume) -> ResumeOut:
         content=ResumeData.model_validate(resume.content),
         provenance=resume.provenance,
         match=match,
+        cover_letter=resume.cover_letter,
     )
 
 
@@ -306,6 +310,84 @@ def delete_resume(resume_id: int, user: CurrentUser, session: SessionDep) -> Res
     session.delete(_own(session, user, resume_id))
     session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+# --- cover letter ------------------------------------------------------------------
+
+
+@router.post("/{resume_id}/cover-letter")
+def write_letter(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOut:
+    """Write (or rewrite) the cover letter for this resume's job, from this resume.
+    Waits for the model, usually 15-30 s."""
+    resume = _own(session, user, resume_id)
+    job = _job(session, resume)
+    if job is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "The job this resume was made for is gone.")
+    rate_limit.check(
+        session,
+        "cover_letter",
+        str(user.id),
+        get_settings().cover_letters_per_day,
+        timedelta(days=1),
+        "You've written a lot of cover letters today. Please try again tomorrow.",
+    )
+    try:
+        letter = write_cover_letter(
+            ResumeData.model_validate(resume.content), job.parsed, job.raw_text, get_ai_provider()
+        )
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    rate_limit.record(session, "cover_letter", str(user.id))
+    resume.cover_letter = {**letter, "generated_at": utcnow().isoformat()}
+    resume.updated_at = utcnow()
+    session.add(resume)
+    session.commit()
+    session.refresh(resume)
+    return _out(session, resume)
+
+
+class LetterIn(BaseModel):
+    text: str = Field(max_length=10_000)
+
+
+@router.put("/{resume_id}/cover-letter")
+def save_letter(
+    resume_id: int, body: LetterIn, user: CurrentUser, session: SessionDep
+) -> ResumeOut:
+    """The person's own edits to the letter: theirs, so not checked."""
+    resume = _own(session, user, resume_id)
+    if resume.cover_letter is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "There's no cover letter yet.")
+    resume.cover_letter = {**resume.cover_letter, "text": body.text}
+    resume.updated_at = utcnow()
+    session.add(resume)
+    session.commit()
+    session.refresh(resume)
+    return _out(session, resume)
+
+
+@router.get("/{resume_id}/cover-letter/pdf")
+def letter_pdf(
+    resume_id: int, user: CurrentUser, session: SessionDep, template: str | None = None
+) -> Response:
+    resume = _own(session, user, resume_id)
+    if not resume.cover_letter:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "There's no cover letter yet.")
+    data = ResumeData.model_validate(resume.content)
+    job = _job(session, resume)
+    html = render_letter_html(
+        data, resume.cover_letter["text"], job.company if job else "", _template(resume, template)
+    )
+    rendered = render_pdf(html)
+    filename = pdf_filename(data).replace("-Resume.pdf", "-Cover-Letter.pdf")
+    return Response(
+        rendered.content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"',
+            "Cache-Control": "private, no-store",
+        },
+    )
 
 
 def _template(resume: Resume, override: str | None) -> str:

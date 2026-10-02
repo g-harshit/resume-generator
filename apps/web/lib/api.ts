@@ -70,10 +70,18 @@ export type ResumeSummary = {
   total: number | null;
 };
 
+export type CoverLetter = {
+  text: string;
+  /** Sentences left out because they claimed something the resume doesn't say. */
+  removed: { text: string; reason: string }[];
+  generated_at: string;
+};
+
 export type ResumeFull = ResumeSummary & {
   content: ResumeData;
   provenance: Record<string, LineHistory>;
   match: Job["match"];
+  cover_letter: CoverLetter | null;
 };
 
 export type Profile = {
@@ -229,6 +237,12 @@ export const api = {
     }),
   /** Tailor again from the profile as it is now; replaces this resume's edits. */
   retailorResume: (id: number) => request<ResumeFull>(`/resumes/${id}/retailor`, { method: "POST" }),
+  /** Write (or rewrite) the cover letter from this resume: waits for the model, ~15–30 s. */
+  writeCoverLetter: (id: number) => request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "POST" }),
+  saveCoverLetter: (id: number, text: string) =>
+    request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "PUT", body: JSON.stringify({ text }) }),
+  coverLetterPdf: (id: number, template: string) =>
+    pdfDownload(`/resumes/${id}/cover-letter/pdf?template=${encodeURIComponent(template)}`),
   duplicateResume: (id: number) => request<ResumeFull>(`/resumes/${id}/duplicate`, { method: "POST" }),
   deleteResume: (id: number) => send(`/resumes/${id}`, { method: "DELETE" }).then(() => undefined),
   resumePdf: (id: number, template: string) =>

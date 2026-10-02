@@ -109,7 +109,7 @@ def numbers_in(text: str) -> set[str]:
     return found
 
 
-def _new_numbers(new: str, allowed_in: str) -> set[str]:
+def new_numbers(new: str, allowed_in: str) -> set[str]:
     allowed = numbers_in(allowed_in)
     # "60%" is supported by "60 percent" or "60"; compare on the digits.
     allowed_digits = {re.sub(r"[^\d.]", "", n) for n in allowed}
@@ -120,7 +120,7 @@ def _new_numbers(new: str, allowed_in: str) -> set[str]:
     }
 
 
-def _new_terms(new: str, allowed_in: str, terms: list[str]) -> list[str]:
+def new_terms(new: str, allowed_in: str, terms: list[str]) -> list[str]:
     return [t for t in terms if is_written(t, new) and not is_written(t, allowed_in)]
 
 
@@ -132,9 +132,9 @@ def check_rewording(new: str, original: str, terms: list[str]) -> str | None:
     """Why `new` can't stand in for `original`, or None if it can."""
     if not new.strip():
         return "came back empty"
-    if extra := _new_numbers(new, original):
+    if extra := new_numbers(new, original):
         return f"added a number that isn't in your original ({', '.join(sorted(extra))})"
-    if extra := _new_terms(new, original, terms):
+    if extra := new_terms(new, original, terms):
         return f"mentioned {', '.join(extra)}, which this line of yours doesn't"
     if _too_long(new, original):
         return "made it much longer than your original"
@@ -162,9 +162,9 @@ def skill_terms(profile: ResumeData, job: dict) -> list[str]:
 def check_summary(new: str, profile: ResumeData, terms: list[str]) -> str | None:
     """Like `check_rewording`, against the whole profile rather than one line."""
     whole = _profile_prose(profile)
-    if extra := _new_numbers(new, whole):
+    if extra := new_numbers(new, whole):
         return f"added a number that isn't in your profile ({', '.join(sorted(extra))})"
-    if extra := _new_terms(new, whole, terms):
+    if extra := new_terms(new, whole, terms):
         return f"mentioned {', '.join(extra)}, which isn't in your profile"
     if "\n" in new.strip() or len(new) > 600:
         return "wasn't a short summary paragraph"

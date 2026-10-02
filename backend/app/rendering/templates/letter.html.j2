@@ -1,0 +1,40 @@
+{#-
+  A cover letter in the same template as its resume: same stylesheet, same header.
+  The greeting, sign-off and name come from here, never from the model.
+-#}
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>{{ b.name or "Cover letter" }} – Cover letter</title>
+{% if b.name %}<meta name="author" content="{{ b.name }}">{% endif %}
+<style>
+{{ base_css }}
+{{ template_css }}
+.letter p { margin: 0 0 0.9em; }
+.letter .date { margin: 1.2em 0 1.4em; color: #3c3e44; }
+.letter .sign { margin-top: 1.6em; }
+</style>
+</head>
+<body class="tpl-{{ slug }}">
+<main class="page letter">
+<header class="head">
+  {% if b.name %}<h1 class="name">{{ b.name }}</h1>{% endif %}
+  {% if b.headline %}<p class="headline">{{ b.headline }}</p>{% endif %}
+  {% if contact %}
+  <p class="contact">
+    {%- for item in contact -%}
+      {% if not loop.first %}<span class="sep" aria-hidden="true"> · </span>{% endif -%}
+      {% if item.href %}<a href="{{ item.href }}">{{ item.text }}</a>{% else %}{{ item.text }}{% endif -%}
+    {%- endfor -%}
+  </p>
+  {% endif %}
+</header>
+<p class="date">{{ today }}</p>
+<p>Dear {{ ("hiring team at " ~ company) if company else "hiring team" }},</p>
+{% for paragraph in paragraphs %}<p>{{ paragraph }}</p>
+{% endfor %}
+<p class="sign">Sincerely,<br>{{ b.name }}</p>
+</main>
+</body>
+</html>

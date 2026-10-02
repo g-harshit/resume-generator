@@ -476,7 +476,14 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       `robots.txt` (keeps `/app` out) and `sitemap.xml`; `NEXT_PUBLIC_SITE_URL` for deploys.
 - [ ] Privacy policy and terms — needed before launch; their content is a decision for
       the owner (what's collected, OpenAI as a processor, retention, jurisdiction).
-- [ ] Cover letter from the same profile + JD
+- [x] Cover letter from the resume + JD (`services/cover_letter.py`, `/app/cover-letter?id=`):
+      checked **sentence by sentence** — rule checks (no number / skill the resume lacks,
+      plus a fixed list of embellishing words unless the resume uses them), then the
+      second check; failing sentences get one rewrite, then are left out and listed with
+      the reason. Greeting, name and sign-off come from code. PDF in the resume's
+      template; 20/day. Real runs drove the design: paragraph-level checking let
+      "which improved reliability" through, and a rewrite duplicated a sentence (now
+      deduplicated). **Web page not yet checked in the browser.**
 - [x] Rate limiting on auth: failed sign-ins 10 per account and 50 per IP per 15 min
       (only failures count), sign-ups 10 per IP per hour, reset requests 3 per account /
       20 per IP per hour. Counted in Postgres (`auth_attempts`, pruned after a day) so it

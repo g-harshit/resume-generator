@@ -7,6 +7,7 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from datetime import date
 from functools import cache
 from pathlib import Path
 
@@ -106,6 +107,26 @@ def render_html(data: ResumeData, slug: str) -> str:
             date_range=date_range,
             format_date=format_date,
             link_for=link_for,
+        )
+    )
+
+
+def render_letter_html(data: ResumeData, body: str, company: str, slug: str) -> str:
+    if slug not in BY_SLUG:
+        raise UnknownTemplate(slug)
+    today = date.today()
+    return (
+        _env()
+        .get_template("letter.html.j2")
+        .render(
+            b=data.basics,
+            slug=slug,
+            contact=_contact(data),
+            base_css=_css("base.css"),
+            template_css=_css(f"{slug}.css"),
+            paragraphs=[p.strip() for p in body.split("\n\n") if p.strip()],
+            company=company,
+            today=f"{today.day} {today.strftime('%B %Y')}",
         )
     )
 

@@ -61,6 +61,7 @@ class Settings(BaseSettings):
     uploads_per_day: int = 20
     jobs_per_day: int = 50
     resumes_per_day: int = 30
+    cover_letters_per_day: int = 20
 
     @model_validator(mode="after")
     def _no_dev_secrets_in_production(self) -> "Settings":
