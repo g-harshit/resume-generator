@@ -320,13 +320,33 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
   turns out to misread postings in practice.
 
 ### Phase 6 — Templates and rendering
-- [ ] Four templates as Jinja2 HTML + CSS: Classic, Modern, Compact, Executive
-- [ ] `templates` table seeded on startup when empty
-- [ ] `render`: ResumeData + template → HTML; `/templates/{slug}/preview` with the user's data
-- [ ] PDF via WeasyPrint; page-count check (warn when > 1 page for < 10 years' experience)
-- [ ] **ATS test**: for every template, render a fixture, extract the PDF text, assert
-      reading order, standard headings, contact details present, no text in header/footer
-- [ ] Web: template picker (mockup 4) with live previews
+- [x] Four templates — Classic, Modern, Compact, Executive — as **one** Jinja2 structure
+      (`rendering/templates/resume.html.j2`) and a stylesheet each. The ATS-critical
+      things (single column, real text, standard headings, contact in the body, reading
+      order) live in the shared HTML, so a new look can't break them.
+- [x] ~~`templates` table~~ — a code registry instead (`rendering/catalog.py`). The HTML
+      and CSS are code anyway, so a new template needs a deploy regardless; a table would
+      only have toggled visibility. Revisit if templates become user- or admin-made.
+- [x] `render_html` (autoescaped; only http(s) links are clickable, `javascript:` stays
+      text) and `render_pdf` (WeasyPrint, with a URL fetcher that refuses everything, so
+      user text can never make the server fetch an address). Same HTML for both.
+- [x] `GET /templates`, `/templates/{slug}/preview` (HTML + page count from the real PDF
+      layout), `/templates/{slug}/pdf` (the profile as a PDF; `X-Page-Count`)
+- [x] **ATS test** (`tests/test_rendering.py`), for every template: text extracts in
+      reading order (contact → headings in order → each role's title before its dates),
+      every bullet is one unbroken string, nothing in the top/bottom 10 mm (no running
+      header/footer), fonts embedded, the template's own font is the one used, user text
+      escaped, only http(s)/mailto links
+- [x] Web: `/app/templates` (mockup 4) — live previews of the user's own profile in a
+      sandboxed iframe (the same HTML as the PDF), page-count badge when > 1, full-size
+      view of the selected one, Download PDF. "Tailor my resume" waits for Phase 7.
+- Found while checking the rendered PDFs: Jinja autoescaped the stylesheets, turning
+  `"Helvetica Neue"` into `&#34;Helvetica Neue&#34;`; browsers and WeasyPrint dropped the
+  rule and three of four templates silently rendered in Times. Now covered by a test.
+- Environment: WeasyPrint needs Pango (`brew install pango`; `render.py` points macOS at
+  Homebrew's lib folder itself). Fonts are the system's Georgia / Helvetica / Arial —
+  **a Linux server needs these or metric-compatible ones (or bundle OFL fonts) before
+  deploying**, and the font test will say so. Paper is A4 only for now.
 
 ### Phase 7 — Tailoring
 - [ ] Prompt: profile + parsed JD → selected/reordered/reworded `ResumeData` + provenance

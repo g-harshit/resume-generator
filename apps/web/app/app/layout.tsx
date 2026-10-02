@@ -10,6 +10,7 @@ const NAV = [
   { href: "/app", label: "Home" },
   { href: "/app/new", label: "New resume" },
   { href: "/app/profile", label: "Profile" },
+  { href: "/app/templates", label: "Templates" },
 ];
 
 function initials(name: string) {

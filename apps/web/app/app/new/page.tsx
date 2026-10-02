@@ -213,16 +213,12 @@ function WhatWeFound({ job, reading }: { job: Job | null; reading: boolean }) {
             </p>
           )}
 
-          <div className="flex flex-col gap-1.5">
-            <button
-              type="button"
-              disabled
-              className="h-12 rounded-[10px] bg-accent text-[15px] font-medium text-white disabled:opacity-50"
-            >
-              Choose a template
-            </button>
-            <span className="text-center text-[13px] text-muted">Templates are the next thing being built.</span>
-          </div>
+          <Link
+            href={`/app/templates?job=${job.id}`}
+            className="flex h-12 items-center justify-center rounded-[10px] bg-accent text-[15px] font-medium text-white hover:bg-accent-hover hover:text-white"
+          >
+            Choose a template
+          </Link>
         </>
       )}
     </aside>

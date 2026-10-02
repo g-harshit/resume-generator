@@ -1,0 +1,9 @@
+@page { size: A4; margin: 15mm 17mm; }
+@media screen { .page { padding: 15mm 17mm; } }
+body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 10pt; line-height: 1.4; }
+.name { font-size: 22pt; font-weight: 700; letter-spacing: -0.01em; }
+.headline { font-size: 11pt; color: #2f5d50; font-weight: 600; margin-top: 0.05em; }
+.contact { font-size: 9pt; margin-top: 0.35em; color: #3c3e44; }
+.section h2 { font-size: 11pt; font-weight: 700; color: #2f5d50; }
+.entry-head .when { color: #3c3e44; font-size: 9.5pt; }
+.where { color: #3c3e44; }

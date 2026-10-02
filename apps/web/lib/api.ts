@@ -43,6 +43,9 @@ export type Job = {
   } | null;
 };
 
+export type TemplateInfo = { slug: string; name: string; description: string };
+export type Preview = { html: string; pages: number };
+
 export type Profile = {
   data: ResumeData;
   version: number;
@@ -153,6 +156,16 @@ export const api = {
   addJob: (text: string) =>
     request<Job>("/jobs", { method: "POST", body: JSON.stringify({ text, source: "paste" }) }),
   getJob: (id: number) => request<Job>(`/jobs/${id}`),
+
+  listTemplates: () => request<TemplateInfo[]>("/templates"),
+  /** The user's profile in this template; `pages` comes from the real PDF layout. */
+  previewTemplate: (slug: string) => request<Preview>(`/templates/${slug}/preview`),
+  /** The user's profile in this template as a PDF, with the file name the API chose. */
+  templatePdf: async (slug: string) => {
+    const res = await send(`/templates/${slug}/pdf`);
+    const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1];
+    return { blob: await res.blob(), filename: name ?? "Resume.pdf" };
+  },
 
   confirmProfile: (version: number) =>
     request<Profile>("/profile/confirm", { method: "POST", body: JSON.stringify({ version }) }),

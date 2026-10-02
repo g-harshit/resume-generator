@@ -8,7 +8,7 @@ The build plan and its progress are in [plan.md](plan.md).
 ## Run it locally
 
 You need Docker Desktop, [uv](https://docs.astral.sh/uv/) and pnpm
-(`brew install uv pnpm`). Python 3.12 is fetched by uv.
+(`brew install uv pnpm pango` — Pango is for PDF rendering). Python 3.12 is fetched by uv.
 
 ```bash
 pnpm install

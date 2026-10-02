@@ -1,0 +1,14 @@
+@page { size: A4; margin: 11mm 13mm; }
+@media screen { .page { padding: 11mm 13mm; } }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 9.3pt; line-height: 1.3; }
+.head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0 1em; margin-bottom: 0.5em; }
+.name { font-size: 16pt; font-weight: 700; }
+.headline { font-size: 10pt; }
+.contact { font-size: 8.6pt; flex-basis: 100%; }
+.section { margin-top: 0.6em; }
+.section h2 {
+  font-size: 9pt; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  background: #efede6; padding: 0.15em 0.4em;
+}
+.entry { margin-top: 0.4em; }
+li { margin: 0.05em 0; }
