@@ -469,7 +469,13 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 - [ ] Credits and payments (if we monetise that way) — every paid action must store its
       result so a refresh never charges twice
 - [ ] Deploy (API, web, Postgres, R2), domain, name
-- [ ] Public landing page
+- [x] Public landing page (`/`): hero with a stylised match + "what changed" view, how it
+      works, "It never makes things up" with **real** rewordings the guard rejected in
+      testing, ATS templates, honest gaps / "I have this", FAQ. Claims only what ships:
+      the extension is "coming to the Chrome Web Store", no pricing (undecided).
+      `robots.txt` (keeps `/app` out) and `sitemap.xml`; `NEXT_PUBLIC_SITE_URL` for deploys.
+- [ ] Privacy policy and terms — needed before launch; their content is a decision for
+      the owner (what's collected, OpenAI as a processor, retention, jurisdiction).
 - [ ] Cover letter from the same profile + JD
 - [x] Rate limiting on auth: failed sign-ins 10 per account and 50 per IP per 15 min
       (only failures count), sign-ups 10 per IP per hour, reset requests 3 per account /
