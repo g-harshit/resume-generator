@@ -497,7 +497,8 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       written to the API log** — real sending needs SMTP settings.
 - [x] Fit to N pages (`services/fit.py`, the editor's "Length" panel): past one page the
       editor asks how many pages the person wants. Then: margins (normal / narrow, all
-      four sides), which sections to include (`resumes.layout`: hidden sections stay in
+      four sides; or **custom**, 5–30 mm, the same on every side, by slider or typed),
+      which sections to include (`resumes.layout`: hidden sections stay in
       the content, just not on the page), "Fit to N pages for me" (narrow margins first;
       then rounds of fewer lines per role by recency — newest keeps the most, e.g.
       5/3/2 — re-rendering the PDF to count pages), lines per role up or down (down

@@ -94,11 +94,25 @@ def _css(name: str) -> Markup:
 
 # "Narrow" margins: the same on all four sides, and a little less space between
 # sections. Comes after the template's own CSS, so it wins.
-_NARROW_CSS = Markup(
-    "@page { margin: 9mm 10mm; }\n"
-    "@media screen { .page { padding: 9mm 10mm; } }\n"
+NARROW_MM = 10
+# Fitting more on a page: tighter spacing between sections and entries too.
+_TIGHT_CSS = (
     ".section { margin-top: 0.6em; } .entry { margin-top: 0.4em; } .head { margin-bottom: 0.6em; }"
 )
+
+
+def _margin_css(mm: int) -> str:
+    """The same margin on all four sides, in the PDF and the on-screen preview."""
+    return f"@page {{ margin: {mm}mm; }}\n@media screen {{ .page {{ padding: {mm}mm; }} }}\n"
+
+
+def _layout_css(layout: Layout) -> Markup:
+    if layout.margins == "narrow":
+        return Markup(_margin_css(NARROW_MM) + _TIGHT_CSS)
+    if layout.margins == "custom" and layout.margin_mm is not None:
+        css = _margin_css(layout.margin_mm)
+        return Markup(css + (_TIGHT_CSS if layout.margin_mm <= NARROW_MM else ""))
+    return Markup("")
 
 
 def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> str:
@@ -120,7 +134,7 @@ def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> st
             link_for=link_for,
             hidden=set(layout.hidden),
             order=layout.sections(),
-            layout_css=_NARROW_CSS if layout.margins == "narrow" else Markup(""),
+            layout_css=_layout_css(layout),
         )
     )
 

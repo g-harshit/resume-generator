@@ -23,7 +23,39 @@ export type FitActions = {
   addLines: (entryId: string, target: number) => void;
 };
 
+// Margins: narrow matches backend/app/rendering/render.py; custom is 5–30 mm.
+const NARROW_MM = 10;
+const MIN_MM = 5;
+const MAX_MM = 30;
+const DEFAULT_CUSTOM_MM = 15;
+
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+/** Typed millimetres, applied on Enter or leaving the box — not on every keystroke,
+ *  so typing "12" doesn't pass through 1 (clamped to 5) on the way. */
+function MarginInput({ value, onCommit }: { value: number; onCommit: (mm: number) => void }) {
+  const [text, setText] = useState<string | null>(null);
+  const commit = () => {
+    if (text !== null && text.trim() !== "" && !Number.isNaN(Number(text))) onCommit(Number(text));
+    setText(null);
+  };
+  return (
+    <label className="flex items-center gap-1 text-sm">
+      <input
+        type="number"
+        min={MIN_MM}
+        max={MAX_MM}
+        value={text ?? value}
+        onChange={(e) => setText(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => e.key === "Enter" && commit()}
+        aria-label="Margin in millimetres"
+        className="h-9 w-16 rounded-md border border-line-strong bg-surface px-2 text-right text-sm"
+      />
+      mm
+    </label>
+  );
+}
 
 /**
  * Page goal, margins, sections, and lines per role. Always there: the person may want
@@ -55,6 +87,8 @@ export function FitPanel({
   const goal = layout.pages;
   const over = goal !== null && pages > goal;
 
+  const setMargin = (mm: number) =>
+    actions.setLayout((l) => ({ ...l, margins: "custom", margin_mm: Math.min(MAX_MM, Math.max(MIN_MM, Math.round(mm))) }));
   const order = layout.order ?? SECTIONS;
   const present = order.filter((s) => (s === "summary" ? true : (data[s] as unknown[]).length > 0));
   // Swap a section with its neighbour among the ones on this resume.
@@ -141,22 +175,52 @@ export function FitPanel({
         </>
       )}
 
-      <fieldset className="flex flex-col gap-1.5 border-t border-sunken pt-3">
+      <fieldset className="flex flex-col gap-2 border-t border-sunken pt-3">
         <legend className="mb-1 text-[13px] font-semibold">Margins</legend>
-        <div className="flex gap-4 text-sm">
-          {(["normal", "narrow"] as const).map((m) => (
-            <label key={m} className="flex items-center gap-1.5 capitalize">
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-sm">
+          {(
+            [
+              ["normal", "Template's own"],
+              ["narrow", `Narrow (${NARROW_MM} mm)`],
+              ["custom", "Custom"],
+            ] as const
+          ).map(([m, label]) => (
+            <label key={m} className="flex items-center gap-1.5">
               <input
                 type="radio"
                 name="margins"
                 checked={layout.margins === m}
-                onChange={() => actions.setLayout((l) => ({ ...l, margins: m }))}
+                onChange={() =>
+                  actions.setLayout((l) => ({
+                    ...l,
+                    margins: m,
+                    margin_mm: m === "custom" ? (l.margin_mm ?? DEFAULT_CUSTOM_MM) : l.margin_mm,
+                  }))
+                }
                 className="accent-accent"
               />
-              {m}
+              {label}
             </label>
           ))}
         </div>
+        {layout.margins === "custom" && (
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={MIN_MM}
+              max={MAX_MM}
+              step={1}
+              value={layout.margin_mm ?? DEFAULT_CUSTOM_MM}
+              onChange={(e) => setMargin(Number(e.target.value))}
+              aria-label="Margin on all four sides, in millimetres"
+              className="flex-1 accent-accent"
+            />
+            <MarginInput value={layout.margin_mm ?? DEFAULT_CUSTOM_MM} onCommit={setMargin} />
+          </div>
+        )}
+        {layout.margins !== "normal" && (
+          <p className="text-xs text-muted">The same on all four sides.</p>
+        )}
       </fieldset>
 
       <fieldset className="flex flex-col gap-1.5 border-t border-sunken pt-3">

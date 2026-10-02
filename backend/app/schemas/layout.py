@@ -20,7 +20,10 @@ SECTIONS: tuple[str, ...] = (
 class Layout(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    margins: Literal["normal", "narrow"] = "normal"
+    # "normal" is the template's own; "narrow" is 10 mm; "custom" is `margin_mm`. Narrow
+    # and custom are the same on all four sides.
+    margins: Literal["normal", "narrow", "custom"] = "normal"
+    margin_mm: int | None = Field(default=None, ge=5, le=30)
     # Sections left out of this resume (the content stays, so showing one again is free).
     hidden: list[Section] = Field(default_factory=list)
     # The page count the person chose when the resume ran long; null until asked.

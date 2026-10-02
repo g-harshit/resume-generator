@@ -86,7 +86,26 @@ def test_narrow_margins_fit_more_on_a_page():
     normal = fit_service.count_pages(long, "classic", Layout())
     narrow = fit_service.count_pages(long, "classic", Layout(margins="narrow"))
     assert narrow <= normal
-    assert "margin: 9mm 10mm" in render_html(long, "classic", Layout(margins="narrow"))
+    assert "@page { margin: 10mm; }" in render_html(long, "classic", Layout(margins="narrow"))
+
+
+@pytest.mark.parametrize("mm", [5, 14, 30])
+def test_a_custom_margin_is_the_same_on_all_four_sides(mm):
+    html = render_html(PROFILE, "classic", Layout(margins="custom", margin_mm=mm))
+    assert f"@page {{ margin: {mm}mm; }}" in html
+    assert f".page {{ padding: {mm}mm; }}" in html
+
+
+def test_a_custom_margin_is_kept_within_limits():
+    with pytest.raises(ValueError):
+        Layout(margins="custom", margin_mm=2)
+
+
+def test_bigger_margins_take_more_pages():
+    long = long_resume(roles=5)
+    small = fit_service.count_pages(long, "classic", Layout(margins="custom", margin_mm=5))
+    big = fit_service.count_pages(long, "classic", Layout(margins="custom", margin_mm=30))
+    assert small < big
 
 
 # --- condensing -----------------------------------------------------------------------
@@ -287,6 +306,7 @@ def test_layout_is_saved_and_used_for_the_preview(client, auth, resume):
         "hidden": ["summary"],
         "pages": 1,
         "order": None,
+        "margin_mm": None,
     }
     html = client.get(f"/resumes/{resume['id']}/preview", headers=auth).json()["html"]
     assert "<h2>Summary</h2>" not in html
