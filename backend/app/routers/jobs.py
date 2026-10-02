@@ -1,4 +1,3 @@
-from dataclasses import asdict
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, status
@@ -13,7 +12,7 @@ from app.database import SessionDep
 from app.models import JobDescription, JobSource, Profile, User, utcnow
 from app.schemas.resume import ResumeData
 from app.services.jobs import JobTextError, check_text, content_hash, find_existing, parse_job
-from app.services.match import match
+from app.services.match import match_job
 
 router = APIRouter(prefix="/jobs", tags=["jobs"])
 
@@ -42,14 +41,7 @@ def _match(session: Session, user: User, job: JobDescription) -> dict | None:
     profile = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
     if profile is None:
         return None
-    p = job.parsed
-    result = match(
-        ResumeData.model_validate(profile.data), p["must_have"], p["nice_to_have"], p["keywords"]
-    )
-    return {
-        key: [asdict(m) for m in value] if isinstance(value, list) else value
-        for key, value in result.items()
-    }
+    return match_job(ResumeData.model_validate(profile.data), job.parsed)
 
 
 def _out(session: Session, user: User, job: JobDescription) -> JobOut:

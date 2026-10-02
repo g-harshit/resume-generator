@@ -31,12 +31,18 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     # Reads resumes and job descriptions. Configurable because model names change.
     openai_parse_model: str = "gpt-4o-mini"
+    # Rewords resumes, and checks the rewording. Compared on the same profile and job
+    # (2026-10): gpt-4o-mini embellished 6 of 7 lines ("…improving operational
+    # efficiency"), all reverted by the guard, leaving tailoring nearly a no-op;
+    # gpt-4.1 reworded cleanly with 1 revert. The guard doesn't depend on the model.
+    openai_tailor_model: str = "gpt-4.1"
 
     # Uploaded files, when stored on local disk (dev). R2 comes with deployment.
     upload_dir: str = "var/uploads"
     # Each parse is a paid model call, so these are capped per account per day.
     uploads_per_day: int = 20
     jobs_per_day: int = 50
+    resumes_per_day: int = 30
 
     @model_validator(mode="after")
     def _no_dev_secrets_in_production(self) -> "Settings":

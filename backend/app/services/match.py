@@ -9,7 +9,7 @@ together by `SYNONYMS` ("Postgres" = "PostgreSQL", "K8s" = "Kubernetes").
 """
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 
 from app.schemas.resume import ResumeData
 
@@ -201,3 +201,17 @@ def appears_in(term: str, text: str) -> bool:
     a model inferred rather than read."""
     lower = text.lower()
     return any(_in_prose(s, text, lower) for s in _spellings(normalise(term)))
+
+
+def match_job(data: ResumeData, parsed_job: dict) -> dict:
+    """`match` for a stored job, as plain JSON (for API responses)."""
+    result = match(
+        data,
+        parsed_job.get("must_have", []),
+        parsed_job.get("nice_to_have", []),
+        parsed_job.get("keywords", []),
+    )
+    return {
+        key: [asdict(m) for m in value] if isinstance(value, list) else value
+        for key, value in result.items()
+    }

@@ -349,16 +349,51 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
   deploying**, and the font test will say so. Paper is A4 only for now.
 
 ### Phase 7 — Tailoring
-- [ ] Prompt: profile + parsed JD → selected/reordered/reworded `ResumeData` + provenance
-- [ ] **Invention guard** (code, after the model returns):
-  - every experience/project/education entry id exists in the profile
-  - every bullet has a source bullet id in the profile
-  - no skill that isn't in the profile
-  - no number in a reworded bullet that isn't in its source bullet
-  - violations are dropped/reverted to the source text and logged, never shown as-is
-- [ ] Summary may be rewritten, but only from facts in the profile (same number check)
-- [ ] `POST /resumes` stores snapshot + provenance + match + first revision
-- [ ] Tests with the stub provider, including a stub that tries to invent a skill
+- [x] The model returns a **plan that points at the profile by id** (which bullets per
+      role, their order and wording; a summary; skill order), never a resume.
+      `apply_plan` builds the resume from the profile: names, titles, employers, dates,
+      education and certifications are always copied; every role stays, in order.
+- [x] **Invention guard, rules** (`services/tailor.py`), per reworded line:
+  - the bullet must come from a bullet of the **same** role/project (moving an
+    achievement between jobs is refused); unknown ids ignored; a role never ends empty
+  - no number its original doesn't have (number words count: "four" = "4")
+  - no skill — job must-have/nice-to-have or the person's own — its original doesn't
+    name (that's how Kafka gets "tailored" onto the wrong job). Domain keywords
+    ("payments") are left to the verifier.
+  - not much longer than the original
+  - skills only from the profile, in the profile's spelling; none silently dropped
+  - summary: same number and skill checks against the whole profile; one paragraph
+- [x] **Invention guard, verifier**: a separate call sees each surviving rewording beside
+      its original (with its role/project as context) and answers "does it state
+      anything the original doesn't?" — reasoning first, then the verdict. It can only
+      revert. Added because a real model wrote "…on AWS ECS, optimizing job scheduling",
+      which no rule can catch.
+- [x] **One repair round**: reverted lines go back once with the reason; new attempts
+      face the rules and the verifier again; whatever fails keeps the original.
+- [x] Provenance per line: `kept | reworded | reverted`, with the original, and for a
+      revert what the model tried and why — shown on the resume page
+- [x] `POST /resumes` (needs a **confirmed** profile; 30/day) stores the snapshot,
+      provenance, profile version and the first revision; `GET /resumes`, `/{id}`,
+      `/{id}/preview?template=`, `/{id}/pdf?template=`. Match is recomputed against the
+      resume's own content.
+- [x] Tests with the stub (`tests/test_tailor.py`): each kind of invention a model might
+      try — new number, job skill slipped in, skill moved between jobs, foreign or made-up
+      bullet ids, embellishment, invented skills, invented summary facts, a summary that's
+      a dump of the whole profile — plus the verifier and repair rounds
+- [x] Web: "Tailor my resume" on the template page → `/app/resume?id=` (preview, template
+      switch, PDF, job match with honest gaps, "What we changed" with originals and the
+      reasons for anything kept); `/app/resumes` list
+- Model choice, from real runs on the same profile and job: `gpt-4o-mini` embellished 6
+  of 7 lines (all reverted, tailoring nearly a no-op); `gpt-4.1` reworded cleanly. Default
+  `OPENAI_TAILOR_MODEL=gpt-4.1` (tailor, verify, repair; ~1¢ per resume), low temperature.
+- Found in real runs and fixed: the verifier answering "true" then explaining "false"
+  (verdict before reasoning); the verifier rejecting summary facts because it compared
+  against the old summary rather than the profile; the repair round turning the summary
+  into a dump of the whole profile.
+- Honest limit: with conservative instructions, well-written bullets often come back
+  unchanged; tailoring is then mostly choosing, ordering, the summary and skill order.
+  That's the intended trade-off for "never invent"; revisit with real users' resumes.
+- Tailoring is synchronous (~20–40 s). Move to a background job if it proves too slow.
 
 ### Phase 8 — Editor
 - [ ] Web: three-pane editor (mockup 5)

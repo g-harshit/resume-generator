@@ -12,6 +12,12 @@ log = logging.getLogger(__name__)
 _TRY_AGAIN = "The AI service didn't respond properly. Please try again in a minute."
 
 
+# Low temperature where wording must stay close to the person's own: less drift, fewer
+# embellishments for the guard to revert. Reasoning models refuse the parameter; then
+# it's dropped and the call retried once.
+_TEMPERATURE = {"tailor": 0.3, "repair_tailoring": 0.0, "verify_tailoring": 0.0}
+
+
 class OpenAIProvider(AIProvider):
     name = "openai"
 
@@ -23,19 +29,31 @@ class OpenAIProvider(AIProvider):
         self._models = {
             "parse_resume": settings.openai_parse_model,
             "parse_jd": settings.openai_parse_model,
+            "tailor": settings.openai_tailor_model,
+            "verify_tailoring": settings.openai_tailor_model,
+            "repair_tailoring": settings.openai_tailor_model,
         }
 
+    def _call(self, task: str, instructions: str, text: str, schema, temperature):
+        return self._client.responses.parse(
+            model=self._models[task],
+            instructions=instructions,
+            input=text,
+            text_format=schema,
+            # Resumes are personal data: don't let OpenAI keep the conversation.
+            store=False,
+            **({"temperature": temperature} if temperature is not None else {}),
+        )
+
     def extract[T](self, *, task: str, instructions: str, text: str, schema: type[T]) -> T:
+        temperature = _TEMPERATURE.get(task)
         try:
-            response = self._client.responses.parse(
-                model=self._models[task],
-                instructions=instructions,
-                input=text,
-                text_format=schema,
-                # No `temperature`: some OpenAI models reject it, and the model is a setting.
-                # Resumes are personal data: don't let OpenAI keep the conversation.
-                store=False,
-            )
+            try:
+                response = self._call(task, instructions, text, schema, temperature)
+            except openai.BadRequestError as exc:
+                if temperature is None or "temperature" not in str(exc):
+                    raise
+                response = self._call(task, instructions, text, schema, None)
         except openai.OpenAIError as exc:
             log.warning("OpenAI %s failed: %s", task, exc)
             raise AIProviderError(_TRY_AGAIN) from exc

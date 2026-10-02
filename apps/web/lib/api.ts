@@ -46,6 +46,32 @@ export type Job = {
 export type TemplateInfo = { slug: string; name: string; description: string };
 export type Preview = { html: string; pages: number };
 
+/** What tailoring did to one line (by bullet id, or "summary"). */
+export type LineHistory = {
+  original: string;
+  status: "kept" | "reworded" | "reverted";
+  /** What the model wrote, when it wasn't allowed to stand. */
+  attempted: string | null;
+  reason: string | null;
+};
+
+export type ResumeSummary = {
+  id: number;
+  title: string;
+  template: string;
+  job_id: number | null;
+  created_at: string;
+  updated_at: string;
+  covered: number | null;
+  total: number | null;
+};
+
+export type ResumeFull = ResumeSummary & {
+  content: ResumeData;
+  provenance: Record<string, LineHistory>;
+  match: Job["match"];
+};
+
 export type Profile = {
   data: ResumeData;
   version: number;
@@ -123,6 +149,23 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (await send(path, init)).json() as Promise<T>;
 }
 
+/** A PDF and the file name the API chose for it. */
+async function pdfDownload(path: string) {
+  const res = await send(path);
+  const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1];
+  return { blob: await res.blob(), filename: name ?? "Resume.pdf" };
+}
+
+/** Hand a downloaded file to the browser as a download. */
+export function saveFile({ blob, filename }: { blob: Blob; filename: string }) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export const api = {
   register: (email: string, password: string, name: string) =>
     request<TokenResponse>("/auth/register", {
@@ -157,15 +200,24 @@ export const api = {
     request<Job>("/jobs", { method: "POST", body: JSON.stringify({ text, source: "paste" }) }),
   getJob: (id: number) => request<Job>(`/jobs/${id}`),
 
+  /** Tailor the profile to a job: waits for the model, usually 20–40 seconds. */
+  createResume: (jobId: number, template: string) =>
+    request<ResumeFull>("/resumes", {
+      method: "POST",
+      body: JSON.stringify({ job_id: jobId, template }),
+    }),
+  listResumes: () => request<ResumeSummary[]>("/resumes"),
+  getResume: (id: number) => request<ResumeFull>(`/resumes/${id}`),
+  previewResume: (id: number, template: string) =>
+    request<Preview>(`/resumes/${id}/preview?template=${encodeURIComponent(template)}`),
+  resumePdf: (id: number, template: string) =>
+    pdfDownload(`/resumes/${id}/pdf?template=${encodeURIComponent(template)}`),
+
   listTemplates: () => request<TemplateInfo[]>("/templates"),
   /** The user's profile in this template; `pages` comes from the real PDF layout. */
   previewTemplate: (slug: string) => request<Preview>(`/templates/${slug}/preview`),
   /** The user's profile in this template as a PDF, with the file name the API chose. */
-  templatePdf: async (slug: string) => {
-    const res = await send(`/templates/${slug}/pdf`);
-    const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1];
-    return { blob: await res.blob(), filename: name ?? "Resume.pdf" };
-  },
+  templatePdf: (slug: string) => pdfDownload(`/templates/${slug}/pdf`),
 
   confirmProfile: (version: number) =>
     request<Profile>("/profile/confirm", { method: "POST", body: JSON.stringify({ version }) }),

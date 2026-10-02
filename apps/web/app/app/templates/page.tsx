@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { PagePreview } from "@/components/page-preview";
-import { api, ApiError, type Preview, type TemplateInfo } from "@/lib/api";
+import { api, ApiError, type Preview, saveFile, type TemplateInfo } from "@/lib/api";
 
 export default function TemplatesPage() {
   // useSearchParams (?job=, ?template=) needs a Suspense boundary.
@@ -25,6 +25,8 @@ function Templates() {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [problem, setProblem] = useState<{ message: string; noProfile: boolean } | null>(null);
   const [downloading, setDownloading] = useState(false);
+  const [tailoring, setTailoring] = useState(false);
+  const [tailorError, setTailorError] = useState<{ message: string; needsReview: boolean } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -63,15 +65,25 @@ function Templates() {
   async function download() {
     setDownloading(true);
     try {
-      const { blob, filename } = await api.templatePdf(selected);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
+      saveFile(await api.templatePdf(selected));
     } finally {
       setDownloading(false);
+    }
+  }
+
+  async function tailorIt() {
+    if (!job) return;
+    setTailoring(true);
+    setTailorError(null);
+    try {
+      const resume = await api.createResume(Number(job), selected);
+      router.push(`/app/resume?id=${resume.id}`);
+    } catch (err) {
+      setTailorError({
+        message: err instanceof TypeError ? "Can't reach the server." : (err as Error).message,
+        needsReview: err instanceof ApiError && err.status === 409,
+      });
+      setTailoring(false);
     }
   }
 
@@ -161,8 +173,26 @@ function Templates() {
 
       <footer className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-surface md:left-58">
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 md:px-11">
-          <span className="text-sm text-muted">
-            Tailoring to a job is the next thing being built. For now you can download your profile.
+          <span role="status" className={`text-sm ${tailorError ? "text-warn-ink" : "text-muted"}`}>
+            {tailorError ? (
+              tailorError.needsReview ? (
+                <>
+                  First <Link href="/app/profile">review and confirm your profile</Link> — every
+                  resume is built from it.
+                </>
+              ) : (
+                tailorError.message
+              )
+            ) : tailoring ? (
+              "Tailoring your resume to the job — this takes 20–40 seconds…"
+            ) : job ? (
+              "Built only from your profile. Every reworded line is checked against your original."
+            ) : (
+              <>
+                To tailor a resume, <Link href="/app/new">start from a job description</Link>. Or
+                download your profile as it is.
+              </>
+            )}
           </span>
           <div className="flex gap-2.5">
             <button
@@ -175,10 +205,11 @@ function Templates() {
             </button>
             <button
               type="button"
-              disabled
-              className="h-12 rounded-[10px] bg-accent px-5 text-[15px] font-medium text-white disabled:opacity-50"
+              disabled={!job || !loaded || tailoring}
+              onClick={tailorIt}
+              className="h-12 rounded-[10px] bg-accent px-5 text-[15px] font-medium text-white hover:bg-accent-hover disabled:opacity-50"
             >
-              Tailor my resume{current ? ` with ${current.name}` : ""}
+              {tailoring ? "Tailoring…" : `Tailor my resume${current ? ` with ${current.name}` : ""}`}
             </button>
           </div>
         </div>

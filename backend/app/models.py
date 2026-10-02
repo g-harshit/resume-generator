@@ -138,3 +138,57 @@ class JobDescription(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )
+
+
+class Resume(SQLModel, table=True):
+    """A resume made for one job: a frozen snapshot, never a view of the profile.
+    Editing the profile later doesn't change a resume someone may already have sent."""
+
+    __tablename__ = "resumes"
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = _owner()
+    # Kept when the job is gone: the resume still exists and was still sent.
+    job_description_id: int | None = Field(
+        default=None,
+        sa_column=Column(
+            Integer, ForeignKey("job_descriptions.id", ondelete="SET NULL"), nullable=True
+        ),
+    )
+    template: str = Field(max_length=40)
+    title: str = Field(max_length=300)
+    content: dict = Field(sa_column=Column(JSONB, nullable=False))
+    # Per bullet id (and "summary"): {"original", "status": kept|reworded|reverted,
+    # "attempted", "reason"} — what tailoring changed, and what it wasn't allowed to.
+    provenance: dict = Field(sa_column=Column(JSONB, nullable=False))
+    profile_version: int
+    created_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+    updated_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+
+
+class RevisionReason:
+    TAILOR = "tailor"
+    EDIT = "edit"
+    RETAILOR = "retailor"
+
+
+class ResumeRevision(SQLModel, table=True):
+    """Every version of a resume's content: undo, and "what exactly did I send?"."""
+
+    __tablename__ = "resume_revisions"
+
+    id: int | None = Field(default=None, primary_key=True)
+    resume_id: int = Field(
+        sa_column=Column(
+            Integer, ForeignKey("resumes.id", ondelete="CASCADE"), nullable=False, index=True
+        )
+    )
+    content: dict = Field(sa_column=Column(JSONB, nullable=False))
+    reason: str = Field(max_length=20)
+    created_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
