@@ -307,6 +307,7 @@ def test_layout_is_saved_and_used_for_the_preview(client, auth, resume):
         "pages": 1,
         "order": None,
         "margin_mm": None,
+        "hidden_header": [],
     }
     html = client.get(f"/resumes/{resume['id']}/preview", headers=auth).json()["html"]
     assert "<h2>Summary</h2>" not in html

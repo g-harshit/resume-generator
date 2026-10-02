@@ -150,3 +150,33 @@ def test_only_web_mail_and_phone_links_are_offered_in_the_preview():
         {"kind": pymupdf.LINK_URI, "from": pymupdf.Rect(0, 0, 50, 50), "uri": "javascript:alert(1)"}
     )
     assert page_images(doc.tobytes())[0].links == []
+
+
+# --- choosing what's in the header -------------------------------------------------------
+
+
+def test_header_items_can_be_left_off_a_resume():
+    from app.schemas.layout import Layout
+
+    data = WITH_CERT.model_copy(deep=True)
+    data.basics.headline = "Backend Engineer"
+    data.basics.location = "Pune"
+    data.basics.links = [
+        {"id": "lnk_li", "label": "LinkedIn", "url": "linkedin.com/in/asha"},
+        {"id": "lnk_gh", "label": "GitHub", "url": "github.com/asha"},
+    ]
+    data = ResumeData.model_validate(data.model_dump())
+    html = render_html(data, "classic", Layout(hidden_header=["phone", "headline", "lnk_li"]))
+    assert "+91 90000 00000" not in html and "Backend Engineer" not in html
+    assert "linkedin.com/in/asha" not in html
+    assert "github.com/asha" in html and "asha@example.com" in html and "Pune" in html
+
+
+def test_the_cover_letter_leaves_off_the_same_header_items():
+    from app.rendering.render import render_letter_html
+    from app.schemas.layout import Layout
+
+    html = render_letter_html(
+        WITH_CERT, "Hello.", "Acme", "classic", Layout(hidden_header=["phone"])
+    )
+    assert "+91 90000 00000" not in html and "asha@example.com" in html

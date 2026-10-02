@@ -20,7 +20,7 @@
 <main class="page letter">
 <header class="head">
   {% if b.name %}<h1 class="name">{{ b.name }}</h1>{% endif %}
-  {% if b.headline %}<p class="headline">{{ b.headline }}</p>{% endif %}
+  {% if b.headline and show_headline %}<p class="headline">{{ b.headline }}</p>{% endif %}
   {% if contact %}
   <p class="contact">
     {%- for item in contact -%}

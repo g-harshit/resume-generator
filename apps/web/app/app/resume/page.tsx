@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { PdfPages } from "@/components/pdf-pages";
 import { ResumeContentEditor } from "@/components/resume/content-editor";
+import { HeaderEditor } from "@/components/resume/header-editor";
 import { FitPanel } from "@/components/resume/fit-panel";
 import { AtsChecks, MatchPanel, type SkillAdded } from "@/components/resume/panels";
 import { api, type FitResult, type Layout, type Preview, type ResumeFull, saveFile, type TemplateInfo } from "@/lib/api";
@@ -303,18 +304,27 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
       )}
 
       <div className="grid gap-5 lg:grid-cols-2 xl:grid-cols-[minmax(0,380px)_minmax(0,1fr)_minmax(0,320px)]">
-        <ResumeContentEditor
-          data={data.content}
-          setData={setContent}
-          profile={profile}
-          provenance={provenance}
-          summaryAi={{
-            busy: aiBusy === "summary",
-            disabled: aiBusy !== null,
-            write: (length) => aiEdit("summary", (v) => api.writeSummary(id, v, length)),
-            undo: undo && aiBusy === null && provenance.summary?.status === "written" ? undoAi : null,
-          }}
-        />
+        <div className="flex flex-col gap-3">
+          <HeaderEditor
+            basics={data.content.basics}
+            setBasics={(update) => setContent((c) => ({ ...c, basics: update(c.basics) }))}
+            hidden={data.layout.hidden_header ?? []}
+            setHidden={(update) => setLayout((l) => ({ ...l, hidden_header: update(l.hidden_header ?? []) }))}
+            profileLinks={profile?.basics.links ?? []}
+          />
+          <ResumeContentEditor
+            data={data.content}
+            setData={setContent}
+            profile={profile}
+            provenance={provenance}
+            summaryAi={{
+              busy: aiBusy === "summary",
+              disabled: aiBusy !== null,
+              write: (length) => aiEdit("summary", (v) => api.writeSummary(id, v, length)),
+              undo: undo && aiBusy === null && provenance.summary?.status === "written" ? undoAi : null,
+            }}
+          />
+        </div>
 
         {/* Sticky on wide screens, and scrolls inside itself so every page can be reached. */}
         <section

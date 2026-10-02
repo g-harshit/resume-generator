@@ -541,6 +541,11 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       link areas are clickable over the page images (web, mail and phone only). Profile
       editor: a credential-link field on certifications. Checked with a real upload:
       credential, LinkedIn and GitHub all came through.
+- [x] Header per resume: a Header card in the resume editor — name and job title, each
+      contact item (job title, email, phone, location, every link) can be left off with
+      a tick (`layout.hidden_header`; the value stays) or edited for this resume, links
+      added or removed, and a profile link removed here can be added back. The cover
+      letter's header leaves off the same items. The profile is never changed.
 - [ ] Email verification — not built: adds friction before the product proves itself;
       the reset flow already proves control of the address when it matters.
 

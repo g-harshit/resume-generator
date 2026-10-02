@@ -72,17 +72,18 @@ def link_for(url: str) -> Link | None:
     return Link(text, None)  # "javascript:…" and friends stay inert text
 
 
-def _contact(data: ResumeData) -> list[Link]:
+def _contact(data: ResumeData, hidden: set[str] = frozenset()) -> list[Link]:
+    """The contact line, less what the person left off this resume."""
     b = data.basics
     items = []
-    if b.location:
+    if b.location and "location" not in hidden:
         items.append(Link(b.location, None))
-    if b.email:
+    if b.email and "email" not in hidden:
         items.append(Link(b.email, f"mailto:{b.email}"))
-    if b.phone:
+    if b.phone and "phone" not in hidden:
         digits = re.sub(r"[^\d+]", "", b.phone)
         items.append(Link(b.phone, f"tel:{digits}" if len(digits) >= 6 else None))
-    items += [link for link in (link_for(x.url) for x in b.links) if link]
+    items += [link for link in (link_for(x.url) for x in b.links if x.id not in hidden) if link]
     return items
 
 
@@ -139,7 +140,8 @@ def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> st
             data=data,
             b=data.basics,
             slug=slug,
-            contact=_contact(data),
+            contact=_contact(data, set(layout.hidden_header)),
+            show_headline="headline" not in layout.hidden_header,
             base_css=_css("base.css"),
             template_css=_css(f"{slug}.css"),
             date_range=date_range,
@@ -152,7 +154,11 @@ def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> st
     )
 
 
-def render_letter_html(data: ResumeData, body: str, company: str, slug: str) -> str:
+def render_letter_html(
+    data: ResumeData, body: str, company: str, slug: str, layout: Layout | None = None
+) -> str:
+    """The letter's header matches its resume's: the same items left off."""
+    layout = layout or Layout()
     if slug not in BY_SLUG:
         raise UnknownTemplate(slug)
     today = date.today()
@@ -162,7 +168,8 @@ def render_letter_html(data: ResumeData, body: str, company: str, slug: str) -> 
         .render(
             b=data.basics,
             slug=slug,
-            contact=_contact(data),
+            contact=_contact(data, set(layout.hidden_header)),
+            show_headline="headline" not in layout.hidden_header,
             base_css=_css("base.css"),
             template_css=_css(f"{slug}.css"),
             paragraphs=[p.strip() for p in body.split("\n\n") if p.strip()],

@@ -97,6 +97,8 @@ export type Layout = {
   margins: "normal" | "narrow" | "custom";
   /** For "custom": millimetres on every side, 5–30. */
   margin_mm: number | null;
+  /** Header items left off this resume: "headline", "location", "email", "phone", or a link id. */
+  hidden_header: string[];
   hidden: Section[];
   pages: number | null;
   /** The order sections appear in; null for the usual one (SECTIONS). */

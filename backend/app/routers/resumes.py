@@ -564,7 +564,11 @@ def letter_pdf(
     data = ResumeData.model_validate(resume.content)
     job = _job(session, resume)
     html = render_letter_html(
-        data, resume.cover_letter["text"], job.company if job else "", _template(resume, template)
+        data,
+        resume.cover_letter["text"],
+        job.company if job else "",
+        _template(resume, template),
+        _layout(resume),
     )
     rendered = render_pdf(html)
     filename = pdf_filename(data).replace("-Resume.pdf", "-Cover-Letter.pdf")

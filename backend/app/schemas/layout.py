@@ -2,7 +2,7 @@
 sections show, and how many pages the person is aiming for."""
 
 import re
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -28,6 +28,11 @@ class Layout(BaseModel):
     hidden: list[Section] = Field(default_factory=list)
     # The page count the person chose when the resume ran long; null until asked.
     pages: int | None = Field(default=None, ge=1, le=3)
+    # Header items left off this resume: "headline", "location", "email", "phone", or a
+    # link's id. The values stay, so showing one again is a tick away.
+    hidden_header: list[Annotated[str, Field(max_length=40)]] = Field(
+        default_factory=list, max_length=30
+    )
     # The order sections appear in; null for the usual one (SECTIONS). A student's
     # resume leads with education and projects (FRESHER_ORDER).
     order: list[Section] | None = None
