@@ -22,6 +22,20 @@ class Settings(BaseSettings):
         "chrome-extension://pjddbiflcebndfljpckcgkigckfpmndm"
     )
 
+    # The website, for links in emails (password reset).
+    web_url: str = "http://localhost:3100"
+
+    # Outgoing email. Unset in development: emails are written to the API log instead.
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+
+    # Behind a proxy (Render, Fly…), the client's IP is in X-Forwarded-For. Only trust
+    # it when there is a proxy, or anyone could fake their IP past the rate limits.
+    trust_proxy_headers: bool = False
+
     # "development" or "production". Production refuses to start with dev-only defaults.
     environment: str = "development"
 

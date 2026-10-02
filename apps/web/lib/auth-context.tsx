@@ -10,6 +10,8 @@ type AuthState = {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
+  /** Sign in with a token the API already issued (after a password reset). */
+  adopt: (token: string, user: User) => void;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -67,13 +69,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(res.user);
   }, []);
 
+  const adopt = useCallback((token: string, next: User) => {
+    setToken(token);
+    setUser(next);
+  }, []);
+
   const logout = useCallback(() => {
     setToken(null);
     setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, adopt }}>
       {children}
     </AuthContext.Provider>
   );

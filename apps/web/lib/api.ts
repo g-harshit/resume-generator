@@ -182,6 +182,13 @@ export const api = {
       body: JSON.stringify({ email, password }),
     }),
   me: () => request<User>("/auth/me"),
+  requestPasswordReset: (email: string) =>
+    request<{ detail: string }>("/auth/password-reset", { method: "POST", body: JSON.stringify({ email }) }),
+  confirmPasswordReset: (token: string, password: string) =>
+    request<TokenResponse>("/auth/password-reset/confirm", {
+      method: "POST",
+      body: JSON.stringify({ token, password }),
+    }),
 
   upload: (file: File) => {
     const body = new FormData();

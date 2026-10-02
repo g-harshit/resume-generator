@@ -28,19 +28,20 @@ def verify_password(password: str, password_hash: str | None) -> bool:
         return False
 
 
-def create_access_token(user_id: int) -> str:
+def create_access_token(user_id: int, version: int = 0) -> str:
     settings = get_settings()
     now = datetime.now(UTC)
     payload = {
         "sub": str(user_id),
+        "ver": version,
         "iat": now,
         "exp": now + timedelta(days=settings.access_token_days),
     }
     return jwt.encode(payload, settings.jwt_secret, algorithm=_ALGORITHM)
 
 
-def user_id_from_token(token: str) -> int | None:
-    """The user id a valid, unexpired token was issued for, else None."""
+def read_token(token: str) -> tuple[int, int] | None:
+    """(user id, token version) for a valid, unexpired token, else None."""
     try:
         payload = jwt.decode(
             token,
@@ -48,6 +49,6 @@ def user_id_from_token(token: str) -> int | None:
             algorithms=[_ALGORITHM],
             options={"require": ["sub", "exp"]},
         )
-        return int(payload["sub"])
-    except (jwt.PyJWTError, ValueError):
+        return int(payload["sub"]), int(payload.get("ver", 0))
+    except (jwt.PyJWTError, ValueError, TypeError):
         return None

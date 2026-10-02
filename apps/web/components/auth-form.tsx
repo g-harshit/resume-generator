@@ -136,10 +136,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </button>
         </form>
 
-        <p className="text-sm text-muted">
-          {mode === "login" ? "New here? " : "Already have an account? "}
-          <Link href={otherHref}>{mode === "login" ? "Create an account" : "Sign in"}</Link>
-        </p>
+        <div className="flex flex-col gap-2 text-sm text-muted">
+          <p>
+            {mode === "login" ? "New here? " : "Already have an account? "}
+            <Link href={otherHref}>{mode === "login" ? "Create an account" : "Sign in"}</Link>
+          </p>
+          {mode === "login" && (
+            <p>
+              <Link href="/forgot-password">Forgot your password?</Link>
+            </p>
+          )}
+        </div>
       </div>
     </main>
   );

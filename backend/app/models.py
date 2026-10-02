@@ -7,7 +7,7 @@ a user removes everything of theirs; `tests/test_models.py` fails if one doesn't
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, UniqueConstraint
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -33,6 +33,11 @@ class User(SQLModel, table=True):
     email: str = Field(max_length=320, unique=True, index=True)
     name: str = Field(max_length=120)
     password_hash: str = Field(max_length=255)
+    # Every login token carries the version current when it was issued; bumping this
+    # (on a password reset) makes all earlier tokens fail — JWTs can't be revoked one
+    # by one. A counter, not a timestamp: token times are whole seconds, and a token from
+    # the same second as the reset must not survive it.
+    token_version: int = Field(default=0, sa_column_kwargs={"server_default": "0"})
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )
@@ -192,6 +197,40 @@ class ResumeRevision(SQLModel, table=True):
     )
     content: dict = Field(sa_column=Column(JSONB, nullable=False))
     reason: str = Field(max_length=20)
+    created_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+
+
+class AuthAttempt(SQLModel, table=True):
+    """Counted to rate-limit sign-in, sign-up and password-reset requests. In the
+    database rather than in memory, so the limits hold across API processes. Rows
+    older than a day are pruned as new ones are written."""
+
+    __tablename__ = "auth_attempts"
+    __table_args__ = (Index("ix_auth_attempts_kind_key_created", "kind", "key", "created_at"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    kind: str = Field(max_length=30)  # "login_failed:email", "register:ip", ...
+    key: str = Field(max_length=320)  # the email or IP it's about
+    created_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+
+
+class PasswordReset(SQLModel, table=True):
+    """A password-reset link. Only a hash of its token is stored, so a database leak
+    doesn't hand out working links."""
+
+    __tablename__ = "password_resets"
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = _owner()
+    token_hash: str = Field(max_length=64, unique=True)
+    expires_at: datetime = Field(sa_column=Column(DateTime(timezone=True), nullable=False))
+    used_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )

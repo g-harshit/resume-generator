@@ -471,7 +471,19 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 - [ ] Deploy (API, web, Postgres, R2), domain, name
 - [ ] Public landing page
 - [ ] Cover letter from the same profile + JD
-- [ ] Rate limiting on auth and AI endpoints, email verification, password reset
+- [x] Rate limiting on auth: failed sign-ins 10 per account and 50 per IP per 15 min
+      (only failures count), sign-ups 10 per IP per hour, reset requests 3 per account /
+      20 per IP per hour. Counted in Postgres (`auth_attempts`, pruned after a day) so it
+      holds across processes. `TRUST_PROXY_HEADERS` decides whether X-Forwarded-For is
+      believed. AI endpoints already had per-user daily caps.
+- [x] Password reset: emailed one-hour, single-use link (only a hash stored); the same
+      answer whether or not the account exists; using it signs out every other session
+      (`users.token_version` in every token — a counter, because a timestamp let a token
+      from the same second survive) and cancels other links. `/forgot-password`,
+      `/reset-password`. Email via SMTP (`services/mailer.py`); **unset, the email is
+      written to the API log** — real sending needs SMTP settings.
+- [ ] Email verification — not built: adds friction before the product proves itself;
+      the reset flow already proves control of the address when it matters.
 
 ---
 
