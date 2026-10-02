@@ -21,6 +21,28 @@ export type Upload = {
   created_at: string;
 };
 
+export type Evidence = { section: string; label: string; id: string | null };
+export type TermMatch = { term: string; covered: boolean; where: Evidence[] };
+
+export type Job = {
+  id: number;
+  source: "paste" | "extension";
+  url: string;
+  title: string;
+  company: string;
+  location: string;
+  seniority: string;
+  created_at: string;
+  /** Against the profile as it is now; null before the user has a profile. */
+  match: {
+    must_have: TermMatch[];
+    nice_to_have: TermMatch[];
+    keywords: TermMatch[];
+    covered: number;
+    total: number;
+  } | null;
+};
+
 export type Profile = {
   data: ResumeData;
   version: number;
@@ -127,6 +149,11 @@ export const api = {
   /** `version` is the one last loaded (0 to create); a stale one gets a 409. */
   saveProfile: (version: number, data: ResumeData) =>
     request<Profile>("/profile", { method: "PUT", body: JSON.stringify({ version, data }) }),
+  /** Reads the posting (a few seconds); the same text twice returns the first reading. */
+  addJob: (text: string) =>
+    request<Job>("/jobs", { method: "POST", body: JSON.stringify({ text, source: "paste" }) }),
+  getJob: (id: number) => request<Job>(`/jobs/${id}`),
+
   confirmProfile: (version: number) =>
     request<Profile>("/profile/confirm", { method: "POST", body: JSON.stringify({ version }) }),
 };

@@ -295,13 +295,29 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
       home shows "Your profile is ready"; phone width has no sideways scroll
 
 ### Phase 5 — Job description intake and matching
-- [ ] `job_descriptions` table; dedupe on `(user_id, content_hash)`
-- [ ] `parse_jd`: raw text → title, company, location, seniority, must-have skills,
-      nice-to-have skills, keywords
-- [ ] `match`: **deterministic** comparison of JD skills/keywords against the profile
-      (normalised, with a small synonym table: "Postgres" = "PostgreSQL", "K8s" = "Kubernetes").
-      No model here, so the result is explainable and free.
-- [ ] Web: paste screen (mockup 3) with parsed chips, covered vs missing
+- [x] `job_descriptions` table (migration `0003`); unique `(user_id, content_hash)` — the
+      hash is of whitespace-normalised, lower-cased text, so re-pasting the same posting
+      returns the first reading with no second model call
+- [x] `POST /jobs` (synchronous, a few seconds: the page and the extension want the answer
+      at once; 200–30,000 chars; 50/user/day), `GET /jobs/{id}`
+- [x] `parse_job` (`services/jobs.py`): title, company, location, seniority (as written),
+      must-have, nice-to-have, keywords. **Every term must be written in the posting**
+      (`is_written`) — a model adding "Docker" to a job that never says it is dropped.
+      Tolerant of phrasing: "Kubernetes (K8s)" when the posting says K8s.
+- [x] `match` (`services/match.py`): deterministic, free, recomputed on every read so it
+      follows the profile. Covered = listed in skills or written in the profile's prose,
+      and it says where ("Paylane", "Summary"). Synonym table (Postgres/PostgreSQL,
+      K8s/Kubernetes, golang/Go…), singular/plural ("payments" ↔ "payment systems"),
+      bracketed alternatives. Words that are also English ("Go", "REST", "React") count
+      in prose only when written as the technology — "go to market" isn't Go.
+- [x] Web: `/app/new` (mockup 3) — paste, "Read the job", chips (✓ covered, dashed
+      missing, with where-found for screen readers and on hover), "covers X of Y";
+      `?job=` keeps the result across a refresh. "Choose a template" waits for Phase 6.
+- [x] Checked against the real OpenAI API: on the Northwind posting it added nothing that
+      wasn't written; in the browser, 5 of 9 covered, each correct (after fixing the
+      plural miss it caught on "payments").
+- Not built (mockup 3 showed it): editing the extracted chips by hand. Add if the model
+  turns out to misread postings in practice.
 
 ### Phase 6 — Templates and rendering
 - [ ] Four templates as Jinja2 HTML + CSS: Classic, Modern, Compact, Executive

@@ -20,7 +20,10 @@ class OpenAIProvider(AIProvider):
         if not settings.openai_api_key:
             raise AIProviderError("Resume reading isn't configured yet (OPENAI_API_KEY).")
         self._client = openai.OpenAI(api_key=settings.openai_api_key, timeout=120, max_retries=2)
-        self._models = {"parse_resume": settings.openai_parse_model}
+        self._models = {
+            "parse_resume": settings.openai_parse_model,
+            "parse_jd": settings.openai_parse_model,
+        }
 
     def extract[T](self, *, task: str, instructions: str, text: str, schema: type[T]) -> T:
         try:

@@ -34,8 +34,9 @@ class Settings(BaseSettings):
 
     # Uploaded files, when stored on local disk (dev). R2 comes with deployment.
     upload_dir: str = "var/uploads"
-    # Each parse is a paid model call, so uploads per account per day are capped.
+    # Each parse is a paid model call, so these are capped per account per day.
     uploads_per_day: int = 20
+    jobs_per_day: int = 50
 
     @model_validator(mode="after")
     def _no_dev_secrets_in_production(self) -> "Settings":

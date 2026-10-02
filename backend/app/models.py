@@ -7,7 +7,7 @@ a user removes everything of theirs; `tests/test_models.py` fails if one doesn't
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
@@ -109,5 +109,32 @@ class Profile(SQLModel, table=True):
         ),
     )
     updated_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+
+
+class JobSource:
+    PASTE = "paste"
+    EXTENSION = "extension"
+
+
+class JobDescription(SQLModel, table=True):
+    """A job posting the user brought in, and what we read from it."""
+
+    __tablename__ = "job_descriptions"
+    # The same posting pasted twice is one row (and one model call).
+    __table_args__ = (UniqueConstraint("user_id", "content_hash"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = _owner()
+    source: str = Field(default=JobSource.PASTE, max_length=20)
+    url: str = Field(default="", max_length=2000)
+    title: str = Field(default="", max_length=200)
+    company: str = Field(default="", max_length=200)
+    raw_text: str = Field(sa_column=Column(Text, nullable=False))
+    # sha256 of the whitespace-normalised text (see services/jobs.py).
+    content_hash: str = Field(max_length=64)
+    parsed: dict = Field(sa_column=Column(JSONB, nullable=False))
+    created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )

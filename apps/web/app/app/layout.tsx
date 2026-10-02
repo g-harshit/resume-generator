@@ -8,6 +8,7 @@ import { APP_NAME } from "@/lib/config";
 
 const NAV = [
   { href: "/app", label: "Home" },
+  { href: "/app/new", label: "New resume" },
   { href: "/app/profile", label: "Profile" },
 ];
 
