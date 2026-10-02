@@ -49,11 +49,22 @@ class Link:
     href: str | None  # only http(s); anything else is shown as text, never linked
 
 
+_MAX_LINK_TEXT = 45
+
+
+def _short(text: str) -> str:
+    """ "credly.com/badges/3f1c…/public_url" → "credly.com/…": a credential link is long
+    and means nothing to read; the full address stays in the link."""
+    if len(text) <= _MAX_LINK_TEXT or "/" not in text:
+        return text
+    return text.split("/", 1)[0] + "/…"
+
+
 def link_for(url: str) -> Link | None:
     url = url.strip()
     if not url:
         return None
-    text = re.sub(r"^https?://(www\.)?", "", url).rstrip("/")
+    text = _short(re.sub(r"^https?://(www\.)?", "", url).rstrip("/"))
     if re.match(r"^https?://", url, re.I):
         return Link(text, url)
     if re.match(r"^[\w-]+(\.[\w-]+)+(/\S*)?$", url):  # "linkedin.com/in/asha"
@@ -69,7 +80,8 @@ def _contact(data: ResumeData) -> list[Link]:
     if b.email:
         items.append(Link(b.email, f"mailto:{b.email}"))
     if b.phone:
-        items.append(Link(b.phone, None))
+        digits = re.sub(r"[^\d+]", "", b.phone)
+        items.append(Link(b.phone, f"tel:{digits}" if len(digits) >= 6 else None))
     items += [link for link in (link_for(x.url) for x in b.links) if link]
     return items
 
@@ -190,13 +202,36 @@ def render_pdf(html: str) -> Pdf:
     return Pdf(document.write_pdf(), len(document.pages))
 
 
-def page_images(pdf: bytes, dpi: int = 144) -> list[str]:
-    """Each page of the PDF as an image (a data: URL), for the preview: the page breaks
-    the browser can't know, exactly where the download has them. 144 dpi is sharp on
-    high-density screens at preview size; JPEG keeps it to ~100 KB a page."""
+@dataclass
+class PageView:
+    image: str  # a data: URL
+    # Where the PDF's links are on this page, as fractions of its width and height, so
+    # the preview can make them clickable over the image.
+    links: list[dict]
+
+
+_SAFE_LINK = re.compile(r"^(https?:|mailto:|tel:)", re.IGNORECASE)
+
+
+def page_images(pdf: bytes, dpi: int = 144) -> list[PageView]:
+    """Each page of the PDF as an image, with its links, for the preview: the page
+    breaks the browser can't know, exactly where the download has them. 144 dpi is
+    sharp on high-density screens at preview size; JPEG keeps it to ~100 KB a page."""
+    out = []
     with pymupdf.open(stream=pdf, filetype="pdf") as doc:
-        return [
-            "data:image/jpeg;base64,"
-            + base64.b64encode(page.get_pixmap(dpi=dpi).tobytes("jpeg", jpg_quality=85)).decode()
-            for page in doc
-        ]
+        for page in doc:
+            w, h = page.rect.width, page.rect.height
+            pix = page.get_pixmap(dpi=dpi).tobytes("jpeg", jpg_quality=85)
+            links = [
+                {
+                    "x": link["from"].x0 / w,
+                    "y": link["from"].y0 / h,
+                    "w": link["from"].width / w,
+                    "h": link["from"].height / h,
+                    "url": link["uri"],
+                }
+                for link in page.get_links()
+                if _SAFE_LINK.match(link.get("uri") or "")
+            ]
+            out.append(PageView("data:image/jpeg;base64," + base64.b64encode(pix).decode(), links))
+    return out

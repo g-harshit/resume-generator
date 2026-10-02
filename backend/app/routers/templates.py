@@ -20,17 +20,33 @@ class TemplateOut(BaseModel):
     description: str
 
 
+class PageLink(BaseModel):
+    x: float
+    y: float
+    w: float
+    h: float
+    url: str
+
+
 class PreviewOut(BaseModel):
     html: str
     # From the real PDF layout, so "2 pages" in the picker is what the download will be.
     pages: int
-    # Every page of that PDF as an image, so the preview shows page 2 where it starts.
+    # Every page of that PDF as an image, so the preview shows page 2 where it starts,
+    # with each page's links (positions as fractions of the page) to click on it.
     images: list[str]
+    links: list[list[PageLink]]
 
 
 def preview_of(html: str) -> PreviewOut:
     rendered = render_pdf(html)
-    return PreviewOut(html=html, pages=rendered.pages, images=page_images(rendered.content))
+    views = page_images(rendered.content)
+    return PreviewOut(
+        html=html,
+        pages=rendered.pages,
+        images=[v.image for v in views],
+        links=[[PageLink(**link) for link in v.links] for v in views],
+    )
 
 
 @router.get("")

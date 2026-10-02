@@ -79,7 +79,33 @@ def _pdf_text(data: bytes) -> str:
     if doc.needs_pass:
         raise ExtractionError("This PDF is password-protected. Upload a copy without a password.")
     with doc:
-        return "\n\n".join(_page_text(page) for page in doc)
+        text = "\n\n".join(_page_text(page) for page in doc)
+        links = [
+            (page.get_textbox(link["from"] + (-1, -1, 1, 1)), link["uri"])
+            for page in doc
+            for link in page.get_links()
+            if link.get("uri")
+        ]
+    return text + links_section(links)
+
+
+# Where a file hides a link behind text (a certificate's name linked to its credential,
+# "LinkedIn" linked to a profile), the text alone loses the address. These are listed
+# after the text so the parser can attach each to its item.
+LINKS_HEADING = "Links in the file (the linked text → where it points):"
+
+
+def links_section(links: list[tuple[str, str]]) -> str:
+    seen: set[str] = set()
+    lines = []
+    for text, url in links:
+        url = url.strip()
+        if not url or url in seen or url.lower().startswith(("mailto:", "tel:")):
+            continue  # an email or phone is already in the text as itself
+        seen.add(url)
+        anchor = " ".join(text.split())[:120]
+        lines.append(f"- {anchor or '(no text)'} → {url}")
+    return f"\n\n{LINKS_HEADING}\n" + "\n".join(lines) if lines else ""
 
 
 def _page_text(page) -> str:
@@ -162,7 +188,24 @@ def _docx_text(data: bytes) -> str:
 
     for section in document.sections:
         lines += [p.text for p in section.footer.paragraphs]
-    return "\n".join(line for line in lines if line.strip())
+
+    links = _docx_links(document.part)
+    for section in document.sections:
+        links += _docx_links(section.header.part) + _docx_links(section.footer.part)
+    return "\n".join(line for line in lines if line.strip()) + links_section(links)
+
+
+def _docx_links(part) -> list[tuple[str, str]]:
+    """(text, address) for each hyperlink in one part of a Word file (body, header…)."""
+    out = []
+    for el in part.element.iter():
+        if not el.tag.endswith("}hyperlink"):
+            continue
+        rid = el.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")
+        rel = part.rels.get(rid) if rid else None
+        if rel is not None and rel.is_external:
+            out.append((_xml_text(el), rel.target_ref))
+    return out
 
 
 def _xml_text(element) -> str:

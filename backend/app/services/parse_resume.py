@@ -117,6 +117,12 @@ Rules:
 - `headline` is the job title under the name if there is one (e.g. "Backend
   Engineer"), without the location or contact details, which have their own fields.
 - `summary` is an objective/summary/profile paragraph if there is one, verbatim.
+- Links: a `url` field (a profile link, a project, a certification) takes an address
+  written in the text, or one from the "Links in the file" list at the end — attach
+  each listed address to the item whose text it is on (a certification's name, a
+  project's name, "LinkedIn", "GitHub", "Portfolio"). Copy addresses exactly. A
+  personal profile link (LinkedIn, GitHub, portfolio) goes in `links` with a label.
+  Never make up an address.
 - Put anything you could not place or read confidently in `unclear`, with the section
   it belongs to and a short description quoting the text.
 """
@@ -211,6 +217,8 @@ class _Converter:
     def __init__(self, source_text: str):
         self.source = _squash(source_text)
         self.notes: list[dict] = []
+        # Every address in the file: written out, or listed from behind a link.
+        self._urls = {_bare_url(u) for u in _URL.findall(source_text)}
 
     def note(self, target: str, field: str | None, message: str) -> None:
         self.notes.append({"target": target, "field": field, "message": message})
@@ -248,12 +256,27 @@ class _Converter:
             )
         return text
 
+    def url(self, url: str) -> str:
+        """An address only if the file has it (in the text or behind a link): a parser
+        that "completes" a link would send recruiters somewhere the person never put."""
+        url = url.strip()[:500]
+        bare = _bare_url(url)
+        return url if bare and bare in self._urls else ""
+
     def bullets(self, items: list[str], limit: int) -> list[dict]:
         out = []
         for text in [t for t in items if t.strip()][:limit]:
             bullet_id = new_id("b")
             out.append({"id": bullet_id, "text": self.verbatim(text, bullet_id, "text")[:2000]})
         return out
+
+
+_URL = re.compile(r"(?:https?://)?(?:www\.)?[\w-]+(?:\.[\w-]+)+(?:/[^\s)\]>,]*)?", re.IGNORECASE)
+
+
+def _bare_url(url: str) -> str:
+    """ "https://www.GitHub.com/asha/" → "github.com/asha", to compare addresses."""
+    return re.sub(r"^(https?://)?(www\.)?", "", url.strip().lower()).rstrip("/.,;")
 
 
 def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, list[dict]]:
@@ -318,7 +341,7 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
             {
                 "id": prj_id,
                 "name": prj.name[:200],
-                "url": prj.url[:500],
+                "url": c.url(prj.url),
                 "start": start,
                 "end": end,
                 "bullets": c.bullets(prj.bullets, 20),
@@ -336,7 +359,7 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
                 "name": cert.name[:200],
                 "issuer": cert.issuer[:200],
                 "date": c.date(cert.date, cert_id, "date").value,
-                "url": cert.url[:500],
+                "url": c.url(cert.url),
             }
         )
 
@@ -349,9 +372,9 @@ def to_resume_data(parsed: ParsedResume, source_text: str) -> tuple[ResumeData, 
                 "phone": b.phone[:200],
                 "location": b.location[:200],
                 "links": [
-                    {"label": link.label[:200], "url": link.url[:500]}
+                    {"label": link.label[:200], "url": c.url(link.url)}
                     for link in b.links[:10]
-                    if link.url.strip()
+                    if c.url(link.url)
                 ],
             },
             "summary": c.verbatim(parsed.summary, "summary", "summary")[:2000],

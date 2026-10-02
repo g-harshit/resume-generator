@@ -45,7 +45,14 @@ export type Job = {
 
 export type TemplateInfo = { slug: string; name: string; description: string };
 /** A rendered resume: its HTML, its PDF page count, and each PDF page as an image. */
-export type Preview = { html: string; pages: number; images: string[] };
+export type PageLink = { x: number; y: number; w: number; h: number; url: string };
+export type Preview = {
+  html: string;
+  pages: number;
+  images: string[];
+  /** Per page: where its links are, as fractions of the page, to click on the image. */
+  links: PageLink[][];
+};
 
 /** What tailoring did to one line (by bullet id, or "summary"). */
 export type LineHistory = {

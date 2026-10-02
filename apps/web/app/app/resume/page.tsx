@@ -325,7 +325,7 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
             {preview ? `${preview.pages} page${preview.pages > 1 ? "s" : ""} · A4 · updates as you save` : "Laying out…"}
           </span>
           {preview ? (
-            <PdfPages images={preview.images} title={resume.title} />
+            <PdfPages images={preview.images} links={preview.links} title={resume.title} />
           ) : (
             <div className="aspect-[210/297] rounded-lg border border-line bg-surface" />
           )}

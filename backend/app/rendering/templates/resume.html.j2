@@ -107,7 +107,8 @@
   <h2>Certifications</h2>
   <ul class="plain">
   {% for c in data.certifications %}
-    <li><strong>{{ c.name }}</strong>{% if c.issuer %} — {{ c.issuer }}{% endif %}{% set d = format_date(c.date) %}{% if d %}, {{ d }}{% endif %}</li>
+    {% set link = link_for(c.url) %}
+    <li>{% if link and link.href %}<a href="{{ link.href }}"><strong>{{ c.name }}</strong></a>{% else %}<strong>{{ c.name }}</strong>{% endif %}{% if c.issuer %} — {{ c.issuer }}{% endif %}{% set d = format_date(c.date) %}{% if d %}, {{ d }}{% endif %}{% if link %} · {% if link.href %}<a href="{{ link.href }}">{{ link.text }}</a>{% else %}{{ link.text }}{% endif %}{% endif %}</li>
   {% endfor %}
   </ul>
 </section>

@@ -165,7 +165,7 @@ function Templates() {
                 {current.name}, full size
               </h2>
               <div className="mx-auto w-full max-w-[794px]">
-                <PdfPages images={loaded.previews[selected]!.images} title={`${current.name} template`} />
+                <PdfPages images={loaded.previews[selected]!.images} links={loaded.previews[selected]!.links} title={`${current.name} template`} />
               </div>
             </section>
           )}

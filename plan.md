@@ -531,6 +531,16 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       was cut off. Used in the resume editor (its sticky column scrolls inside itself)
       and the template's full-size view. The sidebar is sticky and full height on wide
       screens, so the account and Sign out stay at its foot.
+- [x] Links, kept and clickable. Upload: links hidden behind text (a certificate's name
+      linked to its credential, "LinkedIn" linked to a profile) are read out of PDF link
+      annotations and Word hyperlinks and listed after the text, and the parser attaches
+      each to its item; an address is kept only if the file has it (written or linked),
+      so a "completed" link can't slip in. Resume: certificate names link to the
+      credential, with a short visible link ("credly.com/…") for print and ATS; phone is
+      a `tel:` link; email, profile links and projects were already. Preview: the PDF's
+      link areas are clickable over the page images (web, mail and phone only). Profile
+      editor: a credential-link field on certifications. Checked with a real upload:
+      credential, LinkedIn and GitHub all came through.
 - [ ] Email verification — not built: adds friction before the product proves itself;
       the reset flow already proves control of the address when it matters.
 

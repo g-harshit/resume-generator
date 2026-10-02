@@ -542,7 +542,16 @@ export function CertificationsSection({ data, setData, issues }: Props) {
             <TextField label="Name" value={c.name} onChange={(name) => set(i, { name })} />
             <TextField label="Issued by" value={c.issuer} onChange={(issuer) => set(i, { issuer })} />
           </div>
-          <DateField label="Date" value={c.date} onChange={(date) => set(i, { date })} issues={issues(c.id, "date")} />
+          <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
+            <DateField label="Date" value={c.date} onChange={(date) => set(i, { date })} issues={issues(c.id, "date")} />
+            <TextField
+              className="min-w-56 flex-1"
+              label="Credential link (optional)"
+              placeholder="e.g. credly.com/badges/…"
+              value={c.url}
+              onChange={(url) => set(i, { url })}
+            />
+          </div>
         </Entry>
       ))}
       <AddButton onClick={() => setList([...list, { id: newId("cert"), name: "", issuer: "", date: null, url: "" }])}>
