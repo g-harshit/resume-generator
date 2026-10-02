@@ -5,7 +5,7 @@ resume, built from a profile the user owns.
 
 - **Website:** the user pastes a job description.
 - **Extension:** reads the job description from the page the user is on.
-- Both then: pick a template → tailored resume → edit → download PDF / DOCX.
+- Both then: pick a template → tailored resume → edit → download PDF.
 - On first login the user uploads the resume they already have; it becomes their profile.
 
 Product name and domain: **not decided**. The mockups use "Tailor" as a working name —
@@ -50,7 +50,6 @@ profile review, paste JD, templates, editor, my resumes, extension ×3).
 | Text extraction | PyMuPDF (PDF), python-docx (DOCX) |
 | AI | Provider interface (`ai_providers/`), one implementation to start; a stub provider for tests |
 | PDF | WeasyPrint (HTML/CSS → text PDF) |
-| DOCX | python-docx |
 | Auth (now) | Email + password, argon2 hashes, JWT bearer token |
 | Auth (later) | Google OAuth, matched to existing accounts by verified email |
 
@@ -72,7 +71,7 @@ resume-generator/
       main.py  config.py  database.py  models.py  schemas/
       routers/     auth.py profile.py uploads.py jobs.py templates.py resumes.py
       services/    storage.py extract.py parse_resume.py parse_jd.py match.py
-                   tailor.py render.py export_pdf.py export_docx.py
+                   tailor.py render.py export_pdf.py
       ai_providers/  base.py <provider>.py stub.py
       templates/     classic/ modern/ compact/ executive/   (html + css)
     alembic/
@@ -177,7 +176,6 @@ PUT  /resumes/{id}                  save edits (writes a revision)
 POST /resumes/{id}/retailor         rebuild from current profile
 GET  /resumes/{id}/preview          HTML
 GET  /resumes/{id}/pdf
-GET  /resumes/{id}/docx
 DELETE /resumes/{id}
 ```
 
@@ -420,15 +418,15 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
       update it instead, so typing doesn't create hundreds of rows.
 - [x] Autosave extracted to `lib/use-autosave.ts`; the profile editor and the resume
       editor share it (debounce, no overlapping saves, latest-data-wins, 409 → conflict)
-- [x] Download PDF (saves pending edits first). DOCX is Phase 9.
+- [x] Download PDF (saves pending edits first). No DOCX export (Phase 9, skipped).
 - [x] Checked in the browser: ticked a left-out line (saved), "I have this" for
       Kubernetes with a line under Paylane (profile and resume both updated, match 6/9 →
       7/9), "Use original" on the summary, preview following each save; the profile
       editor still autosaves on the shared hook.
 
-### Phase 9 — DOCX export
-- [ ] python-docx builder per template (same section order, real headings, no tables)
-- [ ] Test: open the DOCX, check headings and text order
+### Phase 9 — DOCX export — **skipped** (decided 2026-10-02)
+Not needed: resumes download as PDF only. Word files are still accepted as *uploads*
+(Phase 3); this was only about exporting. Revisit if users or ATS portals ask for .docx.
 
 ### Phase 10 — My resumes
 - [ ] Web: list (mockup 6) — job, company, template, match, source, updated
