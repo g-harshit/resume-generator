@@ -21,7 +21,7 @@ from app.models import (
 from app.rendering.catalog import BY_SLUG
 from app.rendering.render import render_html, render_letter_html, render_pdf
 from app.routers.templates import PreviewOut, pdf_filename
-from app.schemas.layout import Layout
+from app.schemas.layout import Layout, default_layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
 from app.services.cover_letter import write_cover_letter
@@ -186,6 +186,7 @@ def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> Res
         content=data,
         provenance=provenance,
         profile_version=profile.version,
+        layout=default_layout(content).model_dump(),
     )
     session.add(resume)
     session.flush()

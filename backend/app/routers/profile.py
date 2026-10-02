@@ -1,14 +1,20 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import update
 from sqlmodel import Session, select
 
+from app.ai_providers import AIProviderError, get_ai_provider
 from app.auth import CurrentUser
+from app.config import get_settings
 from app.database import SessionDep
 from app.models import Profile, SourceDocument, User, utcnow
 from app.schemas.resume import Bullet, ResumeData, SkillGroup
+from app.services import rate_limit
+from app.services.draft import DraftError, draft_lines
+from app.services.fit import FitError, SummaryLength, write_summary
 from app.services.match import normalise
 from app.services.profile_checks import blocking, profile_checks
 from app.services.resume_import import notes_of
@@ -183,3 +189,86 @@ def add_skill(body: AddSkillIn, user: CurrentUser, session: SessionDep) -> AddSk
     session.commit()
     session.refresh(profile)
     return AddSkillOut(profile=_out(session, profile), bullet=bullet)
+
+
+# --- writing help, for building a profile from scratch ------------------------------
+
+
+def _profile_ai_start(session: Session, user: User) -> ResumeData:
+    """The profile as saved (the client saves first), after the daily cap check."""
+    rate_limit.check(
+        session,
+        "profile_ai",
+        str(user.id),
+        get_settings().resume_ai_edits_per_day,
+        timedelta(days=1),
+        "You've used a lot of AI writing help today. Please try again tomorrow.",
+    )
+    profile = _find(session, user)
+    return ResumeData.model_validate(profile.data) if profile else ResumeData()
+
+
+class LinesIn(BaseModel):
+    kind: Literal["project", "experience"]
+    # What the entry is: "Project: Campus Connect", "Intern at Acme".
+    context: str = Field(default="", max_length=300)
+    notes: str = Field(max_length=3000)
+    count: int = Field(default=3, ge=1, le=6)
+
+
+class LeftOut(BaseModel):
+    text: str
+    reason: str
+
+
+class LinesOut(BaseModel):
+    lines: list[str]
+    # Lines the model wrote that said more than the notes, and why they were dropped.
+    left_out: list[LeftOut]
+
+
+@router.post("/lines")
+def write_lines(body: LinesIn, user: CurrentUser, session: SessionDep) -> LinesOut:
+    """Resume lines from the person's own notes about a project or job. Not saved:
+    the person reads them and adds the ones they want."""
+    data = _profile_ai_start(session, user)
+    try:
+        lines, left_out = draft_lines(
+            body.kind, body.context, body.notes, data, get_ai_provider(), body.count
+        )
+    except DraftError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    rate_limit.record(session, "profile_ai", str(user.id))
+    return LinesOut(lines=lines, left_out=[LeftOut(**x) for x in left_out])
+
+
+class ProfileSummaryIn(BaseModel):
+    length: SummaryLength = "same"
+
+
+class SummaryOut(BaseModel):
+    text: str
+
+
+@router.post("/summary")
+def write_profile_summary(
+    body: ProfileSummaryIn, user: CurrentUser, session: SessionDep
+) -> SummaryOut:
+    """A summary from the saved profile's own facts (not aimed at any one job). Not
+    saved: the editor puts it in the summary field, where the person can change it."""
+    data = _profile_ai_start(session, user)
+    if not (data.experience or data.projects or data.education):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "Add your education, projects or experience first — the summary is written from them.",
+        )
+    try:
+        text = write_summary(data, {}, get_ai_provider(), body.length)
+    except FitError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    rate_limit.record(session, "profile_ai", str(user.id))
+    return SummaryOut(text=text)

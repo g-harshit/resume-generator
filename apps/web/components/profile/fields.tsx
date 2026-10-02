@@ -65,6 +65,7 @@ export function TextArea({
   issues = [],
   rows = 3,
   hideLabel = false,
+  placeholder,
 }: {
   label: string;
   value: string;
@@ -72,6 +73,7 @@ export function TextArea({
   issues?: string[];
   rows?: number;
   hideLabel?: boolean;
+  placeholder?: string;
 }) {
   const issuesId = useId();
   return (
@@ -80,6 +82,7 @@ export function TextArea({
       <textarea
         value={value}
         rows={rows}
+        placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={issues.length > 0 || undefined}
         aria-describedby={issues.length ? issuesId : undefined}

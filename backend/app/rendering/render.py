@@ -119,6 +119,7 @@ def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> st
             format_date=format_date,
             link_for=link_for,
             hidden=set(layout.hidden),
+            order=layout.sections(),
             layout_css=_NARROW_CSS if layout.margins == "narrow" else Markup(""),
         )
     )

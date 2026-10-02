@@ -282,7 +282,12 @@ def test_layout_is_saved_and_used_for_the_preview(client, auth, resume):
         "layout": {"margins": "narrow", "hidden": ["summary"], "pages": 1},
     }
     saved = client.put(f"/resumes/{resume['id']}", headers=auth, json=body).json()
-    assert saved["layout"] == {"margins": "narrow", "hidden": ["summary"], "pages": 1}
+    assert saved["layout"] == {
+        "margins": "narrow",
+        "hidden": ["summary"],
+        "pages": 1,
+        "order": None,
+    }
     html = client.get(f"/resumes/{resume['id']}/preview", headers=auth).json()["html"]
     assert "<h2>Summary</h2>" not in html
 

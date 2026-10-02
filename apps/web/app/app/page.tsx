@@ -98,11 +98,12 @@ export default function AppHome() {
 
   if (state.kind === "ready") {
     const { profile, upload } = state;
+    // Made in the step-by-step builder rather than read from a file.
+    const built = profile.source_document_id === null;
     const d = profile.data;
     const pending = upload;
     const shown = toShow(d, profile.checks, profile.notes);
     const toCheck = shown.general.length + shown.placed.length;
-    const bullets = d.experience.reduce((n, e) => n + e.bullets.length, 0);
     const skills = d.skills.reduce((n, g) => n + g.items.length, 0);
 
     return (
@@ -112,7 +113,9 @@ export default function AppHome() {
           <p className="text-muted">
             {profile.reviewed_at
               ? "Your profile is ready."
-              : "We read your resume. Here's what we found."}
+              : built
+                ? "You've started building your profile."
+                : "We read your resume. Here's what we found."}
           </p>
         </div>
 
@@ -142,10 +145,10 @@ export default function AppHome() {
           </div>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              ["Roles", d.experience.length],
-              ["Bullets", bullets],
-              ["Skills", skills],
               ["Education", d.education.length],
+              ["Projects", d.projects.length],
+              ["Roles", d.experience.length],
+              ["Skills", skills],
             ].map(([label, n]) => (
               <div key={label} className="rounded-lg bg-ground px-3 py-2.5">
                 <dt className="text-sm text-muted">{label}</dt>
@@ -157,10 +160,10 @@ export default function AppHome() {
 
         <div className="flex flex-wrap items-center gap-4">
           <Link
-            href="/app/profile"
+            href={!profile.reviewed_at && built ? "/app/build" : "/app/profile"}
             className="inline-flex h-12 items-center rounded-[10px] bg-accent px-5 text-[15px] font-medium text-white hover:bg-accent-hover hover:text-white"
           >
-            {profile.reviewed_at ? "Edit your profile" : "Review your profile"}
+            {profile.reviewed_at ? "Edit your profile" : built ? "Continue building" : "Review your profile"}
           </Link>
           {toCheck > 0 && (
             <span className="rounded-full bg-warn-soft px-3 py-1.5 text-sm font-medium text-warn-ink">
@@ -215,6 +218,19 @@ export default function AppHome() {
             </p>
           )}
           <ResumeDropzone onFile={start} />
+          <Link
+            href="/app/build"
+            className="group flex flex-col gap-1 rounded-xl border border-line bg-surface p-5 text-ink hover:border-accent hover:bg-accent-soft/40 hover:text-ink sm:flex-row sm:items-center sm:gap-4"
+          >
+            <span className="flex flex-1 flex-col gap-1">
+              <span className="text-[17px] font-semibold">No resume yet? Build one step by step.</span>
+              <span className="text-sm leading-normal text-muted">
+                For students and freshers too: start with your education and projects, describe
+                them in your own words, and we&apos;ll help turn them into resume lines.
+              </span>
+            </span>
+            <span aria-hidden className="text-accent group-hover:translate-x-0.5">→</span>
+          </Link>
         </>
       )}
 

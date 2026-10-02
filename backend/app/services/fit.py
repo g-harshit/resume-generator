@@ -196,7 +196,9 @@ class Summary(BaseModel):
 SUMMARY_INSTRUCTIONS = """\
 Write a summary for the top of this person's resume, as long as LENGTH says, aimed
 at the JOB, using only facts from their RESUME. Lead with who they are and what they've done that
-the job cares about. No skill, number, title, scale or quality the resume doesn't
+the job cares about. Write it the way resumes are written: no name and no pronouns
+("he", "she", "I") — start with the role or degree ("Computer Science student at…",
+"Backend engineer who…"). No skill, number, title, scale or quality the resume doesn't
 state — and don't mention a skill the job asks for unless the resume lists it. No
 clichés ("results-driven", "passionate", "proven track record"). Don't tie a skill,
 task or number to a role or a time ("previously", "at X") unless the resume puts it

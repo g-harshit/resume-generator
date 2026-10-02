@@ -509,6 +509,21 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       tailoring; a role whose merge fails keeps its own top lines instead. A real run
       had a summary say "previously … using Go" of roles that used Java — now the prompt
       and the check both forbid tying a skill to the wrong role or time.
+- [x] Build a profile from scratch (`/app/build`), for people with no resume to upload.
+      Two tracks: **student / fresher** (contact → education → projects → internships,
+      optional → skills → certifications → summary → check and save) and **experienced**
+      (work first). Saved as you go; blank entries dropped between steps; resumable.
+      "Help me write these lines" under every project and role (profile editor too):
+      the person describes it in their own words and gets resume lines, each checked
+      against those notes — numbers, known technologies (case-insensitive in notes:
+      "react" counts), embellishing words, then the second check; failing lines are left
+      out with the reason (`services/draft.py`, `POST /profile/lines`). Summary written
+      from the profile (`POST /profile/summary`). A fresher's resume (no roles, or only
+      internships) leads with Summary, Education, Skills, Projects (`layout.order`), and
+      tailoring keeps all relevant projects; any resume's section order can be changed
+      in the Length panel. A real run had a summary say "Riya Shah is… She built…" —
+      summaries now name no one and use no pronouns (a name says nothing about how
+      someone is referred to), checked in code for tailoring and writing alike.
 - [ ] Email verification — not built: adds friction before the product proves itself;
       the reset flow already proves control of the address when it matters.
 

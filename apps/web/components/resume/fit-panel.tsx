@@ -2,7 +2,7 @@
 
 import type { ResumeData } from "@rg/schema";
 import { useState } from "react";
-import type { Layout, Section } from "@/lib/api";
+import { type Layout, SECTIONS, type Section } from "@/lib/api";
 
 const SECTION_LABEL: Record<Section, string> = {
   summary: "Summary",
@@ -55,9 +55,17 @@ export function FitPanel({
   const goal = layout.pages;
   const over = goal !== null && pages > goal;
 
-  const present = (Object.keys(SECTION_LABEL) as Section[]).filter((s) =>
-    s === "summary" ? true : (data[s] as unknown[]).length > 0,
-  );
+  const order = layout.order ?? SECTIONS;
+  const present = order.filter((s) => (s === "summary" ? true : (data[s] as unknown[]).length > 0));
+  // Swap a section with its neighbour among the ones on this resume.
+  const moveSection = (from: number, to: number) =>
+    actions.setLayout((l) => {
+      const full = [...(l.order ?? SECTIONS)];
+      const a = full.indexOf(present[from]!);
+      const b = full.indexOf(present[to]!);
+      [full[a], full[b]] = [full[b]!, full[a]!];
+      return { ...l, order: full };
+    });
   const entries = [
     ...data.experience.map((e) => ({ id: e.id, label: e.company || e.title, count: e.bullets.length })),
     ...data.projects.map((p) => ({ id: p.id, label: p.name, count: p.bullets.length })),
@@ -152,25 +160,45 @@ export function FitPanel({
       </fieldset>
 
       <fieldset className="flex flex-col gap-1.5 border-t border-sunken pt-3">
-        <legend className="mb-1 text-[13px] font-semibold">Sections to include</legend>
-        <div className="grid grid-cols-2 gap-1.5 text-sm">
-          {present.map((s) => (
-            <label key={s} className="flex items-center gap-1.5">
-              <input
-                type="checkbox"
-                checked={!layout.hidden.includes(s)}
-                onChange={(e) =>
-                  actions.setLayout((l) => ({
-                    ...l,
-                    hidden: e.target.checked ? l.hidden.filter((h) => h !== s) : [...l.hidden, s],
-                  }))
-                }
-                className="size-4 accent-accent"
-              />
-              {SECTION_LABEL[s]}
-            </label>
+        <legend className="mb-1 text-[13px] font-semibold">Sections, in order</legend>
+        <ol className="flex flex-col gap-1 text-sm">
+          {present.map((s, i) => (
+            <li key={s} className="flex items-center gap-1.5">
+              <label className="flex flex-1 items-center gap-1.5">
+                <input
+                  type="checkbox"
+                  checked={!layout.hidden.includes(s)}
+                  onChange={(e) =>
+                    actions.setLayout((l) => ({
+                      ...l,
+                      hidden: e.target.checked ? l.hidden.filter((h) => h !== s) : [...l.hidden, s],
+                    }))
+                  }
+                  className="size-4 accent-accent"
+                />
+                <span className={layout.hidden.includes(s) ? "text-muted line-through" : ""}>{SECTION_LABEL[s]}</span>
+              </label>
+              <button
+                type="button"
+                aria-label={`Move ${SECTION_LABEL[s]} up`}
+                disabled={i === 0}
+                onClick={() => moveSection(i, i - 1)}
+                className="flex size-8 items-center justify-center rounded-md text-muted hover:bg-sunken hover:text-ink disabled:opacity-30"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                aria-label={`Move ${SECTION_LABEL[s]} down`}
+                disabled={i === present.length - 1}
+                onClick={() => moveSection(i, i + 1)}
+                className="flex size-8 items-center justify-center rounded-md text-muted hover:bg-sunken hover:text-ink disabled:opacity-30"
+              >
+                ↓
+              </button>
+            </li>
           ))}
-        </div>
+        </ol>
       </fieldset>
 
       {entries.length > 0 && (

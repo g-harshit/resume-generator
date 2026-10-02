@@ -70,7 +70,9 @@ What you may do:
 - Reword bullets where it helps this job: use the job's name for something the
   bullet already describes, lead with the part the job cares about, tighten it.
   Stay close to the original; the facts must not change.
-- Choose and order the projects that help (or none), the same way.
+- Choose and order the projects that help (or none), the same way. When the profile
+  has little or no work experience (a student or recent graduate), projects are the
+  main evidence: keep every project that's relevant, with its best lines.
 - Write a 2-3 sentence `summary` for this job using only facts from the profile.
 - Order `skills` so the job's skills come first. You may regroup them.
 
@@ -171,6 +173,20 @@ def check_summary(
         return f"mentioned {', '.join(extra)}, which isn't in your profile"
     if "\n" in new.strip() or len(new) > max_chars:
         return "wasn't a short summary paragraph"
+    return not_resume_voice(new, profile.basics.name)
+
+
+_PRONOUNS = re.compile(r"\b(?:(?i:he|she|his|her|hers|him|they|their|my|me)|I)\b")
+
+
+def not_resume_voice(summary: str, name: str) -> str | None:
+    """Resume summaries name no one and use no pronouns — and a name says nothing
+    about how someone is referred to, so a model must not guess."""
+    first = name.strip().split()[0] if name.strip() else ""
+    if first and re.search(rf"\b{re.escape(first)}\b", summary, re.IGNORECASE):
+        return "used the person's name; resume summaries don't"
+    if found := _PRONOUNS.search(summary):
+        return f"used “{found.group(0)}”; resume summaries use no pronouns"
     return None
 
 
@@ -180,8 +196,12 @@ def profile_prose(profile: ResumeData) -> str:
         parts += [e.title, *(b.text for b in e.bullets)]
     for p in profile.projects:
         parts += [p.name, *(b.text for b in p.bullets)]
+    # Education is fact too: a student's summary leads with their degree and year.
+    for ed in profile.education:
+        parts += [ed.degree, ed.field, ed.institution, ed.details, ed.start or "", ed.end or ""]
+    parts += [f"{c.name} {c.issuer}" for c in profile.certifications]
     parts += profile.all_skills()
-    return "\n".join(parts)
+    return "\n".join(p for p in parts if p)
 
 
 class _Builder:

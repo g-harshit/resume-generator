@@ -68,6 +68,20 @@ _AMBIGUOUS: dict[str, tuple[str, ...]] = {
     "tf": ("TF",), "ts": ("TS",), "js": ("JS",), "ml": ("ML",), "kube": ("Kube",),
 }  # fmt: skip
 
+# Technologies we know by name: what a generated line may not mention unless its
+# source does.
+KNOWN_SKILLS: list[str] = list(
+    dict.fromkeys(
+        [group[0] for group in _SYNONYM_GROUPS]
+        # Not the ones a sentence can start with ("Make", "Next").
+        + [
+            names[0]
+            for key, names in _AMBIGUOUS.items()
+            if len(key) > 2 and key not in {"make", "next", "salt", "chef", "node", "kube"}
+        ]
+    )
+)
+
 
 def normalise(term: str) -> str:
     t = re.sub(r"\s+", " ", term.strip().lower()).strip(" .,;:")
@@ -95,6 +109,17 @@ def _spellings(canonical: str) -> list[str]:
     """Every way of writing a canonical skill, singular and plural."""
     names = [s.lower() for g in _SYNONYM_GROUPS if g[0].lower() == canonical for s in g]
     return [form for name in names or [canonical] for form in _number_forms(name)]
+
+
+def mentioned_casually(term: str, text: str) -> bool:
+    """Is `term` named in `text`, in any casing? For the person's own notes ("built it
+    in react"), where the strict prose rule for ambiguous words would miss it."""
+    lower = text.lower()
+    return any(
+        re.search(rf"(?<![\w.+#]){re.escape(form)}(?![\w+#])", lower)
+        for alt in alternatives(term)
+        for form in _spellings(normalise(alt))
+    )
 
 
 def _display(term: str) -> str:

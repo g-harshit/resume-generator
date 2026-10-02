@@ -84,7 +84,19 @@ export type Section = "summary" | "experience" | "education" | "skills" | "proje
 /** Margins, hidden sections and the page goal: how the resume sits on the page. */
 export type SummaryLength = "shorter" | "same" | "longer";
 
-export type Layout = { margins: "normal" | "narrow"; hidden: Section[]; pages: number | null };
+export type Layout = {
+  margins: "normal" | "narrow";
+  hidden: Section[];
+  pages: number | null;
+  /** The order sections appear in; null for the usual one (SECTIONS). */
+  order: Section[] | null;
+};
+
+/** The usual section order (backend/app/schemas/layout.py). */
+export const SECTIONS: Section[] = ["summary", "experience", "education", "skills", "projects", "certifications"];
+
+/** Lines written from the person's notes, and the ones dropped for saying more. */
+export type DraftedLines = { lines: string[]; left_out: { text: string; reason: string }[] };
 
 export type ResumeFull = ResumeSummary & {
   content: ResumeData;
@@ -233,6 +245,12 @@ export const api = {
   /** `version` is the one last loaded (0 to create); a stale one gets a 409. */
   saveProfile: (version: number, data: ResumeData) =>
     request<Profile>("/profile", { method: "PUT", body: JSON.stringify({ version, data }) }),
+  /** Resume lines from the person's own notes about a project or job (not saved). */
+  writeProfileLines: (kind: "project" | "experience", context: string, notes: string) =>
+    request<DraftedLines>("/profile/lines", { method: "POST", body: JSON.stringify({ kind, context, notes }) }),
+  /** A summary from the saved profile's facts (not saved). */
+  writeProfileSummary: (length: SummaryLength) =>
+    request<{ text: string }>("/profile/summary", { method: "POST", body: JSON.stringify({ length }) }),
   /** Reads the posting (a few seconds); the same text twice returns the first reading. */
   addJob: (text: string) =>
     request<Job>("/jobs", { method: "POST", body: JSON.stringify({ text, source: "paste" }) }),

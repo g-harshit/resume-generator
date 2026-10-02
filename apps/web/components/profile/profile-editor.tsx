@@ -10,7 +10,9 @@ import type {
   ResumeData,
   SkillGroup,
 } from "@rg/schema";
-import { useState } from "react";
+import { createContext, useContext, useState } from "react";
+import { SummaryAi } from "@/components/summary-ai";
+import { api, type DraftedLines } from "@/lib/api";
 import { newId } from "@/lib/ids";
 import {
   AddButton,
@@ -28,11 +30,139 @@ import {
 /** Messages for an entry (by id) and optionally one of its fields. */
 export type IssuesFor = (target: string, field?: string | null) => string[];
 
-type Props = {
+export type Props = {
   data: ResumeData;
   setData: (update: (d: ResumeData) => ResumeData) => void;
   issues: IssuesFor;
 };
+
+/**
+ * AI writing help in the profile editor. Present when the editor can save first: the
+ * server writes from the saved profile. Without it, the editor is plain fields.
+ */
+const AiContext = createContext<{ flush: () => Promise<boolean> } | null>(null);
+export const ProfileAiProvider = AiContext.Provider;
+
+function problemText(err: unknown) {
+  return err instanceof TypeError ? "Can't reach the server." : (err as Error).message;
+}
+
+/**
+ * "Help me write these": the person describes a project or job in their own words,
+ * and gets resume lines to add — only from what they wrote.
+ */
+function NotesToLines({
+  kind,
+  context,
+  onAdd,
+  open: startOpen,
+}: {
+  kind: "project" | "experience";
+  context: string;
+  onAdd: (lines: string[]) => void;
+  open: boolean;
+}) {
+  const ai = useContext(AiContext);
+  const [open, setOpen] = useState(startOpen);
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<DraftedLines | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+  if (!ai) return null;
+
+  async function write() {
+    setBusy(true);
+    setProblem(null);
+    try {
+      await ai!.flush();
+      setResult(await api.writeProfileLines(kind, context, notes));
+    } catch (err) {
+      setProblem(problemText(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function add(lines: string[]) {
+    onAdd(lines);
+    setResult((r) => (r ? { ...r, lines: r.lines.filter((l) => !lines.includes(l)) } : r));
+  }
+
+  if (!open) {
+    return (
+      <button type="button" onClick={() => setOpen(true)} className="self-start text-[13px] text-accent underline-offset-2 hover:underline">
+        ✦ Help me write these lines
+      </button>
+    );
+  }
+  return (
+    <div className="flex flex-col gap-2.5 rounded-lg bg-accent-soft/50 p-3">
+      <TextArea
+        label={kind === "project" ? "Tell us about this project in your own words" : "Tell us what you did here, in your own words"}
+        rows={3}
+        value={notes}
+        onChange={setNotes}
+        placeholder={
+          kind === "project"
+            ? "e.g. made a website for our college fest with react and firebase. i did the login and the events page. around 800 students signed up"
+            : "e.g. fixed bugs in the android app, wrote tests in kotlin, built a settings screen that shipped to users"
+        }
+      />
+      <p className="text-xs leading-normal text-muted">
+        What you built, what you did, the tools you used, and anything that came of it (numbers
+        if you have them). We only use what you write here — nothing is made up.
+      </p>
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={write}
+          disabled={busy || notes.trim().length < 15}
+          className="h-9 rounded-lg bg-accent px-3 text-[13px] font-medium text-white hover:bg-accent-hover disabled:opacity-50"
+        >
+          {busy ? "Writing…" : result ? "Write again" : "Write lines"}
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="text-[13px] text-muted hover:text-ink">
+          Close
+        </button>
+      </div>
+      {problem && <p role="alert" className="text-[13px] text-warn-ink">{problem}</p>}
+      {result && result.lines.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <ul className="flex flex-col gap-1.5">
+            {result.lines.map((line) => (
+              <li key={line} className="flex items-start gap-2 rounded-md bg-surface p-2 text-sm">
+                <span className="flex-1">{line}</span>
+                <button type="button" onClick={() => add([line])} className="shrink-0 text-[13px] text-accent hover:underline">
+                  Add
+                </button>
+              </li>
+            ))}
+          </ul>
+          {result.lines.length > 1 && (
+            <button type="button" onClick={() => add(result.lines)} className="self-start text-[13px] font-medium text-accent hover:underline">
+              Add all
+            </button>
+          )}
+        </div>
+      )}
+      {result && result.left_out.length > 0 && (
+        <details className="text-xs text-muted">
+          <summary className="cursor-pointer">
+            {result.left_out.length === 1 ? "1 line was left out" : `${result.left_out.length} lines were left out`} for
+            saying more than you wrote
+          </summary>
+          <ul className="mt-1 flex flex-col gap-1">
+            {result.left_out.map((x) => (
+              <li key={x.text}>
+                “{x.text}” — {x.reason}
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  );
+}
 
 function Section({
   title,
@@ -83,10 +213,13 @@ function Bullets({
   bullets,
   onChange,
   issues,
+  draft,
 }: {
   bullets: Bullet[];
   onChange: (b: Bullet[]) => void;
   issues: IssuesFor;
+  /** Offer AI help writing lines for this entry. */
+  draft?: { kind: "project" | "experience"; context: string };
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -112,13 +245,23 @@ function Bullets({
         </div>
       ))}
       <AddButton onClick={() => onChange([...bullets, { id: newId("b"), text: "" }])}>Add a line</AddButton>
+      {draft && (
+        <NotesToLines
+          {...draft}
+          // Open already when there's nothing written yet: that's when help is wanted.
+          open={!bullets.some((b) => b.text.trim())}
+          onAdd={(lines) =>
+            onChange([...bullets.filter((b) => b.text.trim()), ...lines.map((text) => ({ id: newId("b"), text }))])
+          }
+        />
+      )}
     </div>
   );
 }
 
 // --- sections -----------------------------------------------------------------------
 
-function BasicsSection({ data, setData, issues }: Props) {
+export function BasicsSection({ data, setData, issues }: Props) {
   const b = data.basics;
   const set = (patch: Partial<typeof b>) => setData((d) => ({ ...d, basics: { ...d.basics, ...patch } }));
   const setLinks = (links: Link[]) => set({ links });
@@ -146,7 +289,27 @@ function BasicsSection({ data, setData, issues }: Props) {
   );
 }
 
-function SummarySection({ data, setData, issues }: Props) {
+export function SummarySection({ data, setData, issues }: Props) {
+  const ai = useContext(AiContext);
+  const [busy, setBusy] = useState(false);
+  const [before, setBefore] = useState<string | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  async function write(length: Parameters<typeof api.writeProfileSummary>[0]) {
+    setBusy(true);
+    setProblem(null);
+    try {
+      if (!(await ai!.flush())) return;
+      const { text } = await api.writeProfileSummary(length);
+      setBefore(data.summary);
+      setData((d) => ({ ...d, summary: text }));
+    } catch (err) {
+      setProblem(problemText(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <Section title="Summary">
       <TextArea
@@ -156,11 +319,29 @@ function SummarySection({ data, setData, issues }: Props) {
         onChange={(summary) => setData((d) => ({ ...d, summary }))}
         issues={issues("summary")}
       />
+      {ai && (
+        <SummaryAi
+          has={data.summary.trim() !== ""}
+          busy={busy}
+          disabled={busy}
+          write={write}
+          undo={
+            before !== null && !busy
+              ? () => {
+                  setData((d) => ({ ...d, summary: before }));
+                  setBefore(null);
+                }
+              : null
+          }
+          note="Written only from what's in your profile."
+        />
+      )}
+      {problem && <p role="alert" className="text-[13px] text-warn-ink">{problem}</p>}
     </Section>
   );
 }
 
-function ExperienceSection({ data, setData, issues }: Props) {
+export function ExperienceSection({ data, setData, issues }: Props) {
   const list = data.experience;
   const setList = (experience: Experience[]) => setData((d) => ({ ...d, experience }));
   const set = (i: number, patch: Partial<Experience>) => setList(replaceAt(list, i, { ...list[i]!, ...patch }));
@@ -186,7 +367,12 @@ function ExperienceSection({ data, setData, issues }: Props) {
               I work here now
             </label>
           </div>
-          <Bullets bullets={e.bullets} onChange={(bullets) => set(i, { bullets })} issues={issues} />
+          <Bullets
+            bullets={e.bullets}
+            onChange={(bullets) => set(i, { bullets })}
+            issues={issues}
+            draft={{ kind: "experience", context: [e.title, e.company].filter(Boolean).join(" at ") }}
+          />
         </Entry>
       ))}
       <AddButton
@@ -200,7 +386,7 @@ function ExperienceSection({ data, setData, issues }: Props) {
   );
 }
 
-function EducationSection({ data, setData, issues }: Props) {
+export function EducationSection({ data, setData, issues }: Props) {
   const list = data.education;
   const setList = (education: Education[]) => setData((d) => ({ ...d, education }));
   const set = (i: number, patch: Partial<Education>) => setList(replaceAt(list, i, { ...list[i]!, ...patch }));
@@ -282,7 +468,7 @@ function SkillItems({ group, onChange }: { group: SkillGroup; onChange: (items: 
   );
 }
 
-function SkillsSection({ data, setData }: Props) {
+export function SkillsSection({ data, setData }: Props) {
   const list = data.skills;
   const setList = (skills: SkillGroup[]) => setData((d) => ({ ...d, skills }));
   const set = (i: number, patch: Partial<SkillGroup>) => setList(replaceAt(list, i, { ...list[i]!, ...patch }));
@@ -303,7 +489,7 @@ function SkillsSection({ data, setData }: Props) {
   );
 }
 
-function ProjectsSection({ data, setData, issues }: Props) {
+export function ProjectsSection({ data, setData, issues }: Props) {
   const list = data.projects;
   const setList = (projects: Project[]) => setData((d) => ({ ...d, projects }));
   const set = (i: number, patch: Partial<Project>) => setList(replaceAt(list, i, { ...list[i]!, ...patch }));
@@ -324,7 +510,12 @@ function ProjectsSection({ data, setData, issues }: Props) {
             <DateField label="Start" value={p.start} onChange={(start) => set(i, { start })} issues={issues(p.id, "start")} />
             <DateField label="End" value={p.end} onChange={(end) => set(i, { end })} issues={issues(p.id, "end")} />
           </div>
-          <Bullets bullets={p.bullets} onChange={(bullets) => set(i, { bullets })} issues={issues} />
+          <Bullets
+            bullets={p.bullets}
+            onChange={(bullets) => set(i, { bullets })}
+            issues={issues}
+            draft={{ kind: "project", context: `Project: ${p.name}` }}
+          />
         </Entry>
       ))}
       <AddButton onClick={() => setList([...list, { id: newId("prj"), name: "", url: "", start: null, end: null, bullets: [] }])}>
@@ -334,7 +525,7 @@ function ProjectsSection({ data, setData, issues }: Props) {
   );
 }
 
-function CertificationsSection({ data, setData, issues }: Props) {
+export function CertificationsSection({ data, setData, issues }: Props) {
   const list = data.certifications;
   const setList = (certifications: Certification[]) => setData((d) => ({ ...d, certifications }));
   const set = (i: number, patch: Partial<Certification>) => setList(replaceAt(list, i, { ...list[i]!, ...patch }));

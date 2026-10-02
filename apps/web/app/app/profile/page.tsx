@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { type IssuesFor, ProfileEditor } from "@/components/profile/profile-editor";
+import { useEffect, useMemo, useState } from "react";
+import { type IssuesFor, ProfileAiProvider, ProfileEditor } from "@/components/profile/profile-editor";
 import { api, type Profile } from "@/lib/api";
 import { notePlace, toShow } from "@/lib/notes";
 import { type SaveState, useProfileEditor } from "@/lib/use-profile-editor";
@@ -96,7 +96,8 @@ function Original({ profile }: { profile: Profile }) {
 
 function Review({ initial }: { initial: Profile }) {
   const router = useRouter();
-  const { data, setData, checks, notes, reviewedAt, save, confirm } = useProfileEditor(initial);
+  const { data, setData, checks, notes, reviewedAt, save, flush, confirm } = useProfileEditor(initial);
+  const ai = useMemo(() => ({ flush }), [flush]);
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState<string | null>(null);
 
@@ -151,7 +152,13 @@ function Review({ initial }: { initial: Profile }) {
         </div>
       )}
 
-      <div className="grid gap-7 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div
+        className={
+          initial.source_document_id === null
+            ? "flex max-w-3xl flex-col" // built from scratch: no original to show beside it
+            : "grid gap-7 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+        }
+      >
         <Original profile={initial} />
         <div className="flex min-w-0 flex-col gap-4">
           {general.length > 0 && (
@@ -164,7 +171,9 @@ function Review({ initial }: { initial: Profile }) {
               </ul>
             </section>
           )}
-          <ProfileEditor data={data} setData={setData} issues={issues} />
+          <ProfileAiProvider value={ai}>
+            <ProfileEditor data={data} setData={setData} issues={issues} />
+          </ProfileAiProvider>
         </div>
       </div>
 

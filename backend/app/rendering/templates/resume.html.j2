@@ -34,14 +34,15 @@
   {% endif %}
 </header>
 
-{% if data.summary and 'summary' not in hidden %}
+{#- Sections in the layout's order; hidden ones are left out. -#}
+{% for name in order if name not in hidden %}
+{% if name == 'summary' and data.summary %}
 <section class="section summary">
   <h2>Summary</h2>
   <p>{{ data.summary }}</p>
 </section>
-{% endif %}
 
-{% if data.experience and 'experience' not in hidden %}
+{% elif name == 'experience' and data.experience %}
 <section class="section">
   <h2>Experience</h2>
   {% for e in data.experience %}
@@ -59,9 +60,8 @@
   </div>
   {% endfor %}
 </section>
-{% endif %}
 
-{% if data.education and 'education' not in hidden %}
+{% elif name == 'education' and data.education %}
 <section class="section">
   <h2>Education</h2>
   {% for e in data.education %}
@@ -74,18 +74,16 @@
   </div>
   {% endfor %}
 </section>
-{% endif %}
 
-{% if data.skills and 'skills' not in hidden %}
+{% elif name == 'skills' and data.skills %}
 <section class="section skills">
   <h2>Skills</h2>
   {% for g in data.skills %}
   <p>{% if g.group %}<strong>{{ g.group }}:</strong> {% endif %}{{ g["items"] | join(", ") }}</p>
   {% endfor %}
 </section>
-{% endif %}
 
-{% if data.projects and 'projects' not in hidden %}
+{% elif name == 'projects' and data.projects %}
 <section class="section">
   <h2>Projects</h2>
   {% for p in data.projects %}
@@ -103,9 +101,8 @@
   </div>
   {% endfor %}
 </section>
-{% endif %}
 
-{% if data.certifications and 'certifications' not in hidden %}
+{% elif name == 'certifications' and data.certifications %}
 <section class="section">
   <h2>Certifications</h2>
   <ul class="plain">
@@ -115,6 +112,7 @@
   </ul>
 </section>
 {% endif %}
+{% endfor %}
 
 </main>
 </body>
