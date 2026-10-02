@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { PagePreview } from "@/components/page-preview";
+import { PdfPages } from "@/components/pdf-pages";
 import { api, ApiError, type Preview, saveFile, type TemplateInfo } from "@/lib/api";
 
 export default function TemplatesPage() {
@@ -163,8 +164,8 @@ function Templates() {
               <h2 className="text-[13px] font-semibold tracking-wider text-muted uppercase">
                 {current.name}, full size
               </h2>
-              <div className="mx-auto w-full max-w-[794px] overflow-hidden rounded-lg border border-line">
-                <PagePreview html={loaded.previews[selected]!.html} title={`${current.name} template, full size`} bare />
+              <div className="mx-auto w-full max-w-[794px]">
+                <PdfPages images={loaded.previews[selected]!.images} title={`${current.name} template`} />
               </div>
             </section>
           )}

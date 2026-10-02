@@ -259,3 +259,14 @@ def test_unknown_template_is_not_found(client, auth):
         "/profile", headers=auth, json={"version": 0, "data": PROFILE.model_dump(mode="json")}
     )
     assert client.get("/templates/fancy/pdf", headers=auth).status_code == 404
+
+
+def test_the_preview_shows_every_page_of_the_pdf(client, auth):
+    """A two-page resume previews as two page images, split where the PDF splits."""
+    from tests.test_fit import long_resume
+
+    data = long_resume().model_dump(mode="json")
+    client.put("/profile", headers=auth, json={"version": 0, "data": data})
+    out = client.get("/templates/classic/preview", headers=auth).json()
+    assert out["pages"] == 2 and len(out["images"]) == 2
+    assert all(i.startswith("data:image/jpeg;base64,") for i in out["images"])

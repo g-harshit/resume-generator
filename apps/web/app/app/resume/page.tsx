@@ -4,7 +4,7 @@ import type { ResumeData } from "@rg/schema";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { PagePreview } from "@/components/page-preview";
+import { PdfPages } from "@/components/pdf-pages";
 import { ResumeContentEditor } from "@/components/resume/content-editor";
 import { FitPanel } from "@/components/resume/fit-panel";
 import { AtsChecks, MatchPanel, type SkillAdded } from "@/components/resume/panels";
@@ -316,17 +316,19 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
           }}
         />
 
-        <section aria-label="Preview" className="order-first flex flex-col gap-2 lg:order-none xl:sticky xl:top-6 xl:self-start">
+        {/* Sticky on wide screens, and scrolls inside itself so every page can be reached. */}
+        <section
+          aria-label="Preview"
+          className="order-first flex flex-col gap-2 lg:order-none xl:sticky xl:top-6 xl:max-h-[calc(100vh-3rem)] xl:self-start xl:overflow-y-auto xl:pr-1"
+        >
           <span className="text-sm text-muted">
             {preview ? `${preview.pages} page${preview.pages > 1 ? "s" : ""} · A4 · updates as you save` : "Laying out…"}
           </span>
-          <div className="overflow-hidden rounded-lg border border-line bg-surface">
-            {preview ? (
-              <PagePreview html={preview.html} title={`${resume.title}, preview`} bare />
-            ) : (
-              <div className="aspect-[794/1123]" />
-            )}
-          </div>
+          {preview ? (
+            <PdfPages images={preview.images} title={resume.title} />
+          ) : (
+            <div className="aspect-[210/297] rounded-lg border border-line bg-surface" />
+          )}
         </section>
 
         <div className="flex flex-col gap-3 lg:col-span-2 xl:col-span-1">

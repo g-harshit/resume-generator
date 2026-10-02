@@ -525,6 +525,12 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       in the Length panel. A real run had a summary say "Riya Shah is… She built…" —
       summaries now name no one and use no pronouns (a name says nothing about how
       someone is referred to), checked in code for tailoring and writing alike.
+- [x] Preview shows every page: the API renders each page of the real PDF to an image
+      (`page_images`, pymupdf, 144 dpi JPEG, ~0.25 s for two pages), stacked with "Page 1
+      of 2" — the HTML preview couldn't know where WeasyPrint breaks a page, so page 2
+      was cut off. Used in the resume editor (its sticky column scrolls inside itself)
+      and the template's full-size view. The sidebar is sticky and full height on wide
+      screens, so the account and Sign out stay at its foot.
 - [ ] Email verification — not built: adds friction before the product proves itself;
       the reset flow already proves control of the address when it matters.
 

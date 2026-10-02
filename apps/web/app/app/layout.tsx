@@ -45,7 +45,9 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
     <div className="flex flex-1 flex-col md:flex-row">
       <nav
         aria-label="Main"
-        className="flex shrink-0 items-center justify-between gap-1 border-b border-line bg-sunken px-4 py-3 md:w-58 md:flex-col md:items-stretch md:justify-start md:border-r md:border-b-0 md:px-3.5 md:py-6"
+        // On wide screens the sidebar stays put, full height, so the account and sign-out
+        // stay at its foot however far the page scrolls.
+        className="flex shrink-0 items-center justify-between gap-1 border-b border-line bg-sunken px-4 py-3 md:sticky md:top-0 md:h-dvh md:w-58 md:flex-col md:items-stretch md:justify-start md:self-start md:overflow-y-auto md:border-r md:border-b-0 md:px-3.5 md:py-6"
       >
         <Link href="/app" className="font-display text-3xl text-ink hover:text-ink md:px-3 md:pb-6">
           {APP_NAME}

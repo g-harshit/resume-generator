@@ -20,7 +20,7 @@ from app.models import (
 )
 from app.rendering.catalog import BY_SLUG
 from app.rendering.render import render_html, render_letter_html, render_pdf
-from app.routers.templates import PreviewOut, pdf_filename
+from app.routers.templates import PreviewOut, pdf_filename, preview_of
 from app.schemas.layout import Layout, default_layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
@@ -593,7 +593,7 @@ def preview(
     html = render_html(
         ResumeData.model_validate(resume.content), _template(resume, template), _layout(resume)
     )
-    return PreviewOut(html=html, pages=render_pdf(html).pages)
+    return preview_of(html)
 
 
 @router.get("/{resume_id}/pdf")

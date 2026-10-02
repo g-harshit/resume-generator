@@ -8,7 +8,7 @@ from app.auth import CurrentUser
 from app.database import SessionDep
 from app.models import Profile, User
 from app.rendering.catalog import BY_SLUG, TEMPLATES
-from app.rendering.render import render_html, render_pdf
+from app.rendering.render import page_images, render_html, render_pdf
 from app.schemas.resume import ResumeData
 
 router = APIRouter(prefix="/templates", tags=["templates"])
@@ -24,6 +24,13 @@ class PreviewOut(BaseModel):
     html: str
     # From the real PDF layout, so "2 pages" in the picker is what the download will be.
     pages: int
+    # Every page of that PDF as an image, so the preview shows page 2 where it starts.
+    images: list[str]
+
+
+def preview_of(html: str) -> PreviewOut:
+    rendered = render_pdf(html)
+    return PreviewOut(html=html, pages=rendered.pages, images=page_images(rendered.content))
 
 
 @router.get("")
@@ -54,8 +61,7 @@ def pdf_filename(data: ResumeData) -> str:
 @router.get("/{slug}/preview")
 def preview(slug: str, user: CurrentUser, session: SessionDep) -> PreviewOut:
     """The user's profile in this template, as HTML for the picker's live preview."""
-    html = render_html(_profile_data(session, user), _known(slug))
-    return PreviewOut(html=html, pages=render_pdf(html).pages)
+    return preview_of(render_html(_profile_data(session, user), _known(slug)))
 
 
 @router.get("/{slug}/pdf")

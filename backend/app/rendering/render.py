@@ -3,6 +3,7 @@
 Both come from the same HTML, so the preview can't drift from the file.
 """
 
+import base64
 import os
 import re
 import sys
@@ -167,6 +168,7 @@ def render_letter_html(data: ResumeData, body: str, company: str, slug: str) -> 
 if sys.platform == "darwin" and Path("/opt/homebrew/lib").is_dir():
     os.environ.setdefault("DYLD_FALLBACK_LIBRARY_PATH", "/opt/homebrew/lib")
 
+import pymupdf  # noqa: E402
 import weasyprint  # noqa: E402
 
 
@@ -186,3 +188,15 @@ class Pdf:
 def render_pdf(html: str) -> Pdf:
     document = weasyprint.HTML(string=html, url_fetcher=_no_fetching).render()
     return Pdf(document.write_pdf(), len(document.pages))
+
+
+def page_images(pdf: bytes, dpi: int = 144) -> list[str]:
+    """Each page of the PDF as an image (a data: URL), for the preview: the page breaks
+    the browser can't know, exactly where the download has them. 144 dpi is sharp on
+    high-density screens at preview size; JPEG keeps it to ~100 KB a page."""
+    with pymupdf.open(stream=pdf, filetype="pdf") as doc:
+        return [
+            "data:image/jpeg;base64,"
+            + base64.b64encode(page.get_pixmap(dpi=dpi).tobytes("jpeg", jpg_quality=85)).decode()
+            for page in doc
+        ]
