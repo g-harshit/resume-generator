@@ -12,11 +12,12 @@ import { AtsChecks, MatchPanel, type SkillAdded } from "@/components/resume/pane
 import { api, type FitResult, type Layout, type Preview, type ResumeFull, saveFile, type TemplateInfo } from "@/lib/api";
 import { newId } from "@/lib/ids";
 import { type SaveState, useAutosave } from "@/lib/use-autosave";
+import { Loading } from "@/components/loading";
 
 export default function ResumePage() {
   // useSearchParams (?id=) needs a Suspense boundary.
   return (
-    <Suspense fallback={<p role="status" className="text-muted">Loading…</p>}>
+    <Suspense fallback={<Loading />}>
       <Loader />
     </Suspense>
   );
@@ -50,7 +51,7 @@ function Loader() {
     );
   }
   if (error) return <p role="alert" className="text-warn-ink">{error}</p>;
-  if (!loaded) return <p role="status" className="text-muted">Loading…</p>;
+  if (!loaded) return <Loading />;
   return <Editor key={loaded.resume.id} {...loaded} />;
 }
 

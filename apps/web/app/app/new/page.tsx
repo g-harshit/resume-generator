@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { api, type Job, type TermMatch } from "@/lib/api";
+import { Loading } from "@/components/loading";
 
 const MIN_CHARS = 200; // mirrors the API's check, so we don't send what it would refuse
 
 export default function NewResumePage() {
   // useSearchParams (the ?job= in the URL) needs a Suspense boundary.
   return (
-    <Suspense fallback={<p role="status" className="text-muted">Loading…</p>}>
+    <Suspense fallback={<Loading />}>
       <NewResume />
     </Suspense>
   );

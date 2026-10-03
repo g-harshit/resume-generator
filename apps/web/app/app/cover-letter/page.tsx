@@ -5,11 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { api, type ResumeFull, saveFile } from "@/lib/api";
 import { useAutosave } from "@/lib/use-autosave";
+import { Loading } from "@/components/loading";
 
 export default function CoverLetterPage() {
   // useSearchParams (?id=) needs a Suspense boundary.
   return (
-    <Suspense fallback={<p role="status" className="text-muted">Loading…</p>}>
+    <Suspense fallback={<Loading />}>
       <Loader />
     </Suspense>
   );
@@ -38,7 +39,7 @@ function Loader() {
 
   if (!id) return <p className="text-muted">No resume chosen. <Link href="/app/resumes">See your resumes</Link>.</p>;
   if (error) return <p role="alert" className="text-warn-ink">{error}</p>;
-  if (!resume) return <p role="status" className="text-muted">Loading…</p>;
+  if (!resume) return <Loading />;
   return <Letter key={resume.cover_letter?.generated_at ?? "none"} resume={resume} onWritten={setResume} />;
 }
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { api, type Profile, type ResumeSummary, saveFile } from "@/lib/api";
 import { toShow } from "@/lib/notes";
+import { Loading } from "@/components/loading";
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
 
@@ -213,7 +214,7 @@ export default function ResumesPage() {
       )}
 
       {resumes === null ? (
-        !error && <p role="status" className="text-muted">Loading…</p>
+        !error && <Loading />
       ) : resumes.length === 0 ? (
         <p className="text-muted">
           No resumes yet. <Link href="/app/new">Paste a job description</Link> to make your first.

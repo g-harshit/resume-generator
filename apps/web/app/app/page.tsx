@@ -6,6 +6,7 @@ import { api, type Profile, type Upload } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { toShow } from "@/lib/notes";
+import { Loading } from "@/components/loading";
 
 const POLL_MS = 1500;
 
@@ -93,7 +94,7 @@ export default function AppHome() {
   const firstName = user?.name.split(/\s+/)[0];
 
   if (state.kind === "loading") {
-    return <p role="status" className="text-muted">Loading…</p>;
+    return <Loading />;
   }
 
   if (state.kind === "ready") {

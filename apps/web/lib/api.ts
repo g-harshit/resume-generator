@@ -228,6 +228,10 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password, name }),
     }),
+  /** Start the API waking up, without waiting for it (nothing comes back). */
+  wake: () => {
+    fetch(`${API_URL}/health`, { cache: "no-store" }).catch(() => {});
+  },
   /** Sign in (or up) with the ID token Google gave the browser. */
   googleSignIn: (credential: string) =>
     request<TokenResponse>("/auth/google", { method: "POST", body: JSON.stringify({ credential }) }),

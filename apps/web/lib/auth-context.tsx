@@ -34,6 +34,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function load(delay: number) {
       if (!getToken()) {
+        // Nobody signed in yet: start waking the API (it sleeps when idle on the free
+        // plan) while they read the page or type their email, so signing in is quick.
+        api.wake();
         if (!cancelled) setLoading(false);
         return;
       }

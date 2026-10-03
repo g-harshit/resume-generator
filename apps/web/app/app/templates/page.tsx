@@ -6,11 +6,12 @@ import { Suspense, useEffect, useState } from "react";
 import { PagePreview } from "@/components/page-preview";
 import { PdfPages } from "@/components/pdf-pages";
 import { api, ApiError, type Preview, saveFile, type TemplateInfo } from "@/lib/api";
+import { Loading } from "@/components/loading";
 
 export default function TemplatesPage() {
   // useSearchParams (?job=, ?template=) needs a Suspense boundary.
   return (
-    <Suspense fallback={<p role="status" className="text-muted">Loading…</p>}>
+    <Suspense fallback={<Loading />}>
       <Templates />
     </Suspense>
   );

@@ -21,6 +21,7 @@ import { useAuth } from "@/lib/auth-context";
 import { newId } from "@/lib/ids";
 import { notePlace } from "@/lib/notes";
 import { useProfileEditor } from "@/lib/use-profile-editor";
+import { Loading } from "@/components/loading";
 
 /**
  * Building a profile from scratch, one section at a time, for someone with no resume
@@ -176,7 +177,7 @@ export default function BuildPage() {
   }, [user, router]);
 
   if (error) return <p role="alert" className="text-warn-ink">{error}</p>;
-  if (!initial) return <p role="status" className="text-muted">Loading…</p>;
+  if (!initial) return <Loading />;
   return <Builder initial={initial} />;
 }
 

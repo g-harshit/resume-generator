@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { APP_NAME } from "@/lib/config";
+import { Loading } from "@/components/loading";
 
 const NAV = [
   { href: "/app", label: "Home" },
@@ -35,9 +36,7 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
 
   if (!user) {
     return (
-      <p role="status" className="m-auto text-muted">
-        Loading…
-      </p>
+      <Loading className="m-auto" />
     );
   }
 

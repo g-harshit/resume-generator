@@ -6,6 +6,7 @@ import { type IssuesFor, ProfileAiProvider, ProfileEditor } from "@/components/p
 import { api, type Profile } from "@/lib/api";
 import { notePlace, toShow } from "@/lib/notes";
 import { type SaveState, useProfileEditor } from "@/lib/use-profile-editor";
+import { Loading } from "@/components/loading";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function ProfilePage() {
   }, [router]);
 
   if (error) return <p role="alert" className="text-warn-ink">{error}</p>;
-  if (profile === "loading" || profile === null) return <p role="status" className="text-muted">Loading…</p>;
+  if (profile === "loading" || profile === null) return <Loading />;
   return <Review initial={profile} />;
 }
 
