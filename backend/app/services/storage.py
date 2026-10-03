@@ -1,7 +1,8 @@
-"""Where uploaded files live. Local disk in development; the interface is what R2
-(or S3) will implement when the app is deployed."""
+"""Where uploaded files live: local disk in development, Cloudflare R2 when deployed
+(chosen by whether an R2 bucket is configured)."""
 
 import secrets
+from functools import cache
 from pathlib import Path
 from typing import Protocol
 
@@ -42,5 +43,48 @@ class LocalStorage:
         self._path(key).unlink(missing_ok=True)
 
 
+class R2Storage:
+    """Cloudflare R2 through its S3 API. Objects are private: the API reads them back
+    for the person who uploaded them; nothing is ever served from the bucket."""
+
+    def __init__(self, bucket: str, client):
+        self.bucket = bucket
+        self.client = client
+
+    @classmethod
+    def from_settings(cls) -> "R2Storage":
+        import boto3  # only needed when deployed
+        from botocore.config import Config
+
+        s = get_settings()
+        client = boto3.client(
+            "s3",
+            endpoint_url=f"https://{s.r2_account_id}.r2.cloudflarestorage.com",
+            aws_access_key_id=s.r2_access_key_id,
+            aws_secret_access_key=s.r2_secret_access_key,
+            region_name="auto",
+            config=Config(retries={"max_attempts": 3, "mode": "standard"}),
+        )
+        return cls(s.r2_bucket, client)
+
+    def put(self, data: bytes, *, suffix: str) -> str:
+        key = f"uploads/{secrets.token_hex(16)}{suffix}"
+        self.client.put_object(Bucket=self.bucket, Key=key, Body=data)
+        return key
+
+    def get(self, key: str) -> bytes:
+        return self.client.get_object(Bucket=self.bucket, Key=key)["Body"].read()
+
+    def delete(self, key: str) -> None:
+        self.client.delete_object(Bucket=self.bucket, Key=key)
+
+
+@cache
+def _r2() -> R2Storage:
+    return R2Storage.from_settings()
+
+
 def get_storage() -> Storage:
+    if get_settings().r2_bucket:
+        return _r2()
     return LocalStorage(get_settings().upload_dir)

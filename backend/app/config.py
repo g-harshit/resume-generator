@@ -61,6 +61,12 @@ class Settings(BaseSettings):
 
     # Uploaded files, when stored on local disk (dev). R2 comes with deployment.
     upload_dir: str = "var/uploads"
+    # Cloudflare R2 (S3-compatible). With a bucket set, uploads go there instead of
+    # `upload_dir`, so they survive restarts on a host without a persistent disk.
+    r2_account_id: str = ""
+    r2_access_key_id: str = ""
+    r2_secret_access_key: str = ""
+    r2_bucket: str = ""
     # Each parse is a paid model call, so these are capped per account per day.
     uploads_per_day: int = 20
     jobs_per_day: int = 50
