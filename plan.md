@@ -468,7 +468,7 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 - [ ] Google OAuth login (email + password stays as the fallback)
 - [ ] Credits and payments (if we monetise that way) — every paid action must store its
       result so a refresh never charges twice
-- [ ] Deploy (API, web, Postgres, R2), domain, name. Domain: **quickfitcv.com**.
+- [x] Deploy (API, web, Postgres, R2), domain, name — **live at https://quickfitcv.com** (2026-10-03). Domain: **quickfitcv.com**.
       Postgres: **Supabase** (Postgres 17 — the whole suite and every migration checked on
       17). Connect through the **Session pooler** URI (IPv4; the direct host is IPv6-only
       on the free plan, which Render can't reach), with `sslmode=require`; pool capped at
@@ -485,8 +485,15 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       page counts checked match the Mac. The production image was run against Aiven + R2
       (health, upload → R2 → download), and the static build clicked through.
       Extension: `pnpm zip:extension:prod` → the Chrome Web Store zip.
-      Left for the owner: Render account + secrets, DNS records, Web Store listing,
-      rotating the keys pasted in chat (OpenAI, Aiven, R2).
+      DNS at GoDaddy: A `@` → 216.24.57.1, CNAME `www` → quickfitcv-web.onrender.com,
+      CNAME `api` → quickfitcv-api.onrender.com; Render certificates on all three.
+      Render isn't linked to the GitHub account, so **pushes don't deploy**: use the
+      Blueprint's "Manual sync" (or link GitHub in Render). Render's free workspace allows
+      2 custom domains per service. The first build failed on `corepack enable`
+      (read-only /usr/bin on Render) — removed; Render installs pnpm itself.
+      Still for the owner: rotate the keys pasted in chat (OpenAI, Aiven, R2) and update
+      them in Render; Chrome Web Store listing (needs a privacy policy); SMTP (Resend)
+      for reset emails; the $7 API plan once real users arrive (free sleeps).
 - [x] Public landing page (`/`): hero with a stylised match + "what changed" view, how it
       works, "It never makes things up" with **real** rewordings the guard rejected in
       testing, ATS templates, honest gaps / "I have this", FAQ. Claims only what ships:
