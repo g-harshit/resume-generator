@@ -13,6 +13,7 @@ from app.database import SessionDep
 from app.models import PasswordReset, User, normalise_email, utcnow
 from app.security import create_access_token, hash_password, verify_password
 from app.services import rate_limit
+from app.services.google_auth import GoogleTokenError, verify_id_token
 from app.services.mailer import MailError, send_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -106,7 +107,80 @@ def login(body: LoginIn, request: Request, session: SessionDep) -> TokenOut:
     if not verify_password(body.password, user.password_hash if user else None):
         rate_limit.record(session, "login_failed:email", email)
         rate_limit.record(session, "login_failed:ip", ip)
+        if user and user.password_hash is None:
+            raise HTTPException(
+                status.HTTP_401_UNAUTHORIZED,
+                "This account signs in with Google. Use “Continue with Google”, or set a "
+                "password with “Forgot password”.",
+            )
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Email or password is incorrect")
+    return _token_response(user)
+
+
+# --- Sign in with Google -----------------------------------------------------------------
+
+
+class GoogleIn(BaseModel):
+    # The ID token Google Identity Services gave the browser.
+    credential: str = Field(min_length=20, max_length=8192)
+
+
+GOOGLE_FAILED = "Signing in with Google didn't work. Please try again."
+
+
+@router.post("/google")
+def google_sign_in(body: GoogleIn, request: Request, session: SessionDep) -> TokenOut:
+    """Sign in, link, or sign up with a Google ID token.
+
+    - An account already linked to this Google account (by Google's stable `sub`): in.
+    - Else an account with the same email: linked, and in. If that address had never
+      been verified, whoever set its password may not own the inbox (anyone can sign
+      up with any address), so the password is removed and other sessions are signed
+      out; the owner can set a new one with "Forgot password".
+    - Else a new account, with no password.
+    """
+    ip = rate_limit.client_ip(request)
+    window = timedelta(minutes=15)
+    rate_limit.check(session, "google_failed:ip", ip, 30, window, TOO_MANY_LOGINS)
+    try:
+        identity = verify_id_token(body.credential, get_settings().google_client_id)
+    except GoogleTokenError:
+        rate_limit.record(session, "google_failed:ip", ip)
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, GOOGLE_FAILED) from None
+
+    user = session.exec(select(User).where(User.google_sub == identity.sub)).first()
+    if user is None:
+        email = normalise_email(identity.email)
+        user = session.exec(select(User).where(User.email == email)).first()
+        now = utcnow()
+        if user is None:
+            user = User(
+                email=email,
+                name=identity.name or email.split("@")[0],
+                password_hash=None,
+                google_sub=identity.sub,
+                email_verified_at=now,
+            )
+        else:
+            if user.google_sub is not None:  # linked to a different Google account
+                raise HTTPException(
+                    status.HTTP_409_CONFLICT,
+                    "This email is already linked to a different Google account.",
+                )
+            if user.email_verified_at is None and user.password_hash is not None:
+                user.password_hash = None
+                user.token_version += 1
+            user.google_sub = identity.sub
+            user.email_verified_at = now
+        session.add(user)
+        try:
+            session.commit()
+        except IntegrityError:  # the same person, twice at once
+            session.rollback()
+            user = session.exec(select(User).where(User.google_sub == identity.sub)).first()
+            if user is None:
+                raise HTTPException(status.HTTP_409_CONFLICT, GOOGLE_FAILED) from None
+        session.refresh(user)
     return _token_response(user)
 
 
@@ -196,6 +270,8 @@ def confirm_reset(body: ResetConfirmIn, session: SessionDep) -> TokenOut:
     user = session.get(User, reset.user_id)
     now = utcnow()
     user.password_hash = hash_password(body.password)
+    # Using the emailed link shows the inbox is theirs.
+    user.email_verified_at = user.email_verified_at or now
     # Sign out every existing session: whoever had the old password shouldn't keep in.
     user.token_version += 1
     reset.used_at = now

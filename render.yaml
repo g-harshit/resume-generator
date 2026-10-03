@@ -36,6 +36,10 @@ services:
         value: "4"
       - key: DB_MAX_OVERFLOW
         value: "4"
+      # "Sign in with Google" (Google Cloud project quickfit-cv). The client ID is public;
+      # this flow needs no client secret.
+      - key: GOOGLE_CLIENT_ID
+        value: 557351084350-5rnkmi2l3fi9dk5usaei3g8d78461172.apps.googleusercontent.com
       - key: JWT_SECRET
         generateValue: true
       - key: DATABASE_URL
@@ -81,6 +85,8 @@ services:
         value: https://api.quickfitcv.com
       - key: NEXT_PUBLIC_SITE_URL
         value: https://quickfitcv.com
+      - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
+        value: 557351084350-5rnkmi2l3fi9dk5usaei3g8d78461172.apps.googleusercontent.com
     # Pages are folders (/app/resume/index.html). Links written without the trailing
     # slash (emails, the extension, people typing) still land on the page. A new page
     # needs a line here.
@@ -124,6 +130,12 @@ services:
       - type: rewrite
         source: /reset-password
         destination: /reset-password/index.html
+      - type: rewrite
+        source: /privacy
+        destination: /privacy/index.html
+      - type: rewrite
+        source: /terms
+        destination: /terms/index.html
     headers:
       - path: /*
         name: X-Frame-Options

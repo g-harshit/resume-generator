@@ -32,7 +32,15 @@ class User(SQLModel, table=True):
     # effectively case-insensitive: Alice@x.com and alice@x.com are one account.
     email: str = Field(max_length=320, unique=True, index=True)
     name: str = Field(max_length=120)
-    password_hash: str = Field(max_length=255)
+    # None for an account that only signs in with Google.
+    password_hash: str | None = Field(default=None, max_length=255)
+    # Google's stable id for the person ("sub"), once they've signed in with Google.
+    google_sub: str | None = Field(default=None, max_length=255, unique=True, index=True)
+    # When the address was shown to belong to them (Google said so, for now). An
+    # account made with a password and never verified has None.
+    email_verified_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
     # Every login token carries the version current when it was issued; bumping this
     # (on a password reset) makes all earlier tokens fail — JWTs can't be revoked one
     # by one. A counter, not a timestamp: token times are whole seconds, and a token from

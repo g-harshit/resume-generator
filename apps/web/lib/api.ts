@@ -228,6 +228,9 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password, name }),
     }),
+  /** Sign in (or up) with the ID token Google gave the browser. */
+  googleSignIn: (credential: string) =>
+    request<TokenResponse>("/auth/google", { method: "POST", body: JSON.stringify({ credential }) }),
   login: (email: string, password: string) =>
     request<TokenResponse>("/auth/login", {
       method: "POST",

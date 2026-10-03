@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
@@ -301,6 +302,10 @@ export default function Home() {
         <div className="mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-3 px-4 py-6 text-sm text-muted sm:px-6">
           <span>{APP_NAME}</span>
           <span>Built only from what&apos;s true about you.</span>
+          <nav aria-label="Legal" className="flex gap-4">
+            <Link href="/privacy">Privacy</Link>
+            <Link href="/terms">Terms</Link>
+          </nav>
         </div>
       </footer>
     </div>

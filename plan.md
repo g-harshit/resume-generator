@@ -465,7 +465,16 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 - Chrome Web Store listing: later (needs a developer account, name, icon, privacy policy).
 
 ### Later (not in the first build)
-- [ ] Google OAuth login (email + password stays as the fallback)
+- [x] Google sign-in (email + password stays). Google Identity Services button on
+      sign-in and sign-up; Google hands the browser a signed ID token and `POST
+      /auth/google` checks it against Google's published keys (signature, our client ID,
+      issuer, expiry, verified email) — only a client ID is needed, no secret. Accounts:
+      found by Google's stable `sub`; else linked by email (if that address was never
+      verified, its password is removed and its sessions ended, since whoever set it may
+      not own the inbox); else created without a password. A password login on a
+      Google-only account says to use Google; "Forgot password" can add one. Google
+      Cloud project `quickfit-cv`, web client for https://quickfitcv.com and
+      http://localhost:3100. `/privacy` and `/terms` pages (needed to publish the app).
 - [ ] Credits and payments (if we monetise that way) — every paid action must store its
       result so a refresh never charges twice
 - [x] Deploy (API, web, Postgres, R2), domain, name — **live at https://quickfitcv.com** (2026-10-03). Domain: **quickfitcv.com**.

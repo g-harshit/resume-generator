@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { GoogleButton } from "@/components/google-button";
 import { useAuth } from "@/lib/auth-context";
-import { APP_NAME } from "@/lib/config";
+import { APP_NAME, GOOGLE_CLIENT_ID } from "@/lib/config";
 
 type Mode = "login" | "register";
 
@@ -33,7 +34,7 @@ const inputClass =
   "focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20";
 
 export function AuthForm({ mode }: { mode: Mode }) {
-  const { user, loading, login, register } = useAuth();
+  const { user, loading, login, register, loginWithGoogle } = useAuth();
   const router = useRouter();
   const next = safeNext(useSearchParams().get("next"));
   const [error, setError] = useState<string | null>(null);
@@ -65,6 +66,21 @@ export function AuthForm({ mode }: { mode: Mode }) {
     }
   }
 
+  async function onGoogle(credential: string) {
+    setError(null);
+    setSubmitting(true);
+    try {
+      await loginWithGoogle(credential);
+    } catch (err) {
+      setError(
+        err instanceof TypeError
+          ? "Can't reach the server. Check your connection and try again."
+          : (err as Error).message,
+      );
+      setSubmitting(false);
+    }
+  }
+
   const otherHref = `${mode === "login" ? "/register" : "/login"}${
     next !== "/app" ? `?next=${encodeURIComponent(next)}` : ""
   }`;
@@ -81,6 +97,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <h1 className="font-display text-5xl leading-tight">{copy.title}</h1>
           <p className="text-base leading-relaxed text-muted">{copy.lead}</p>
         </div>
+
+        {GOOGLE_CLIENT_ID && (
+          <div className="flex flex-col gap-5">
+            <GoogleButton text={mode === "login" ? "signin_with" : "signup_with"} onCredential={onGoogle} />
+            <div className="flex items-center gap-3 text-sm text-muted">
+              <span className="h-px flex-1 bg-line" />
+              or with email
+              <span className="h-px flex-1 bg-line" />
+            </div>
+          </div>
+        )}
 
         {/* method="post": if someone submits before the page's JavaScript has loaded,
             the browser falls back to a native submit, and a GET would put the password
@@ -144,6 +171,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
           {mode === "login" && (
             <p>
               <Link href="/forgot-password">Forgot your password?</Link>
+            </p>
+          )}
+          {mode === "register" && (
+            <p>
+              By creating an account you agree to the <Link href="/terms">terms</Link> and{" "}
+              <Link href="/privacy">privacy policy</Link>.
             </p>
           )}
         </div>

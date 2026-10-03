@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     # "development" or "production". Production refuses to start with dev-only defaults.
     environment: str = "development"
 
+    # "Sign in with Google": the OAuth client ID (public; Google Cloud → Credentials).
+    # Empty turns Google sign-in off. Only the ID is needed: the API checks the ID
+    # token Google gives the browser against Google's published keys.
+    google_client_id: str = ""
+
     # Signs login tokens. Anyone holding it can mint a token for any account.
     jwt_secret: str = DEV_JWT_SECRET
     # There is no refresh token yet, so this is how long a login lasts.

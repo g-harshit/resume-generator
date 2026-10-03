@@ -8,5 +8,11 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8100
 // The Chrome Web Store gives a published extension its own; set this for that build.
 export const EXTENSION_ID = process.env.NEXT_PUBLIC_EXTENSION_ID ?? "pjddbiflcebndfljpckcgkigckfpmndm";
 
+// "Sign in with Google": the OAuth client ID (public). Unset hides the button.
+export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+
+// Where people write to us (privacy requests, support).
+export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? "gharshit1237@gmail.com";
+
 // Where the site is served from publicly (canonical links, sitemap). Set for deploys.
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3100";

@@ -9,6 +9,8 @@ type AuthState = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
+  /** With the ID token from Google's button. */
+  loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   /** Sign in with a token the API already issued (after a password reset). */
   adopt: (token: string, user: User) => void;
@@ -69,6 +71,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(res.user);
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential: string) => {
+    const res = await api.googleSignIn(credential);
+    setToken(res.token);
+    setUser(res.user);
+  }, []);
+
   const adopt = useCallback((token: string, next: User) => {
     setToken(token);
     setUser(next);
@@ -80,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, adopt }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, adopt }}>
       {children}
     </AuthContext.Provider>
   );
