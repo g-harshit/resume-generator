@@ -64,7 +64,9 @@ services:
   - type: web
     name: quickfitcv-web
     runtime: static
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter web build
+    # Render installs the workspace with pnpm (from package.json's packageManager) before
+    # this runs; `corepack enable` fails there (read-only /usr/bin), so it isn't used.
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter web build
     staticPublishPath: apps/web/out
     autoDeploy: true
     domains:
