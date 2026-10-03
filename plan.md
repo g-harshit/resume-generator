@@ -468,7 +468,13 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 - [ ] Google OAuth login (email + password stays as the fallback)
 - [ ] Credits and payments (if we monetise that way) — every paid action must store its
       result so a refresh never charges twice
-- [ ] Deploy (API, web, Postgres, R2), domain, name
+- [ ] Deploy (API, web, Postgres, R2), domain, name. Domain: **quickfitcv.com**.
+      Postgres: **Supabase** (Postgres 17 — the whole suite and every migration checked on
+      17). Connect through the **Session pooler** URI (IPv4; the direct host is IPv6-only
+      on the free plan, which Render can't reach), with `sslmode=require`; pool capped at
+      5 + 5 (`DB_POOL_SIZE`, `DB_MAX_OVERFLOW`). Migration 0009 locks every table away
+      from Supabase's public Data API (RLS on, no grants for `anon`/`authenticated`) —
+      checked against simulated Supabase roles: anon gets "permission denied".
 - [x] Public landing page (`/`): hero with a stylised match + "what changed" view, how it
       works, "It never makes things up" with **real** rewordings the guard rejected in
       testing, ATS templates, honest gaps / "I have this", FAQ. Claims only what ships:

@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     app_name: str = "Tailor"
 
     database_url: str = "postgresql+psycopg://resume:resume@localhost:5433/resume"
+    # Connections this process may hold. A hosted pooler caps clients (Supabase's free
+    # session pooler: 15), so stay well under it with room for migrations.
+    db_pool_size: int = 5
+    db_max_overflow: int = 5
 
     # Comma-separated: the web app, and the Chrome extension (its ID is fixed by the
     # public key in apps/extension/wxt.config.ts).

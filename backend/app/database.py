@@ -10,6 +10,8 @@ from app.config import get_settings, normalise_db_url
 engine: Engine = create_engine(
     normalise_db_url(get_settings().database_url),
     pool_pre_ping=True,
+    pool_size=get_settings().db_pool_size,
+    max_overflow=get_settings().db_max_overflow,
 )
 
 
