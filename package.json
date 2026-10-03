@@ -10,6 +10,8 @@
     "build:extension": "pnpm --filter @rg/extension build",
     "dev:extension": "pnpm --filter @rg/extension dev",
     "test:extension": "pnpm --filter @rg/extension test",
-    "zip:extension:prod": "WXT_APP_NAME='QuickFit CV' WXT_API_URL=https://api.quickfitcv.com WXT_WEB_URL=https://quickfitcv.com pnpm --filter @rg/extension zip"
+    "build:extension:prod": "WXT_APP_NAME='QuickFit CV' WXT_API_URL=https://api.quickfitcv.com WXT_WEB_URL=https://quickfitcv.com pnpm --filter @rg/extension build",
+    "zip:extension:store": "WXT_APP_NAME='QuickFit CV' WXT_API_URL=https://api.quickfitcv.com WXT_WEB_URL=https://quickfitcv.com WXT_STORE=1 pnpm --filter @rg/extension zip",
+    "e2e:extension": "pnpm --filter @rg/extension e2e"
   }
 }

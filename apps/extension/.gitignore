@@ -24,3 +24,7 @@ web-ext.config.ts
 *.njsproj
 *.sln
 *.sw?
+
+# Real-Chromium test output (screenshots, downloaded PDFs)
+e2e/out/
+dist/

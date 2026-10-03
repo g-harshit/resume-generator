@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getToken } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { APP_NAME, EXTENSION_ID } from "@/lib/config";
+import { APP_NAME, EXTENSION_IDS } from "@/lib/config";
 
 // The bit of the Chrome API a web page gets when an extension lists the page's origin
 // in externally_connectable.
@@ -21,20 +21,26 @@ declare global {
 
 type State = "sending" | "connected" | "no-extension";
 
-/** Hand the website's login to the Chrome extension, then say so. */
-function send(token: string): Promise<State> {
-  const runtime = window.chrome?.runtime;
-  if (!runtime?.sendMessage) return Promise.resolve("no-extension");
+/** Send the login to one extension ID; true if that extension took it. */
+function sendTo(runtime: ChromeRuntime, id: string, token: string): Promise<boolean> {
   return new Promise((resolve) => {
     try {
-      runtime.sendMessage(EXTENSION_ID, { type: "connect", token }, (response) => {
-        const ok = !runtime.lastError && (response as { ok?: boolean } | undefined)?.ok;
-        resolve(ok ? "connected" : "no-extension");
+      runtime.sendMessage(id, { type: "connect", token }, (response) => {
+        resolve(!runtime.lastError && Boolean((response as { ok?: boolean } | undefined)?.ok));
       });
     } catch {
-      resolve("no-extension");
+      resolve(false);
     }
   });
+}
+
+/** Hand the website's login to the Chrome extension (the Store's, or an unpacked one),
+ *  then say so. */
+async function send(token: string): Promise<State> {
+  const runtime = window.chrome?.runtime;
+  if (!runtime?.sendMessage) return "no-extension";
+  const results = await Promise.all(EXTENSION_IDS.map((id) => sendTo(runtime, id, token)));
+  return results.some(Boolean) ? "connected" : "no-extension";
 }
 
 export default function ConnectExtension() {

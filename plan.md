@@ -460,9 +460,21 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       the profile, Download PDF, Open in editor). Follows the person across tabs.
 - [x] `make extension` builds to `apps/extension/.output/chrome-mv3`; README says how to
       load it unpacked. `make lint` / `make test` include the extension.
-- **Not yet tried in a real Chrome** — the built-in browser can't load extensions. Needs
-  someone to load it unpacked and run it on real LinkedIn / Naukri / company pages.
-- Chrome Web Store listing: later (needs a developer account, name, icon, privacy policy).
+- [x] **End to end in real Chromium** (`pnpm e2e:extension`, Playwright): the extension
+      loads with the fixed ID, the website hands it the login, the panel reads a careers
+      page (JSON-LD JobPosting), tailors with the real model and downloads the PDF. The
+      test build pre-allows localhost (`WXT_E2E=1`), since a test can't click Chrome's
+      permission prompt. Still worth trying by hand on real LinkedIn / Naukri pages.
+- [x] Production builds: `pnpm build:extension:prod` (unpacked, fixed ID) and `pnpm
+      zip:extension:store` (no `key` — the Store rejects it and assigns its own ID).
+      The website tries every ID in `NEXT_PUBLIC_EXTENSION_IDS`; the live API's CORS
+      allows the fixed one. Version 1.0.0.
+- [x] Chrome Web Store listing ready (`apps/extension/store/LISTING.md`): summary,
+      description, category, single purpose, permission justifications, data-use
+      answers; icon, two 1280×800 screenshots and the small promo tile from the
+      real-Chromium run. Privacy policy mentions what the extension reads.
+- [ ] Publish (owner): $5 developer registration, upload, submit for review. Then add
+      the Store's ID to `NEXT_PUBLIC_EXTENSION_IDS` and `CORS_ORIGINS` and deploy.
 
 ### Later (not in the first build)
 - [x] Google sign-in (email + password stays). Google Identity Services button on

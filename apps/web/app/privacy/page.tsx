@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy policy" };
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy policy" updated="3 October 2026">
+    <LegalPage title="Privacy policy" updated="4 October 2026">
       <p>
         {APP_NAME} turns the resume you already have into a profile, and tailors it to job
         descriptions you choose. This page says what we keep, why, who helps us run the
@@ -24,6 +24,11 @@ export default function PrivacyPage() {
           <strong>What you upload or write:</strong> your resume file, the profile made
           from it, job descriptions you paste or read with the extension, and the resumes and
           cover letters made from them, with their edit history.
+        </li>
+        <li>
+          <strong>From the Chrome extension:</strong> the text of the job posting on the page
+          you open it on — only that page, only when you use it — to read the job. It
+          doesn&apos;t look at other tabs or your browsing history.
         </li>
         <li>
           <strong>Security records:</strong> failed sign-in attempts and similar events,
