@@ -153,11 +153,14 @@ def test_text_is_real_text_with_embedded_fonts(rendered):
         assert all(ext != "n/a" for _, ext, *_ in fonts)  # "n/a" = not embedded
 
 
+# The font each template asks for, or its same-width stand-in on the Linux server
+# (backend/fonts/60-metric-aliases.conf): Gelasio for Georgia, Liberation Sans for
+# Helvetica and Arial. Anything else means the stylesheet didn't apply.
 EXPECTED_FONT = {
-    "classic": "Georgia",
-    "modern": "Helvetica",
-    "compact": "Arial",
-    "executive": "Georgia",
+    "classic": ("Georgia", "Gelasio"),
+    "modern": ("Helvetica", "Liberation-Sans", "LiberationSans"),
+    "compact": ("Arial", "Liberation-Sans", "LiberationSans"),
+    "executive": ("Georgia", "Gelasio"),
 }
 
 
@@ -165,7 +168,7 @@ def test_the_template_font_is_the_one_used(rendered):
     """Catches a stylesheet that silently doesn't apply (it happened: autoescaped CSS
     quotes made every template fall back to Times)."""
     fonts = {f[3] for page in rendered["doc"] for f in page.get_fonts()}
-    assert any(EXPECTED_FONT[rendered["slug"]] in f for f in fonts), fonts
+    assert any(want in f for want in EXPECTED_FONT[rendered["slug"]] for f in fonts), fonts
     assert "&#34;" not in rendered["html"]
 
 

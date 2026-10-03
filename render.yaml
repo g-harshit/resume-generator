@@ -1,0 +1,137 @@
+# Render Blueprint: the whole production setup. In Render: New → Blueprint → this repo.
+# Values marked `sync: false` are secrets; Render asks for them when the Blueprint is
+# first applied, and they never live in the repo.
+#
+#   quickfitcv.com, www   → quickfitcv-web  (static files, free)
+#   api.quickfitcv.com    → quickfitcv-api  (FastAPI in Docker, free instance)
+#   Postgres: Aiven · uploaded files: Cloudflare R2 · AI: OpenAI
+
+services:
+  - type: web
+    name: quickfitcv-api
+    runtime: docker
+    plan: free # sleeps after 15 idle minutes; "starter" ($7) to keep it awake
+    region: singapore # nearest to India, and to the Aiven database (Bangalore)
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    domains:
+      - api.quickfitcv.com
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: APP_NAME
+        value: QuickFit CV
+      - key: WEB_URL
+        value: https://quickfitcv.com
+      - key: CORS_ORIGINS
+        value: https://quickfitcv.com,https://www.quickfitcv.com,chrome-extension://pjddbiflcebndfljpckcgkigckfpmndm
+      # Render's proxy sets X-Forwarded-For; the rate limits need the real client IP.
+      - key: TRUST_PROXY_HEADERS
+        value: "true"
+      # Aiven's free plan allows 15 connections: leave room for migrations and the console.
+      - key: DB_POOL_SIZE
+        value: "4"
+      - key: DB_MAX_OVERFLOW
+        value: "4"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      # Password-reset emails. Leave empty until an email provider is set up: the
+      # emails are then written to the API log instead of sent.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+
+  - type: web
+    name: quickfitcv-web
+    runtime: static
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm --filter web build
+    staticPublishPath: apps/web/out
+    autoDeploy: true
+    domains:
+      - quickfitcv.com
+      - www.quickfitcv.com
+    envVars:
+      - key: NODE_VERSION
+        value: "24"
+      - key: NEXT_PUBLIC_APP_NAME
+        value: QuickFit CV
+      - key: NEXT_PUBLIC_API_URL
+        value: https://api.quickfitcv.com
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://quickfitcv.com
+    # Pages are folders (/app/resume/index.html). Links written without the trailing
+    # slash (emails, the extension, people typing) still land on the page. A new page
+    # needs a line here.
+    routes:
+      - type: rewrite
+        source: /app
+        destination: /app/index.html
+      - type: rewrite
+        source: /app/build
+        destination: /app/build/index.html
+      - type: rewrite
+        source: /app/cover-letter
+        destination: /app/cover-letter/index.html
+      - type: rewrite
+        source: /app/new
+        destination: /app/new/index.html
+      - type: rewrite
+        source: /app/profile
+        destination: /app/profile/index.html
+      - type: rewrite
+        source: /app/resume
+        destination: /app/resume/index.html
+      - type: rewrite
+        source: /app/resumes
+        destination: /app/resumes/index.html
+      - type: rewrite
+        source: /app/templates
+        destination: /app/templates/index.html
+      - type: rewrite
+        source: /extension/connect
+        destination: /extension/connect/index.html
+      - type: rewrite
+        source: /forgot-password
+        destination: /forgot-password/index.html
+      - type: rewrite
+        source: /login
+        destination: /login/index.html
+      - type: rewrite
+        source: /register
+        destination: /register/index.html
+      - type: rewrite
+        source: /reset-password
+        destination: /reset-password/index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /_next/static/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable

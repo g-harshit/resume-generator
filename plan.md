@@ -475,6 +475,18 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       5 + 5 (`DB_POOL_SIZE`, `DB_MAX_OVERFLOW`). Migration 0009 locks every table away
       from Supabase's public Data API (RLS on, no grants for `anon`/`authenticated`) —
       checked against simulated Supabase roles: anon gets "permission denied".
+      **Chosen instead: Aiven** (Postgres 18.6, DigitalOcean Bangalore, 15 connections) —
+      migrations applied, schema clean. **R2** bucket `quickfitcv-uploads`, private,
+      checked end to end. **Render** (`render.yaml`): `quickfitcv-web` static site (Next
+      `output: "export"`, `trailingSlash`, a rewrite per page for slash-less links) on
+      quickfitcv.com + www; `quickfitcv-api` Docker on the free plan in Singapore at
+      api.quickfitcv.com, migrations on start, non-root. Server fonts: Gelasio (bundled,
+      OFL) for Georgia, Liberation Sans for Helvetica/Arial — same widths, so all 12
+      page counts checked match the Mac. The production image was run against Aiven + R2
+      (health, upload → R2 → download), and the static build clicked through.
+      Extension: `pnpm zip:extension:prod` → the Chrome Web Store zip.
+      Left for the owner: Render account + secrets, DNS records, Web Store listing,
+      rotating the keys pasted in chat (OpenAI, Aiven, R2).
 - [x] Public landing page (`/`): hero with a stylised match + "what changed" view, how it
       works, "It never makes things up" with **real** rewordings the guard rejected in
       testing, ATS templates, honest gaps / "I have this", FAQ. Claims only what ships:

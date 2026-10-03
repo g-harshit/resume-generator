@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Deployed as plain files (a static site on Render): every page loads its data from
+  // the API in the browser, so nothing needs a Node server. `trailingSlash` makes each
+  // page a folder with an index.html, which any static host serves for /app/resume/.
+  output: "export",
+  trailingSlash: true,
   // @rg/schema ships TypeScript source (generated from the backend), not built JS.
   transpilePackages: ["@rg/schema"],
   // Dev only: also serve dev assets to http://127.0.0.1:3100 (a separate origin, so a

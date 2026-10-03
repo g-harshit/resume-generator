@@ -4,13 +4,33 @@
     {
       "name": "api",
       "runtimeExecutable": "make",
-      "runtimeArgs": ["api"],
+      "runtimeArgs": [
+        "api"
+      ],
       "port": 8100
     },
     {
       "name": "web",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "web", "dev"],
+      "runtimeArgs": [
+        "--filter",
+        "web",
+        "dev"
+      ],
+      "port": 3100
+    },
+    {
+      "name": "web-static",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "3100",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "apps/web/out"
+      ],
       "port": 3100
     }
   ]
