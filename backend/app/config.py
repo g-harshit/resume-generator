@@ -48,6 +48,11 @@ class Settings(BaseSettings):
     # token Google gives the browser against Google's published keys.
     google_client_id: str = ""
 
+    # Comma-separated emails with access to the admin panel. Only counts once the
+    # account's address is verified (Google sign-in or a password reset), so nobody can
+    # sign up with an admin's address first and inherit the rights.
+    admin_emails: str = ""
+
     # Signs login tokens. Anyone holding it can mint a token for any account.
     jwt_secret: str = DEV_JWT_SECRET
     # There is no refresh token yet, so this is how long a login lasts.
@@ -79,6 +84,10 @@ class Settings(BaseSettings):
     cover_letters_per_day: int = 20
     # Summaries, condensing and fit-to-pages: each is a few model calls.
     resume_ai_edits_per_day: int = 60
+
+    @property
+    def admin_email_list(self) -> set[str]:
+        return {e.strip().lower() for e in self.admin_emails.split(",") if e.strip()}
 
     @model_validator(mode="after")
     def _no_dev_secrets_in_production(self) -> "Settings":

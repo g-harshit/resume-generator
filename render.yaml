@@ -40,6 +40,9 @@ services:
       # this flow needs no client secret.
       - key: GOOGLE_CLIENT_ID
         value: 557351084350-5rnkmi2l3fi9dk5usaei3g8d78461172.apps.googleusercontent.com
+      # Who can open the admin panel (/app/admin), once their address is verified.
+      - key: ADMIN_EMAILS
+        value: gharshit1237@gmail.com
       - key: JWT_SECRET
         generateValue: true
       - key: DATABASE_URL
@@ -130,6 +133,12 @@ services:
       - type: rewrite
         source: /reset-password
         destination: /reset-password/index.html
+      - type: rewrite
+        source: /app/admin
+        destination: /app/admin/index.html
+      - type: rewrite
+        source: /app/admin/user
+        destination: /app/admin/user/index.html
       - type: rewrite
         source: /privacy
         destination: /privacy/index.html

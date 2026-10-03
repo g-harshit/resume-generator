@@ -580,6 +580,17 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       a tick (`layout.hidden_header`; the value stays) or edited for this resume, links
       added or removed, and a profile link removed here can be added back. The cover
       letter's header leaves off the same items. The profile is never changed.
+- [x] Admin panel (`/app/admin`, API `/admin/*`). Admins are `ADMIN_EMAILS` whose address
+      is verified (Google sign-in or a password reset) — so nobody can sign up with the
+      admin's address first and inherit the rights; everyone else gets 404. Overview
+      (users new/active, Google vs password, profiles, resumes, cover letters, jobs,
+      uploads and failures, 30-day sign-ups chart); users list with search, paging and
+      CSV export; per-user page with activity — resumes, jobs, uploads and their errors,
+      profile section counts, **not** resume text; actions: sign out everywhere,
+      disable/enable (blocks sign-in and every token), delete account with its data and
+      R2 files (type the email to confirm; not your own); failed uploads; an admin log
+      (`admin_actions`) of every action, kept after an account is deleted. `last_seen_at`
+      is updated at most hourly on signed-in requests.
 - [ ] Email verification — not built: adds friction before the product proves itself;
       the reset flow already proves control of the address when it matters.
 

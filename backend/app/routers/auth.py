@@ -7,7 +7,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import select
 
-from app.auth import CurrentUser
+from app.auth import DISABLED, CurrentUser, is_admin
 from app.config import get_settings
 from app.database import SessionDep
 from app.models import PasswordReset, User, normalise_email, utcnow
@@ -45,6 +45,12 @@ class UserOut(BaseModel):
     id: int
     email: str
     name: str
+    # Shows the admin panel's link; the admin endpoints check for themselves.
+    is_admin: bool = False
+
+
+def _user_out(user: User) -> UserOut:
+    return UserOut(id=user.id, email=user.email, name=user.name, is_admin=is_admin(user))
 
 
 class TokenOut(BaseModel):
@@ -53,10 +59,9 @@ class TokenOut(BaseModel):
 
 
 def _token_response(user: User) -> TokenOut:
-    return TokenOut(
-        token=create_access_token(user.id, user.token_version),
-        user=UserOut(id=user.id, email=user.email, name=user.name),
-    )
+    if user.disabled_at is not None:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, DISABLED)
+    return TokenOut(token=create_access_token(user.id, user.token_version), user=_user_out(user))
 
 
 EMAIL_TAKEN = "An account with this email already exists. Sign in instead."
@@ -186,7 +191,7 @@ def google_sign_in(body: GoogleIn, request: Request, session: SessionDep) -> Tok
 
 @router.get("/me")
 def me(user: CurrentUser) -> UserOut:
-    return UserOut(id=user.id, email=user.email, name=user.name)
+    return _user_out(user)
 
 
 # --- password reset --------------------------------------------------------------------

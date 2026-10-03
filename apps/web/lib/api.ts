@@ -1,7 +1,79 @@
 import type { ResumeData } from "@rg/schema";
 import { API_URL } from "@/lib/config";
 
-export type User = { id: number; email: string; name: string };
+export type User = {
+  id: number;
+  email: string;
+  name: string;
+  /** Shows the admin panel's link; the admin endpoints check for themselves. */
+  is_admin?: boolean;
+};
+
+// --- admin panel (only admins get anything but 404) ---
+
+export type AdminStats = {
+  users: number;
+  users_today: number;
+  users_7d: number;
+  users_30d: number;
+  active_7d: number;
+  google_users: number;
+  password_users: number;
+  disabled_users: number;
+  profiles: number;
+  profiles_confirmed: number;
+  resumes: number;
+  resumes_7d: number;
+  cover_letters: number;
+  jobs: number;
+  jobs_from_extension: number;
+  uploads: number;
+  uploads_failed: number;
+  signups_by_day: { day: string; count: number }[];
+};
+
+export type AdminUserRow = {
+  id: number;
+  email: string;
+  name: string;
+  sign_in: ("google" | "password")[];
+  email_verified: boolean;
+  created_at: string;
+  last_seen_at: string | null;
+  disabled: boolean;
+  profile: "none" | "draft" | "confirmed";
+  resumes: number;
+  jobs: number;
+  uploads: number;
+};
+
+export type AdminAction = {
+  admin_email: string;
+  action: string;
+  target_email: string;
+  detail: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export type AdminUserDetail = {
+  user: AdminUserRow;
+  is_admin: boolean;
+  profile_updated_at: string | null;
+  profile_sections: Record<string, number>;
+  resumes: { id: number; title: string; template: string; has_cover_letter: boolean; created_at: string; updated_at: string }[];
+  jobs: { id: number; title: string; company: string; source: string; created_at: string }[];
+  uploads: { id: number; filename: string; size_bytes: number; status: string; error: string | null; created_at: string }[];
+  actions: AdminAction[];
+};
+
+export type FailedUpload = {
+  id: number;
+  user_id: number;
+  user_email: string;
+  filename: string;
+  error: string | null;
+  created_at: string;
+};
 type TokenResponse = { token: string; user: User };
 
 /** Something noticed while reading the file, pointing at an entry by id. `target`
@@ -228,6 +300,26 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email, password, name }),
     }),
+  admin: {
+    stats: () => request<AdminStats>("/admin/stats"),
+    users: (q: string, offset = 0, limit = 50) =>
+      request<{ total: number; users: AdminUserRow[] }>(
+        `/admin/users?q=${encodeURIComponent(q)}&offset=${offset}&limit=${limit}`,
+      ),
+    exportUsers: async (q: string) => ({
+      blob: await (await send(`/admin/users.csv?q=${encodeURIComponent(q)}`)).blob(),
+      filename: "users.csv",
+    }),
+    user: (id: number) => request<AdminUserDetail>(`/admin/users/${id}`),
+    signOut: (id: number) => request<AdminUserDetail>(`/admin/users/${id}/sign-out`, { method: "POST" }),
+    disable: (id: number) => request<AdminUserDetail>(`/admin/users/${id}/disable`, { method: "POST" }),
+    enable: (id: number) => request<AdminUserDetail>(`/admin/users/${id}/enable`, { method: "POST" }),
+    remove: async (id: number, confirmEmail: string) => {
+      await send(`/admin/users/${id}`, { method: "DELETE", body: JSON.stringify({ confirm_email: confirmEmail }) });
+    },
+    failedUploads: () => request<FailedUpload[]>("/admin/uploads/failed"),
+    log: () => request<AdminAction[]>("/admin/log"),
+  },
   /** Start the API waking up, without waiting for it (nothing comes back). */
   wake: () => {
     fetch(`${API_URL}/health`, { cache: "no-store" }).catch(() => {});

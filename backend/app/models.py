@@ -49,6 +49,15 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )
+    # Roughly when they last used the app (updated at most hourly, on any signed-in
+    # request), for the admin panel.
+    last_seen_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    # Set by an admin: the account can't sign in or use a token until it's cleared.
+    disabled_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
 
 
 def normalise_email(email: str) -> str:
@@ -245,6 +254,23 @@ class PasswordReset(SQLModel, table=True):
     used_at: datetime | None = Field(
         default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
     )
+    created_at: datetime = Field(
+        default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
+    )
+
+
+class AdminAction(SQLModel, table=True):
+    """What an admin did, to whom, and when. Kept after the account it was about is
+    deleted (so no foreign keys); the emails say who was involved."""
+
+    __tablename__ = "admin_actions"
+
+    id: int | None = Field(default=None, primary_key=True)
+    admin_email: str = Field(max_length=320)
+    action: str = Field(max_length=40)
+    target_user_id: int | None = Field(default=None, index=True)
+    target_email: str = Field(default="", max_length=320)
+    detail: dict | None = Field(default=None, sa_column=Column(JSONB, nullable=True))
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )

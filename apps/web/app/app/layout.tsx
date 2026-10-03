@@ -52,8 +52,10 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
           {APP_NAME}
         </Link>
         <div className="flex gap-1 md:flex-col">
-          {NAV.map(({ href, label }) => {
-            const active = pathname === href;
+          {[...NAV, ...(user.is_admin ? [{ href: "/app/admin", label: "Admin" }] : [])].map(({ href, label }) => {
+            // Trailing slashes come from the static export (/app/admin/).
+            const here = pathname.replace(/\/$/, "") || "/";
+            const active = href === "/app/admin" ? here.startsWith(href) : here === href;
             return (
               <Link
                 key={href}
