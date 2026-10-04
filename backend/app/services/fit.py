@@ -19,8 +19,8 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.ai_providers import AIProvider
-from app.rendering.render import render_html, render_pdf
+from app.ai_providers import AIProvider, AIProviderError
+from app.rendering.render import measure, render_html, render_pdf
 from app.schemas.layout import Layout
 from app.schemas.resume import Bullet, ResumeData, new_id
 from app.services.cover_letter import embellishments, facts_text
@@ -236,7 +236,7 @@ def write_summary(
     why, rejected, honest = "", "", ""
     for _ in range(2):
         draft = provider.extract(
-            task="tailor",
+            task="write_summary",
             instructions=SUMMARY_INSTRUCTIONS,
             text=json.dumps(
                 {
@@ -340,11 +340,15 @@ def fit_to_pages(
     target: int,
     job: dict,
     provider: AIProvider,
+    profile: ResumeData | None = None,
+    provenance: dict | None = None,
 ) -> FitResult:
+    """Make the resume `target` pages: shorter if it runs over, and using the whole
+    last page if it has room (adding back the person's own lines from `profile`)."""
     before = count_pages(resume, slug, layout)
     layout = layout.model_copy(update={"pages": target})
     if before <= target:
-        return FitResult(resume, layout, {}, before, before, ["It already fits."])
+        return fill_page(resume, layout, slug, profile or resume, job, provider, provenance, target)
 
     steps: list[str] = []
     narrow = layout.model_copy(update={"margins": "narrow"})
@@ -375,8 +379,158 @@ def fit_to_pages(
             notes,
         )
         if pages <= target:
+            # Shortening overshoots a little: spread what's left over the last page.
+            spaced = fill_page(
+                shorter, narrow, slug, resume, job, provider, target=target, add_content=False
+            )
+            if spaced.layout.spacing:
+                result.layout = spaced.layout
+                result.steps += spaced.steps
             return result
     result.steps.append(
         f"Still {result.pages_after} pages. Try hiding a section, or shortening a role further."
     )
     return result
+
+
+# --- filling the page ---------------------------------------------------------------------
+#
+# The other way round: a resume with room to spare on its last page uses it. Every step
+# is kept only if the resume still has its pages, and none adds anything that isn't the
+# person's: their own lines and projects left out of this resume come back, the summary
+# is written longer from the resume's facts, and the gaps between sections, entries and
+# lines grow until the last page is full. Margins are the person's choice: left alone.
+
+FULL = 0.93  # a last page this full is done
+_SPACINGS = [1.15, 1.3, 1.45, 1.6, 1.8, 2.0]
+
+
+def _fill(resume: ResumeData, slug: str, layout: Layout) -> tuple[int, float]:
+    return measure(render_html(resume, slug, layout))
+
+
+def _left_out(resume: ResumeData, profile: ResumeData, provenance: dict) -> dict[str, list[Bullet]]:
+    """Per role and project in the resume: the profile's lines it doesn't have (nor
+    merged into one of its lines), in the profile's order."""
+    out: dict[str, list[Bullet]] = {}
+    # Merged into a line that's still here; a merge since undone doesn't count.
+    current = {b.id for e in [*resume.experience, *resume.projects] for b in e.bullets}
+    sources = {s for k, p in provenance.items() if k in current for s in p.get("sources", [])}
+    for mine, theirs in (
+        (resume.experience, profile.experience),
+        (resume.projects, profile.projects),
+    ):
+        own = {e.id: e for e in theirs}
+        for entry in mine:
+            if entry.id not in own:
+                continue
+            have = {b.id for b in entry.bullets} | sources
+            if missing := [b for b in own[entry.id].bullets if b.id not in have]:
+                out[entry.id] = missing
+    return out
+
+
+def fill_page(
+    resume: ResumeData,
+    layout: Layout,
+    slug: str,
+    profile: ResumeData,
+    job: dict,
+    provider: AIProvider,
+    provenance: dict | None = None,
+    target: int | None = None,
+    add_content: bool = True,
+    longer_summary: bool = True,
+) -> FitResult:
+    """Use the room left on the last page, without going past `target` pages (default:
+    as many as it has now). `add_content=False` only adjusts the layout;
+    `longer_summary=False` skips the one step that needs the model."""
+    provenance = dict(provenance or {})
+    pages, fill = _fill(resume, slug, layout)
+    target = target or pages
+    before = pages
+    steps: list[str] = []
+
+    def fits(r: ResumeData, lay: Layout) -> tuple[bool, int, float]:
+        p, f = _fill(r, slug, lay)
+        return p <= target, p, f
+
+    if pages > target:
+        return FitResult(resume, layout, provenance, before, pages, steps)
+
+    # 1. The person's own lines and projects left out of this resume, newest role first.
+    if add_content and fill < FULL:
+        resume = resume.model_copy(deep=True)
+        order = {eid: i for i, eid in enumerate(_by_recency(resume))}
+        waiting = _left_out(resume, profile, provenance)
+        entries = {e.id: e for e in [*resume.experience, *resume.projects]}
+        queue = sorted(waiting, key=lambda eid: order.get(eid, len(order)))
+        added = 0
+        while queue and fill < FULL:
+            for eid in list(queue):
+                line = waiting[eid].pop(0)
+                entries[eid].bullets.append(Bullet(id=line.id, text=line.text))
+                ok, p, f = fits(resume, layout)
+                if ok:
+                    pages, fill, added = p, f, added + 1
+                else:
+                    entries[eid].bullets.pop()
+                    waiting[eid] = []
+                if not waiting[eid]:
+                    queue.remove(eid)
+                if fill >= FULL:
+                    break
+        if added:
+            steps.append(
+                f"Added back {added} of your own line{'s' if added > 1 else ''} "
+                "left out of this resume."
+            )
+        have = {p.id for p in resume.projects}
+        for project in profile.projects:
+            if fill >= FULL or project.id in have:
+                continue
+            trial = resume.model_copy(update={"projects": [*resume.projects, project]})
+            ok, p, f = fits(trial, layout)
+            if ok:
+                resume, pages, fill = trial, p, f
+                steps.append(f"Added back your project {project.name}.")
+
+    # 2. A longer summary, from the resume's own facts.
+    if add_content and longer_summary and fill < FULL - 0.04 and resume.summary.strip():
+        try:
+            longer = write_summary(resume, job, provider, "longer")
+        except (FitError, AIProviderError) as exc:
+            log.info("fill: no longer summary: %s", exc)
+        else:
+            trial = resume.model_copy(update={"summary": longer})
+            ok, p, f = fits(trial, layout)
+            if ok:
+                provenance["summary"] = {
+                    "original": provenance.get("summary", {}).get("original") or resume.summary,
+                    "status": "written",
+                    "attempted": None,
+                    "reason": None,
+                }
+                resume, pages, fill = trial, p, f
+                steps.append("Wrote a longer summary from what's in your resume.")
+
+    # 3. More room between sections, entries and lines.
+    if fill < FULL:
+        best = None
+        for spacing in _SPACINGS:
+            if spacing <= (layout.spacing or 1):
+                continue
+            trial = layout.model_copy(update={"spacing": spacing})
+            ok, p, f = fits(resume, trial)
+            if not ok:
+                break
+            best, pages, fill = trial, p, f
+            if fill >= FULL:
+                break
+        if best:
+            layout = best
+            steps.append("Spaced sections and lines out to use the whole page.")
+
+    if not steps:
+        steps.append("The page is already full.")
+    return FitResult(resume, layout, provenance, before, pages, steps)

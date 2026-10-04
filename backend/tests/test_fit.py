@@ -17,6 +17,7 @@ from app.services.fit import (
     FitError,
     Summary,
     condense,
+    fill_page,
     fit_to_pages,
     write_summary,
 )
@@ -196,7 +197,7 @@ def test_entries_already_short_enough_cost_no_model_call():
 
 def test_a_summary_is_written_from_the_resume():
     stub.answer(
-        "tailor",
+        "write_summary",
         lambda text: Summary(text="Backend engineer building payment systems in Go and Kafka."),
     )
     stub.answer("verify_tailoring", approve_all)
@@ -216,7 +217,7 @@ def test_a_summary_that_embellishes_gets_a_second_try():
             "Backend engineer building payment systems.",
         ]
     )
-    stub.answer("tailor", lambda text: Summary(text=next(drafts)))
+    stub.answer("write_summary", lambda text: Summary(text=next(drafts)))
     stub.answer("verify_tailoring", approve_all)
     assert (
         write_summary(PROFILE, JOB, StubProvider()) == "Backend engineer building payment systems."
@@ -237,7 +238,7 @@ def test_a_summary_that_embellishes_gets_a_second_try():
 def test_a_summary_is_written_at_the_length_asked_for(length, drafts, expected):
     profile = PROFILE.model_copy(update={"summary": "Backend engineer building payment systems."})
     replies = iter(drafts)
-    stub.answer("tailor", lambda text: Summary(text=next(replies)))
+    stub.answer("write_summary", lambda text: Summary(text=next(replies)))
     stub.answer("verify_tailoring", approve_all)
     assert write_summary(profile, JOB, StubProvider(), length) == drafts[expected]
     asked = json.loads(stub.calls[0]["text"])["length"]
@@ -247,7 +248,7 @@ def test_a_summary_is_written_at_the_length_asked_for(length, drafts, expected):
 
 def test_a_summary_that_keeps_inventing_is_refused():
     stub.answer(
-        "tailor", lambda text: Summary(text="Backend engineer with 12 years on Kubernetes.")
+        "write_summary", lambda text: Summary(text="Backend engineer with 12 years on Kubernetes.")
     )
     with pytest.raises(FitError, match="couldn't write a summary"):
         write_summary(PROFILE, JOB, StubProvider())
@@ -256,10 +257,54 @@ def test_a_summary_that_keeps_inventing_is_refused():
 # --- fit to pages ----------------------------------------------------------------------
 
 
-def test_already_fitting_changes_nothing():
+def test_already_fitting_fills_the_rest_of_the_page():
+    # Nothing of the person's is left out and the summary can't be written (no answer):
+    # the room is used by spacing alone, and the content is untouched.
     result = fit_to_pages(PROFILE, Layout(), "classic", 1, JOB, StubProvider())
     assert (result.pages_before, result.pages_after) == (1, 1)
-    assert result.resume == PROFILE and stub.calls == []
+    assert result.resume == PROFILE
+    assert result.layout.spacing and result.layout.spacing > 1
+    assert "Spaced sections and lines out to use the whole page." in result.steps
+
+
+def _short(resume: ResumeData, keep: int = 1) -> ResumeData:
+    """`resume` with only the first `keep` lines of each role."""
+    short = resume.model_copy(deep=True)
+    for e in short.experience:
+        e.bullets = e.bullets[:keep]
+    short.projects = []
+    return short
+
+
+def test_filling_adds_back_the_persons_own_lines_first():
+    short = _short(PROFILE)
+    result = fill_page(short, Layout(), "classic", PROFILE, JOB, StubProvider())
+    lines = {b.text for e in result.resume.experience for b in e.bullets}
+    own = {b.text for e in PROFILE.experience for b in e.bullets}
+    assert lines == own  # every line came back, and all are the person's own
+    assert [p.id for p in result.resume.projects] == [p.id for p in PROFILE.projects]
+    assert result.pages_after == 1
+    assert any(s.startswith("Added back") for s in result.steps)
+
+
+def test_filling_never_adds_a_page():
+    long = PROFILE.model_copy(deep=True)
+    long.experience[0].bullets = [
+        long.experience[0].bullets[0].model_copy(update={"id": f"b{i}"}) for i in range(60)
+    ]
+    profile = long.model_copy(deep=True)
+    short = long.model_copy(deep=True)
+    short.experience[0].bullets = short.experience[0].bullets[:20]
+    before = fit_service.count_pages(short, "classic", Layout())
+    result = fill_page(short, Layout(), "classic", profile, JOB, StubProvider())
+    assert result.pages_after == before
+    assert fit_service.count_pages(result.resume, "classic", result.layout) == before
+
+
+def test_spacing_reaches_the_rendering():
+    html = render_html(PROFILE, "classic", Layout(spacing=1.5))
+    assert ".section { margin-top: 1.275em; }" in html
+    assert "1.275em" not in render_html(PROFILE, "classic", Layout())
 
 
 def test_narrow_margins_are_tried_first(monkeypatch):
@@ -308,6 +353,7 @@ def test_layout_is_saved_and_used_for_the_preview(client, auth, resume):
         "order": None,
         "margin_mm": None,
         "hidden_header": [],
+        "spacing": None,
     }
     html = client.get(f"/resumes/{resume['id']}/preview", headers=auth).json()["html"]
     assert "<h2>Summary</h2>" not in html
@@ -330,7 +376,8 @@ def test_a_save_without_layout_keeps_it(client, auth, resume):
 
 def test_summary_endpoint(client, auth, resume):
     stub.answer(
-        "tailor", lambda text: Summary(text="Backend engineer building payment systems in Go.")
+        "write_summary",
+        lambda text: Summary(text="Backend engineer building payment systems in Go."),
     )
     r = client.post(
         f"/resumes/{resume['id']}/summary", headers=auth, json={"version": resume["version"]}
@@ -362,7 +409,7 @@ def test_fit_endpoint_reports_what_it_did(client, auth, resume):
     )
     assert r.status_code == 200, r.text
     out = r.json()
-    assert out["pages_after"] == 1 and out["steps"] == ["It already fits."]
+    assert out["pages_after"] == 1 and out["steps"]
     assert out["resume"]["layout"]["pages"] == 1
 
 
@@ -380,3 +427,11 @@ def test_an_unknown_entry_is_not_found(client, auth, resume):
         json={"version": resume["version"], "entry_id": "exp_nope", "bullets": 1},
     )
     assert r.status_code == 404
+
+
+def test_a_merge_no_longer_in_the_resume_doesnt_hide_lines():
+    short = _short(PROFILE)
+    stale = {"b_gone": {"original": "", "status": "condensed", "sources": ["b_kafka", "b_team"]}}
+    result = fill_page(short, Layout(), "classic", PROFILE, JOB, StubProvider(), stale)
+    lines = {b.id for e in result.resume.experience for b in e.bullets}
+    assert {"b_kafka", "b_team"} <= lines

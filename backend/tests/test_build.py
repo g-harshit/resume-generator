@@ -131,7 +131,7 @@ def test_an_order_names_every_section_once():
 
 def test_a_students_summary_may_mention_their_degree_and_year():
     stub.answer(
-        "tailor",
+        "write_summary",
         lambda text: Summary(
             text="Computer Science student at VIT Pune graduating in 2025 who built FestApp in React."
         ),
@@ -167,7 +167,7 @@ def test_lines_endpoint(client, fresher):
 
 
 def test_summary_endpoint_for_a_profile(client, fresher):
-    stub.answer("tailor", lambda text: Summary(text="Computer Science student at VIT Pune."))
+    stub.answer("write_summary", lambda text: Summary(text="Computer Science student at VIT Pune."))
     stub.answer("verify_tailoring", approve_all)
     r = client.post("/profile/summary", headers=fresher, json={"length": "shorter"})
     assert r.status_code == 200, r.text

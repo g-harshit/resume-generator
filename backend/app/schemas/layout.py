@@ -36,6 +36,9 @@ class Layout(BaseModel):
     # The order sections appear in; null for the usual one (SECTIONS). A student's
     # resume leads with education and projects (FRESHER_ORDER).
     order: list[Section] | None = None
+    # Room between sections, entries and lines, as a multiple of the usual: set by
+    # "fill the page" so a resume with room to spare uses its whole last page.
+    spacing: float | None = Field(default=None, ge=1.0, le=2.0)
 
     @field_validator("order")
     @classmethod

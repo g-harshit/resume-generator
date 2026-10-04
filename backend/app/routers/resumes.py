@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -32,12 +33,15 @@ from app.services.fit import (
     SummaryLength,
     condense,
     count_pages,
+    fill_page,
     fit_to_pages,
     write_summary,
 )
 from app.services.keywords import KeywordError, add_keywords
 from app.services.match import match_job
 from app.services.tailor import tailor
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -167,6 +171,34 @@ def _check_daily_cap(session: Session, user: User) -> None:
         )
 
 
+def _fill(
+    profile: Profile,
+    job: JobDescription,
+    content: ResumeData,
+    provenance: dict,
+    slug: str,
+    layout: Layout,
+) -> tuple[ResumeData, dict, Layout]:
+    """Use the room left on the last page (the person's own left-out lines first). A
+    nicety: if it fails, the resume is as tailored."""
+    try:
+        result = fill_page(
+            content,
+            layout,
+            slug,
+            ResumeData.model_validate(profile.data),
+            job.parsed,
+            get_ai_provider(),
+            provenance,
+            # Tailoring just wrote the summary for this job; no second model call.
+            longer_summary=False,
+        )
+    except Exception:
+        log.exception("filling the page failed")
+        return content, provenance, layout
+    return result.resume, result.provenance, result.layout
+
+
 def _tailor(profile: Profile, job: JobDescription) -> tuple[ResumeData, dict]:
     try:
         return tailor(
@@ -187,6 +219,9 @@ def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> Res
     profile = _reviewed_profile(session, user)
     _check_daily_cap(session, user)
     content, provenance = _tailor(profile, job)
+    content, provenance, layout = _fill(
+        profile, job, content, provenance, body.template, default_layout(content)
+    )
 
     data = content.model_dump(mode="json")
     resume = Resume(
@@ -197,7 +232,7 @@ def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> Res
         content=data,
         provenance=provenance,
         profile_version=profile.version,
-        layout=default_layout(content).model_dump(),
+        layout=layout.model_dump(),
     )
     session.add(resume)
     session.flush()
@@ -296,6 +331,9 @@ def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOu
     _check_daily_cap(session, user)
     started_at_version = resume.version
     content, provenance = _tailor(profile, job)  # 20-40 s; the editor may save meanwhile
+    content, provenance, layout = _fill(
+        profile, job, content, provenance, resume.template, _layout(resume)
+    )
 
     data = content.model_dump(mode="json")
     result = session.exec(
@@ -305,6 +343,7 @@ def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOu
             content=data,
             provenance=provenance,
             profile_version=profile.version,
+            layout=layout.model_dump(),
             version=Resume.version + 1,
             updated_at=utcnow(),
         )
@@ -567,6 +606,7 @@ def fit(resume_id: int, body: FitIn, user: CurrentUser, session: SessionDep) -> 
     roles (the newest keeps the most), re-rendering after each round. 20-60 s."""
     resume, job = _ai_edit_start(session, user, resume_id, body.version)
     try:
+        own = session.exec(select(Profile).where(Profile.user_id == user.id)).first()
         result = fit_to_pages(
             ResumeData.model_validate(resume.content),
             _layout(resume),
@@ -574,6 +614,8 @@ def fit(resume_id: int, body: FitIn, user: CurrentUser, session: SessionDep) -> 
             body.pages,
             job,
             get_ai_provider(),
+            profile=ResumeData.model_validate(own.data) if own else None,
+            provenance=resume.provenance,
         )
     except AIProviderError as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None

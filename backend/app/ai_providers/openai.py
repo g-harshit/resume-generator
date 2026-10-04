@@ -19,6 +19,7 @@ _TRY_AGAIN = "The AI service didn't respond properly. Please try again in a minu
 _REASONING = {"keyword_rewrite": "low"}
 _TEMPERATURE = {
     "tailor": 0.3,
+    "write_summary": 0.3,
     "repair_tailoring": 0.0,
     "verify_tailoring": 0.0,
     "bridge_claims": 0.0,
@@ -40,6 +41,7 @@ class OpenAIProvider(AIProvider):
             "parse_resume": settings.openai_parse_model,
             "parse_jd": settings.openai_parse_model,
             "tailor": settings.openai_tailor_model,
+            "write_summary": settings.openai_tailor_model,
             "verify_tailoring": settings.openai_tailor_model,
             "repair_tailoring": settings.openai_tailor_model,
             "bridge_claims": settings.openai_tailor_model,

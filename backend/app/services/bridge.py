@@ -34,7 +34,7 @@ from pydantic import BaseModel
 from app.ai_providers import AIProvider, AIProviderError
 from app.schemas.resume import ResumeData
 from app.services.cover_letter import embellishments
-from app.services.match import alternatives, appears_in, normalise
+from app.services.match import alternatives, names, normalise
 from app.services.tailor import _line_context, new_numbers, new_terms, skill_terms
 
 log = logging.getLogger(__name__)
@@ -173,29 +173,8 @@ unsure, true.
 # --- the steps -------------------------------------------------------------------------------
 
 
-# "Backend development" is named by "backend", "Distributed systems" by "distributed";
-# "System design" isn't named by "system".
-_GENERIC = {"systems", "system", "development", "engineering", "services", "experience"}
-
-
 def _key(term: str) -> str:
     return normalise(alternatives(term)[0])
-
-
-def names(term: str, text: str) -> bool:
-    """Does `text` name `term`, a synonym of it, or (for a phrase like "Backend
-    development") the phrase without its generic last word ("backend")?
-    "High-throughput" and "high throughput" are the same."""
-    if any(appears_in(a, text) for a in alternatives(term)):
-        return True
-    flat_term, flat_text = term.replace("-", " "), text.replace("-", " ")
-    if (flat_term, flat_text) != (term, text) and appears_in(flat_term, flat_text):
-        return True
-    words = re.findall(r"[\w+#./]+", flat_term.lower())
-    core = list(words)
-    while len(core) > 1 and core[-1] in _GENERIC:
-        core.pop()
-    return core != words and appears_in(" ".join(core), flat_text)
 
 
 def missing_skills(resume: ResumeData, job: dict) -> list[str]:

@@ -124,3 +124,22 @@ def test_singular_and_plural_both_count():
         "settlements": True,
         "address": False,  # "-ss" is not a plural
     }
+
+
+@pytest.mark.parametrize(
+    ("term", "line"),
+    [
+        ("e-commerce", "Built checkout for an ecommerce marketplace."),
+        ("High-throughput systems", "Built for high throughput and low latency."),
+        ("Backend development", "Owned the backend for payouts."),
+    ],
+)
+def test_coverage_accepts_what_the_editor_accepts(term, line):
+    # A keyword the editor worked into a line must leave "missing" in the panel.
+    data = ResumeData.model_validate(
+        {
+            "basics": {"name": "A"},
+            "experience": [{"id": "e", "company": "C", "bullets": [{"id": "b", "text": line}]}],
+        }
+    )
+    assert match(data, [term], [], [])["covered"] == 1

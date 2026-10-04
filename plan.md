@@ -427,6 +427,23 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
       avoiding the last wording; "Use original" restores the person's own line.
       Failures show under the line (they used to go to the page banner, off-screen,
       which looked like "nothing happened").
+- [x] **Fill the page** (`fill_page` in `services/fit.py`; `Layout.spacing`). A resume with
+      room on its last page uses it, never adding a page: (1) the person's own lines and
+      projects left out of this resume come back, newest role first; (2) a longer
+      summary from the resume's facts (Fit only, not at creation); (3) more room between
+      sections, entries and lines, and up to 12% more line height (`spacing` 1–2×).
+      Margins are the person's choice and aren't touched. Runs automatically when a
+      resume is made or re-tailored, from "Fill the page" in the Fit panel, and after
+      shortening to spread the remainder. Page fill is measured from WeasyPrint's line
+      boxes (`render.measure`). Roles may now break across pages between their lines —
+      a whole role pushed over left half of page 1 empty. A local resume went from page
+      2 at 44% to 90%. Found: stale merge `sources` in provenance hid left-out lines.
+- [x] **Template picker shows a sample resume**: the same invented resume in each
+      template, as static images (`apps/web/public/templates/*.jpg`, made by `make
+      samples`), instead of laying out the person's profile four times per visit.
+- [x] "Not in this resume yet" (was "Not in your profile"): the job-match panel and the
+      keyword editor now use the same matcher (`match.names`: "ecommerce" = "e-commerce",
+      "backend" names "Backend development"), so a keyword added to a line leaves it.
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

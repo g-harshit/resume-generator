@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { PagePreview } from "@/components/page-preview";
-import { PdfPages } from "@/components/pdf-pages";
-import { api, ApiError, type Preview, saveFile, type TemplateInfo } from "@/lib/api";
+import { api, ApiError, saveFile, type TemplateInfo } from "@/lib/api";
 import { Loading } from "@/components/loading";
 
 export default function TemplatesPage() {
@@ -17,7 +15,11 @@ export default function TemplatesPage() {
   );
 }
 
-type Loaded = { templates: TemplateInfo[]; previews: Record<string, Preview> };
+type Loaded = { templates: TemplateInfo[] };
+
+/** The same invented sample resume in each template (made by
+ * backend/scripts/template_samples.py): instant, and the same every visit. */
+const sample = (slug: string) => `/templates/${slug}.jpg`;
 
 function Templates() {
   const router = useRouter();
@@ -35,13 +37,7 @@ function Templates() {
     (async () => {
       try {
         const templates = await api.listTemplates();
-        const previews = await Promise.all(templates.map((t) => api.previewTemplate(t.slug)));
-        if (!cancelled) {
-          setLoaded({
-            templates,
-            previews: Object.fromEntries(templates.map((t, i) => [t.slug, previews[i]!])),
-          });
-        }
+        if (!cancelled) setLoaded({ templates });
       } catch (err) {
         if (cancelled) return;
         setProblem({
@@ -101,7 +97,9 @@ function Templates() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-col gap-1.5">
           <h1 className="font-display text-4xl sm:text-5xl">Pick a look</h1>
-          <p className="text-[15px] text-muted">Shown with your own details. You can switch any time.</p>
+          <p className="text-[15px] text-muted">
+            Shown with a sample resume; yours uses your own details. You can switch any time.
+          </p>
         </div>
         <span className="rounded-full bg-accent-soft px-3 py-1.5 text-sm text-accent-ink">
           Every template: one column · real text · standard headings
@@ -120,14 +118,13 @@ function Templates() {
         </p>
       ) : !loaded ? (
         <p role="status" className="text-muted">
-          Laying out your resume in each template…
+          Loading templates…
         </p>
       ) : (
         <>
           <fieldset className="grid grid-cols-2 gap-5 lg:grid-cols-4">
             <legend className="sr-only">Template</legend>
             {loaded.templates.map((t) => {
-              const preview = loaded.previews[t.slug]!;
               const isSelected = t.slug === selected;
               return (
                 <label key={t.slug} className="flex cursor-pointer flex-col gap-2.5">
@@ -136,7 +133,14 @@ function Templates() {
                       isSelected ? "outline-3 outline-offset-3 outline-accent" : "border border-line hover:shadow-md"
                     }`}
                   >
-                    <PagePreview html={preview.html} title={`${t.name} template preview`} bare />
+                    {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser */}
+                    <img
+                      src={sample(t.slug)}
+                      alt={`${t.name} template, shown with a sample resume`}
+                      width={1191}
+                      height={1684}
+                      className="block h-auto w-full bg-white"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -148,11 +152,6 @@ function Templates() {
                       className="size-4.5 accent-accent"
                     />
                     <span className="text-base font-semibold">{t.name}</span>
-                    {preview.pages > 1 && (
-                      <span className="ml-auto rounded-full bg-warn-soft px-2 py-0.5 text-xs text-warn-ink">
-                        {preview.pages} pages
-                      </span>
-                    )}
                   </div>
                   <span className="-mt-1.5 text-[13px] text-muted">{t.description}</span>
                 </label>
@@ -166,7 +165,14 @@ function Templates() {
                 {current.name}, full size
               </h2>
               <div className="mx-auto w-full max-w-[794px]">
-                <PdfPages images={loaded.previews[selected]!.images} links={loaded.previews[selected]!.links} title={`${current.name} template`} />
+                {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser */}
+                <img
+                  src={sample(selected)}
+                  alt={`${current.name} template, full size, with a sample resume`}
+                  width={1191}
+                  height={1684}
+                  className="block h-auto w-full rounded-lg border border-line bg-white shadow-sm"
+                />
               </div>
             </section>
           )}

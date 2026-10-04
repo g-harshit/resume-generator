@@ -180,6 +180,8 @@ export type Layout = {
   pages: number | null;
   /** The order sections appear in; null for the usual one (SECTIONS). */
   order: Section[] | null;
+  /** Room between sections and lines, × the usual (1–2); set by "fill the page". */
+  spacing?: number | null;
 };
 
 /** The usual section order (backend/app/schemas/layout.py). */

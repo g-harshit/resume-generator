@@ -27,3 +27,6 @@ test: db
 
 extension:   ## build the Chrome extension into apps/extension/.output/chrome-mv3
 	pnpm --filter @rg/extension build
+
+samples:     ## re-render the template picker's sample images (after changing a template)
+	cd backend && uv run python -m scripts.template_samples

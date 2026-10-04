@@ -173,7 +173,7 @@ export function MatchPanel({
 
       {missing.length > 0 && profile && (
         <div className="flex flex-col gap-2 rounded-lg bg-warn-soft p-3 text-warn-ink">
-          <span className="text-sm font-semibold">Not in your profile</span>
+          <span className="text-sm font-semibold">Not in this resume yet</span>
           <ul className="flex flex-col gap-2">
             {missing.map((m) => (
               <li key={m.term} className="flex flex-wrap items-center justify-between gap-2">
@@ -185,7 +185,8 @@ export function MatchPanel({
             ))}
           </ul>
           <span className="text-xs leading-normal">
-            We only use what&apos;s in your profile. If you don&apos;t have one of these, leave it.
+            Add one to a line with &ldquo;+ Add job keywords&rdquo;, or to your profile with &ldquo;I have this&rdquo;.
+            If you don&apos;t have one of these, leave it.
           </span>
         </div>
       )}

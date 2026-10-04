@@ -174,6 +174,22 @@ export function FitPanel({
           </p>
         </>
       )}
+      {!over && pages !== null && (
+        <>
+          <button
+            type="button"
+            onClick={() => actions.fit(goal ?? pages)}
+            disabled={busy !== null}
+            className="h-11 rounded-[10px] border border-accent px-4 text-[15px] font-medium text-accent hover:bg-accent-soft disabled:opacity-50"
+          >
+            {busy === "fit" ? "Filling… (10–30 s)" : `Fill ${pages > 1 ? `all ${pages} pages` : "the page"}`}
+          </button>
+          <p className="text-xs leading-normal text-muted">
+            Uses the empty space: adds back your own lines left out of this resume, writes a
+            longer summary, then spaces things out. Never adds a page — and you can undo it.
+          </p>
+        </>
+      )}
 
       <fieldset className="flex flex-col gap-2 border-t border-sunken pt-3">
         <legend className="mb-1 text-[13px] font-semibold">Margins</legend>
@@ -220,6 +236,18 @@ export function FitPanel({
         )}
         {layout.margins !== "normal" && (
           <p className="text-xs text-muted">The same on all four sides.</p>
+        )}
+        {layout.spacing && layout.spacing > 1 && (
+          <p className="flex items-center gap-2 text-xs text-muted">
+            Spacing {layout.spacing.toFixed(2).replace(/0$/, "")}× to fill the page.
+            <button
+              type="button"
+              onClick={() => actions.setLayout((l) => ({ ...l, spacing: null }))}
+              className="text-accent underline-offset-2 hover:underline"
+            >
+              Reset
+            </button>
+          </p>
         )}
       </fieldset>
 

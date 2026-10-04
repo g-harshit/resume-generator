@@ -120,13 +120,37 @@ def _margin_css(mm: int) -> str:
     return f"@page {{ margin: {mm}mm; }}\n@media screen {{ .page {{ padding: {mm}mm; }} }}\n"
 
 
-def _layout_css(layout: Layout) -> Markup:
+def _line_height(slug: str) -> float:
+    found = re.search(r"body\s*{[^}]*line-height:\s*([\d.]+)", _css(f"{slug}.css"))
+    return float(found.group(1)) if found else 1.35
+
+
+def _spacing_css(s: float, slug: str) -> str:
+    """base.css's gaps, `s` times over: more room between sections, entries and lines,
+    and a little more between the lines of text (up to 12% at the most spacing)."""
+    gaps = {
+        ".head": ("margin-bottom", 0.9),
+        ".section": ("margin-top", 0.85),
+        ".entry": ("margin-top", 0.55),
+        ".entry:first-of-type": ("margin-top", 0.35),
+        ".details": ("margin-top", 0.15),
+        ".skills p": ("margin-top", 0.2),
+    }
+    css = " ".join(f"{sel} {{ {prop}: {em * s:.3f}em; }}" for sel, (prop, em) in gaps.items())
+    leading = _line_height(slug) * (1 + 0.12 * (s - 1))
+    return css + f" li {{ margin: {0.12 * s:.3f}em 0; }} body {{ line-height: {leading:.3f}; }}\n"
+
+
+def _layout_css(layout: Layout, slug: str) -> Markup:
+    css = ""
     if layout.margins == "narrow":
-        return Markup(_margin_css(NARROW_MM) + _TIGHT_CSS)
-    if layout.margins == "custom" and layout.margin_mm is not None:
+        css = _margin_css(NARROW_MM) + _TIGHT_CSS
+    elif layout.margins == "custom" and layout.margin_mm is not None:
         css = _margin_css(layout.margin_mm)
-        return Markup(css + (_TIGHT_CSS if layout.margin_mm <= NARROW_MM else ""))
-    return Markup("")
+        css += _TIGHT_CSS if layout.margin_mm <= NARROW_MM else ""
+    if layout.spacing and layout.spacing > 1:
+        css += _spacing_css(layout.spacing, slug)
+    return Markup(css)
 
 
 def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> str:
@@ -149,7 +173,7 @@ def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> st
             link_for=link_for,
             hidden=set(layout.hidden),
             order=layout.sections(),
-            layout_css=_layout_css(layout),
+            layout_css=_layout_css(layout, slug),
         )
     )
 
@@ -207,6 +231,17 @@ class Pdf:
 def render_pdf(html: str) -> Pdf:
     document = weasyprint.HTML(string=html, url_fetcher=_no_fetching).render()
     return Pdf(document.write_pdf(), len(document.pages))
+
+
+def measure(html: str) -> tuple[int, float]:
+    """How many pages, and how full the last one is (0-1 of its writing area)."""
+    document = weasyprint.HTML(string=html, url_fetcher=_no_fetching).render()
+    box = document.pages[-1]._page_box
+    lines = [d for d in box.descendants() if type(d).__name__ == "LineBox"]
+    if not lines or not box.height:
+        return len(document.pages), 0.0
+    bottom = max(d.position_y + d.height for d in lines)
+    return len(document.pages), min(1.0, (bottom - box.content_box_y()) / box.height)
 
 
 @dataclass

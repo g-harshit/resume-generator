@@ -178,7 +178,9 @@ class _ProfileIndex:
             where.append(Evidence("skills", "Skills"))
         for evidence, text in self.prose:
             lower = text.lower()
-            if any(_in_prose(s, text, lower) for s in spellings):
+            # `names` too: "ecommerce" for "e-commerce", "backend" for "Backend
+            # development" — the same test the editor uses when it rewrites a line.
+            if any(_in_prose(s, text, lower) for s in spellings) or names(term, text):
                 where.append(evidence)
         return TermMatch(_display(alternatives(term)[0]), bool(where), where)
 
@@ -240,3 +242,26 @@ def match_job(data: ResumeData, parsed_job: dict) -> dict:
         key: [asdict(m) for m in value] if isinstance(value, list) else value
         for key, value in result.items()
     }
+
+
+# "Backend development" is named by "backend", "Distributed systems" by "distributed";
+# "System design" isn't named by "system".
+_GENERIC = {"systems", "system", "development", "engineering", "services", "experience"}
+
+
+def names(term: str, text: str) -> bool:
+    """Does `text` name `term`, a synonym of it, or (for a phrase like "Backend
+    development") the phrase without its generic last word ("backend")?
+    "High-throughput", "high throughput" and "highthroughput" are the same."""
+    if any(appears_in(a, text) for a in alternatives(term)):
+        return True
+    flat_term, flat_text = term.replace("-", " "), text.replace("-", " ")
+    if (flat_term, flat_text) != (term, text) and appears_in(flat_term, flat_text):
+        return True
+    if "-" in term and appears_in(term.replace("-", ""), text):  # "ecommerce"
+        return True
+    words = re.findall(r"[\w+#./]+", flat_term.lower())
+    core = list(words)
+    while len(core) > 1 and core[-1] in _GENERIC:
+        core.pop()
+    return core != words and appears_in(" ".join(core), flat_text)
