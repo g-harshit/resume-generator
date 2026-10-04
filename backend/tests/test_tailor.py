@@ -602,7 +602,7 @@ def test_tailoring_makes_a_resume_with_its_provenance_and_match(client, auth, re
     sent = next(c["text"] for c in stub.calls if c["task"] == "tailor")
     assert '"b_rec"' in sent and "asha@example.com" not in sent
     # Then a look for lines that prove a missing skill (no answer here: skipped).
-    assert [c["task"] for c in stub.calls[-3:]] == ["tailor", "verify_tailoring", "bridge_skills"]
+    assert [c["task"] for c in stub.calls[-3:]] == ["tailor", "verify_tailoring", "bridge_claims"]
 
 
 def test_a_resume_is_a_snapshot(client, auth, ready):
@@ -672,3 +672,30 @@ def test_the_first_revision_is_stored(client, auth, ready, session):
         select(ResumeRevision).where(ResumeRevision.resume_id == resume_id)
     ).all()
     assert [r.reason for r in revisions] == ["tailor"]
+
+
+def test_an_existing_resume_can_name_the_skills_its_lines_prove(client, auth, ready):
+    from app.services.bridge import Claim
+    from tests.test_bridge import answer
+
+    stub.answer("tailor", lambda text: plan())
+    resume = make(client, auth, ready).json()
+    claim = Claim(
+        skill="Distributed systems", line_id="b_kafka", evidence="Kafka consumers", reasoning=""
+    )
+    new = "Moved settlement jobs from cron to distributed Kafka consumers on AWS."
+    answer([claim], rewrites={"b_kafka": new})
+
+    r = client.post(f"/resumes/{resume['id']}/bridge", headers=auth, json={"version": 1})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["added"] == ["Distributed systems"]
+    line = body["resume"]["content"]["experience"][0]["bullets"][0]
+    assert line == {"id": "b_kafka", "text": new}
+    prov = body["resume"]["provenance"]["b_kafka"]
+    assert prov["status"] == "bridged"
+    assert prov["original"] == PROFILE.experience[0].bullets[1].text  # the person's own
+    assert body["resume"]["version"] == 2
+
+    stale = client.post(f"/resumes/{resume['id']}/bridge", headers=auth, json={"version": 1})
+    assert stale.status_code == 409

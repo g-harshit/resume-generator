@@ -394,18 +394,26 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
   unchanged; tailoring is then mostly choosing, ordering, the summary and skill order.
   That's the intended trade-off for "never invent"; revisit with real users' resumes.
 - Tailoring is synchronous (~20–40 s). Move to a background job if it proves too slow.
-- [x] **Skill bridging** (`services/bridge.py`, after repair): for each job skill or
-      keyword the tailored resume never names, the model may pick one line whose own
-      words prove it and rewrite the line to name it ("Built REST APIs in Django" →
-      "…in Python (Django)"). It must quote the evidence; code checks the quote is in
-      the person's original line, the line names the skill, and adds nothing else (no
-      number, other skill/job term, padding, not much longer). A second strict call
-      decides whether the evidence *means* the skill was used — Django → Python, ECS →
-      AWS, GitHub Actions → CI/CD yes; Docker → Kubernetes, REST → GraphQL, SQL →
-      PostgreSQL no — and only a passing verdict is applied. Provenance `bridged` with
-      `skill` and `evidence`; the editor says "Added Python: your line says “Django”",
-      with Use original. Optional: an AI failure just skips it. Live run: Python, AWS,
-      CI/CD bridged; Kubernetes, GraphQL, Terraform refused (twice, same result).
+- [x] **Skill bridging** (`services/bridge.py`, after repair; also `POST
+      /resumes/{id}/bridge` and "Name skills my lines prove" in the job-match panel, for
+      resumes as they are). A skill is *missing* when no line names it — the Skills list
+      and summary don't count; the point is to show it in the work. Four steps, each
+      able only to say no: (1) the model claims, per missing skill, one line that proves
+      it, quoting the fewest exact words — code checks the quote is in the person's
+      line; (2) a strict call judges each claim: does that evidence *mean* the skill?
+      Django → Python, ECS → AWS, "designed and built a service" → system design and
+      backend, Kafka consumers → queues: yes. Docker → Kubernetes, "scalable" →
+      high-throughput / distributed, "a service" → microservices, "event-driven" →
+      queues: no; (3) each line is rewritten naming all its proven skills where the
+      evidence is ("Python (Django)", "AWS ECS"), never a tacked-on "…, utilizing AWS";
+      code checks it names them and adds nothing else (number, other term, padding,
+      length); (4) a last call confirms nothing else was added. Provenance `bridged`
+      with `skills: [{skill, evidence}]`; the editor says "Added Python (your line says
+      “Django”)" with Use original. An AI failure skips it.
+      Live: "Designed and built a scalable, robust end-to-end event-driven service in
+      Go" → "System design and backend development of a scalable, robust end-to-end
+      event-driven service in Go" (same on two runs); microservices, distributed,
+      high-throughput, low-latency, queues refused for it — those need the fact stated.
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

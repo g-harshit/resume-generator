@@ -112,10 +112,13 @@ export function MatchPanel({
   match,
   profile,
   onSkillAdded,
+  bridge,
 }: {
   match: NonNullable<ResumeFull["match"]>;
   profile: ResumeData | null;
   onSkillAdded: (added: SkillAdded) => void;
+  /** Name the job's skills in the lines that already prove them. `added`: the last run's result. */
+  bridge?: { busy: boolean; disabled: boolean; run: () => void; added: string[] | null };
 }) {
   const missing = [
     ...match.must_have.filter((m) => !m.covered).map((m) => ({ ...m, kind: "must have" })),
@@ -143,6 +146,30 @@ export function MatchPanel({
           </span>
         </div>
       </div>
+
+      {bridge && (
+        <div className="flex flex-col gap-1.5 rounded-lg bg-sunken p-3">
+          <span className="text-[13px] leading-snug">
+            Some skills may already be shown by what a line describes: Django is Python, ECS is AWS. Name them in
+            those lines, and only where your words prove it.
+          </span>
+          <button
+            type="button"
+            onClick={bridge.run}
+            disabled={bridge.disabled}
+            className="h-9 self-start rounded-lg border border-line bg-surface px-3 text-sm font-medium hover:bg-sunken disabled:opacity-60"
+          >
+            {bridge.busy ? "Reading your lines…" : "Name skills my lines prove"}
+          </button>
+          {bridge.added && (
+            <span role="status" className="text-[13px] leading-snug text-muted">
+              {bridge.added.length
+                ? `Added ${bridge.added.join(", ")}. Each changed line is marked, with Use original.`
+                : "None of your lines prove the missing skills. If you have them, add the fact to your profile (\"…Kafka queues at 20k events/s\") and re-tailor."}
+            </span>
+          )}
+        </div>
+      )}
 
       {missing.length > 0 && profile && (
         <div className="flex flex-col gap-2 rounded-lg bg-warn-soft p-3 text-warn-ink">

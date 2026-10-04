@@ -132,9 +132,8 @@ export type LineHistory = {
   status: "kept" | "reworded" | "reverted" | "condensed" | "written" | "bridged";
   /** For a "condensed" line: the ids of the person's lines it was merged from. */
   sources?: string[];
-  /** For a "bridged" line: the job's skill it now names, and the person's words that show it. */
-  skill?: string;
-  evidence?: string;
+  /** For a "bridged" line: the job's skills it now names, each with the person's words that prove it. */
+  skills?: { skill: string; evidence: string }[];
   /** What the model wrote, when it wasn't allowed to stand. */
   attempted: string | null;
   reason: string | null;
@@ -391,6 +390,11 @@ export const api = {
   /** Write the summary from this resume's facts: shorter, about as long, or longer than now. */
   writeSummary: (id: number, version: number, length: SummaryLength) =>
     request<ResumeFull>(`/resumes/${id}/summary`, { method: "POST", body: JSON.stringify({ version, length }) }),
+  bridgeSkills: (id: number, version: number) =>
+    request<{ resume: ResumeFull; added: string[] }>(`/resumes/${id}/bridge`, {
+      method: "POST",
+      body: JSON.stringify({ version }),
+    }),
   condenseEntry: (id: number, version: number, entryId: string, bullets: number) =>
     request<FitResult>(`/resumes/${id}/condense`, {
       method: "POST",

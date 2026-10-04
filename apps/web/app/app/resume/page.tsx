@@ -109,6 +109,17 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
   }
 
   /** Run an AI edit on the saved resume; the server returns the new version. */
+  const [bridged, setBridged] = useState<string[] | null>(null);
+
+  async function bridgeSkills() {
+    setBridged(null);
+    await aiEdit("bridge", async (v) => {
+      const out = await api.bridgeSkills(id, v);
+      setBridged(out.added);
+      return out.resume;
+    });
+  }
+
   async function aiEdit(what: string, run: (version: number) => Promise<ResumeFull | FitResult>) {
     setAiBusy(what);
     setProblem(null);
@@ -359,7 +370,12 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
             }}
           />
           {match ? (
-            <MatchPanel match={match} profile={profile} onSkillAdded={skillAdded} />
+            <MatchPanel
+              match={match}
+              profile={profile}
+              onSkillAdded={skillAdded}
+              bridge={{ busy: aiBusy === "bridge", disabled: aiBusy !== null, run: bridgeSkills, added: bridged }}
+            />
           ) : (
             <p className="rounded-xl border border-line bg-surface p-4 text-sm text-muted">
               The job this resume was made for is gone, so there&apos;s nothing to match against.

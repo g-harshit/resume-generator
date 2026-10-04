@@ -24,6 +24,7 @@ from app.routers.templates import PreviewOut, pdf_filename, preview_of
 from app.schemas.layout import Layout, default_layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
+from app.services.bridge import bridge
 from app.services.cover_letter import write_cover_letter
 from app.services.fit import (
     FitError,
@@ -464,6 +465,29 @@ def condense_entry(
         steps=[],
         notes=notes,
     )
+
+
+class BridgeOut(BaseModel):
+    resume: ResumeOut
+    added: list[str]  # the job's skills now named in a line
+
+
+@router.post("/{resume_id}/bridge")
+def bridge_skills(
+    resume_id: int, body: AiEditIn, user: CurrentUser, session: SessionDep
+) -> BridgeOut:
+    """Name the job's skills in the lines that already prove them ("Django" → Python),
+    for a resume as it is now. New resumes get this when they're tailored."""
+    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    if not job:
+        raise HTTPException(status.HTTP_409_CONFLICT, "The job this resume was made for is gone.")
+    content = ResumeData.model_validate(resume.content)
+    provenance = {**resume.provenance}
+    # The resume is the evidence: every line in it is the person's own or checked.
+    added = bridge(content, provenance, content.model_copy(deep=True), job, get_ai_provider())
+    if added:
+        _ai_edit_save(session, user, resume, body.version, content, provenance)
+    return BridgeOut(resume=_out(session, resume), added=added)
 
 
 @router.post("/{resume_id}/fit")

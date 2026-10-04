@@ -57,8 +57,8 @@ function LineOrigin({
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
       <span className="font-medium text-accent-ink">
-        {history.status === "bridged" && history.skill
-          ? `Added ${history.skill}: your line says “${history.evidence}”`
+        {history.status === "bridged" && history.skills?.length
+          ? `Added ${history.skills.map((s) => `${s.skill} (your line says “${s.evidence}”)`).join(", ")}`
           : ORIGIN_LABEL[history.status]}
       </span>
       {history.original && (

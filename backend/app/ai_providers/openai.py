@@ -19,8 +19,10 @@ _TEMPERATURE = {
     "tailor": 0.3,
     "repair_tailoring": 0.0,
     "verify_tailoring": 0.0,
-    "bridge_skills": 0.0,
-    "verify_bridge": 0.0,
+    "bridge_claims": 0.0,
+    "judge_bridge_claims": 0.0,
+    "bridge_rewrite": 0.0,
+    "verify_bridge_rewrite": 0.0,
 }
 
 
@@ -38,8 +40,10 @@ class OpenAIProvider(AIProvider):
             "tailor": settings.openai_tailor_model,
             "verify_tailoring": settings.openai_tailor_model,
             "repair_tailoring": settings.openai_tailor_model,
-            "bridge_skills": settings.openai_tailor_model,
-            "verify_bridge": settings.openai_tailor_model,
+            "bridge_claims": settings.openai_tailor_model,
+            "judge_bridge_claims": settings.openai_tailor_model,
+            "bridge_rewrite": settings.openai_tailor_model,
+            "verify_bridge_rewrite": settings.openai_tailor_model,
         }
 
     def _call(self, task: str, instructions: str, text: str, schema, temperature):
