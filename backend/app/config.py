@@ -48,6 +48,12 @@ class Settings(BaseSettings):
     # token Google gives the browser against Google's published keys.
     google_client_id: str = ""
 
+    # Ping our own public URL every 10 minutes so Render's free plan never puts the
+    # API to sleep (app/services/keep_awake.py). Only runs where there's a URL:
+    # KEEP_AWAKE_URL, or RENDER_EXTERNAL_URL (set by Render).
+    keep_awake: bool = True
+    keep_awake_url: str = ""
+
     # Comma-separated emails with access to the admin panel. Only counts once the
     # account's address is verified (Google sign-in or a password reset), so nobody can
     # sign up with an admin's address first and inherit the rights.

@@ -602,6 +602,13 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       a tick (`layout.hidden_header`; the value stays) or edited for this resume, links
       added or removed, and a profile link removed here can be added back. The cover
       letter's header leaves off the same items. The profile is never changed.
+- [x] Keeping the free API awake: it pings its own public URL every 10 minutes
+      (`services/keep_awake.py`, started in the app's lifespan; on wherever Render sets
+      `RENDER_EXTERNAL_URL`). The request comes back in through Render's proxy, so it
+      counts as traffic. The GitHub Actions ping ran every 2–6 hours instead of every 10
+      minutes (best-effort schedules), so it's only a backstop. Budget: 750 free hours
+      per workspace, an always-on service uses ≤744 — keep it the only free web service
+      in the workspace, or move it to a paid instance. Same approach as Signal.
 - [x] Admin panel (`/app/admin`, API `/admin/*`). Admins are `ADMIN_EMAILS` whose address
       is verified (Google sign-in or a password reset) — so nobody can sign up with the
       admin's address first and inherit the rights; everyone else gets 404. Overview

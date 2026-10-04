@@ -1,13 +1,31 @@
+import asyncio
+import contextlib
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import models  # noqa: F401  (registers tables on SQLModel.metadata)
 from app.config import get_settings
 from app.routers import admin, auth, health, jobs, profile, resumes, templates, uploads
+from app.services import keep_awake
 
 settings = get_settings()
 
-app = FastAPI(title=f"{settings.app_name} API")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Keep Render's free plan from sleeping the API (see app/services/keep_awake.py).
+    url = keep_awake.target_url()
+    task = asyncio.create_task(keep_awake.ping_forever(url)) if url else None
+    yield
+    if task:
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
+
+
+app = FastAPI(title=f"{settings.app_name} API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

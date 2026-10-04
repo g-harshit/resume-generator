@@ -1,12 +1,16 @@
-# The API runs on Render's free plan, which puts it to sleep after 15 idle minutes; the
-# next visitor then waits up to a minute for it to wake. A light ping every 10 minutes
-# keeps it awake. Delete this file after moving the API to a paid plan (which never
-# sleeps). GitHub may run scheduled jobs a few minutes late; that's fine here.
+# A BACKSTOP, not the thing that keeps the API awake.
+#
+# Render's free plan sleeps the API after 15 idle minutes. This was meant to ping it
+# every 10 minutes, but GitHub runs scheduled workflows on a best-effort basis: it
+# ran every 2–6 hours (Oct 2026). What keeps the API awake is the API pinging its
+# own public URL (backend/app/services/keep_awake.py). This stays because it runs
+# from outside: if the service ever does fall asleep, the in-process loop died with
+# it, and the next run here wakes it. Off the top of the hour, GitHub's peak.
 name: Keep API awake
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "7-59/10 * * * *"
   workflow_dispatch: # run it by hand from the Actions tab
 
 permissions: {}
