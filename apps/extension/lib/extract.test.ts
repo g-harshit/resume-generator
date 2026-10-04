@@ -77,6 +77,40 @@ describe("extractJob", () => {
     expect(job.text).not.toContain("Investors");
   });
 
+  it("reads LinkedIn's 2026 layout: the description box under About the job, not the poster's bio", () => {
+    page(
+      `<div><h1>Search for more than just job titles</h1></div>
+      <section><h2>Meet the hiring team</h2>
+        <div data-testid="expandable-text-box">Talent Acquisition @ Swish | Hiring across Product, Tech</div>
+      </section>
+      <section><div><h2>About the job</h2></div>
+        <div data-testid="expandable-text-box">Swish is building the next generation of food delivery.
+          ${REQUIREMENTS}</div>
+      </section>`,
+      "https://www.linkedin.com/jobs/search-results/?currentJobId=4462302967",
+    );
+    document.title = "(3) Tech Lead / Engineering Manager | Swish | LinkedIn";
+    const job = extractJob()!;
+    expect(job.source).toBe("site");
+    expect(job.title).toBe("Tech Lead / Engineering Manager");
+    expect(job.company).toBe("Swish");
+    expect(job.text).toContain("Swish is building");
+    expect(job.text).toContain("Deep Postgres");
+    expect(job.text).not.toContain("Talent Acquisition");
+  });
+
+  it("reads the text under a 'Job description' heading on an unknown site", () => {
+    page(`<header>Acme careers · Sign in · All jobs</header>
+      <div class="wrap"><div class="inner"><h2>Job description</h2>
+        <div>We're hiring a backend engineer for our payments team.</div>${REQUIREMENTS}</div></div>
+      <footer>© Acme · Privacy · Terms</footer>`);
+    document.title = "Backend Engineer – Acme – Careers";
+    const job = extractJob()!;
+    expect(job.source).toBe("page");
+    expect(job.text).toContain("payments team");
+    expect(job.text).not.toContain("Privacy");
+  });
+
   it("returns null when nothing reads like a job", () => {
     page(`<main><h1>Our blog</h1><p>Ten tips for better coffee.</p></main>`);
     expect(extractJob()).toBeNull();

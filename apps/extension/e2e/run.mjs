@@ -83,6 +83,19 @@ try {
   await panel.screenshot({ path: path.join(OUT, "panel-job-found.png") });
   await posting.screenshot({ path: path.join(OUT, "posting.png") });
 
+  step("a page the extension may not read yet offers to allow job sites");
+  // The test build may read localhost only; 127.0.0.1 is "another site".
+  const elsewhere = await context.newPage();
+  await elsewhere.goto(`http://127.0.0.1:${JOB_PORT}/careers/elsewhere`);
+  await elsewhere.bringToFront();
+  await panel.getByRole("button", { name: "Allow on job sites" }).waitFor({ timeout: 30_000 });
+  check(true, "panel asks to allow job sites instead of a dead end");
+  await panel.screenshot({ path: path.join(OUT, "panel-allow.png") });
+  await elsewhere.close();
+  await posting.bringToFront();
+  await panel.getByText("Job found on this page").waitFor({ timeout: 30_000 });
+  check(true, "back on the posting, the panel reads it again");
+
   step("tailor (real model calls: ~20–60 s)");
   await panel.getByRole("button", { name: "Tailor my resume" }).click();
   await panel.getByText("Your resume is ready").waitFor({ timeout: 180_000 });

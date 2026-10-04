@@ -1,7 +1,7 @@
 # Chrome Web Store listing — QuickFit CV
 
 Everything the Developer Dashboard asks for, ready to paste. Upload
-`apps/extension/dist/1.0.0/quickfitcv-chrome-store-1.0.0.zip`
+`apps/extension/dist/1.0.1/quickfitcv-chrome-store-1.0.1.zip`
 (rebuild with `pnpm zip:extension:store`).
 
 ## Store listing tab

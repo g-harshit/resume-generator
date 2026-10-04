@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError, type Resume, type TemplateInfo, type User } from "@/lib/api";
 import { APP_NAME, WEB_URL } from "@/lib/config";
 import { type ExtractedJob, extractJob } from "@/lib/extract";
@@ -9,7 +9,9 @@ const MIN_CHARS = 200; // the API's minimum for a job description
 type Reading =
   | { kind: "idle" }
   | { kind: "reading" }
-  | { kind: "needs-permission"; origin: string }
+  // Chrome hasn't given the extension this page: the icon wasn't clicked on it, and the
+  // site isn't allowed yet. `origin` when we know which site it is.
+  | { kind: "needs-permission"; origin: string | null }
   | { kind: "found"; job: ExtractedJob }
   | { kind: "not-found"; message: string };
 
@@ -28,18 +30,38 @@ const secondary =
 
 // --- reading the page ------------------------------------------------------------------
 
+// Where people find jobs. One "Allow on job sites" click covers them all, so the panel
+// can read postings however it was opened and follow the person from job to job.
+const JOB_SITES = [
+  "https://*.linkedin.com/*",
+  "https://*.naukri.com/*",
+  "https://*.indeed.com/*",
+  "https://*.foundit.in/*",
+  "https://*.instahyre.com/*",
+  "https://*.wellfound.com/*",
+  "https://*.glassdoor.com/*",
+  "https://*.glassdoor.co.in/*",
+  "https://*.greenhouse.io/*",
+  "https://*.lever.co/*",
+  "https://*.ashbyhq.com/*",
+  "https://*.myworkdayjobs.com/*",
+  "https://*.smartrecruiters.com/*",
+];
+
 async function activeTab() {
   const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
   return tab;
 }
 
-/** Run the reader in the active tab. Throws "permission" when the extension may not
- *  read this site yet (only the tab the toolbar icon was clicked in is granted). */
+/** Run the reader in the active tab. Throws with `origin` (null if Chrome won't even
+ *  say which site) when the extension may not read this page yet: only the tab the
+ *  toolbar icon was clicked in, and sites the person allowed, are readable. */
 async function readTab(mode: "auto" | "selection"): Promise<ExtractedJob | null> {
   const tab = await activeTab();
-  if (!tab?.id || !tab.url?.startsWith("http")) {
-    throw new Error("Open a job posting in this tab, then read it.");
-  }
+  if (!tab?.id) throw new Error("Open a job posting in this tab, then read it.");
+  // No URL means no access to this tab (Chrome hides it until the page is granted).
+  if (!tab.url) throw Object.assign(new Error("permission"), { origin: null });
+  if (!tab.url.startsWith("http")) throw new Error("Open a job posting in this tab, then read it.");
   try {
     const [result] = await browser.scripting.executeScript({
       target: { tabId: tab.id },
@@ -50,6 +72,14 @@ async function readTab(mode: "auto" | "selection"): Promise<ExtractedJob | null>
   } catch {
     throw Object.assign(new Error("permission"), { origin: `${new URL(tab.url).origin}/*` });
   }
+}
+
+/** Does a match pattern like "https://*.linkedin.com/*" cover "https://www.linkedin.com/*"? */
+function matches(pattern: string, origin: string): boolean {
+  const host = (p: string) => p.replace(/^https?:\/\//, "").replace(/\/\*$/, "");
+  const want = host(pattern);
+  const have = host(origin);
+  return want.startsWith("*.") ? have === want.slice(2) || have.endsWith(want.slice(1)) : have === want;
 }
 
 // --- screens ---------------------------------------------------------------------------
@@ -174,12 +204,23 @@ function Tailor({ user }: { user: User }) {
   const [error, setError] = useState<{ message: string; needsProfile: boolean } | null>(null);
   const [resume, setResume] = useState<Resume | null>(null);
 
-  const read = useCallback(async (mode: "auto" | "selection" = "auto") => {
+  // Each read gets a number; a slower, older read (or its retry) never overwrites a newer
+  // one — the person may have moved to another tab or job meanwhile.
+  const generation = useRef(0);
+
+  const read = useCallback(async (mode: "auto" | "selection" = "auto", attempt = 0) => {
+    const mine = attempt === 0 ? ++generation.current : generation.current;
     setReading({ kind: "reading" });
     setError(null);
     try {
       const job = await readTab(mode);
+      if (generation.current !== mine) return;
       if (job && job.text.length >= MIN_CHARS) setReading({ kind: "found", job });
+      else if (mode === "auto" && attempt < 2)
+        // Job sites often fill in the description a moment after the page appears.
+        setTimeout(() => {
+          if (generation.current === mine) void read("auto", attempt + 1);
+        }, attempt === 0 ? 1500 : 3000);
       else
         setReading({
           kind: "not-found",
@@ -189,8 +230,9 @@ function Tailor({ user }: { user: User }) {
               : "We couldn't find a job description on this page. Select it on the page and use your selection.",
         });
     } catch (err) {
-      const origin = (err as { origin?: string }).origin;
-      if (origin) setReading({ kind: "needs-permission", origin });
+      if (generation.current !== mine) return;
+      const origin = (err as { origin?: string | null }).origin;
+      if (origin !== undefined) setReading({ kind: "needs-permission", origin });
       else setReading({ kind: "not-found", message: (err as Error).message });
     }
   }, []);
@@ -201,8 +243,10 @@ function Tailor({ user }: { user: User }) {
     // Deferred a tick so the effect body itself doesn't set state.
     const t = setTimeout(() => void read(), 0);
     const onActivated = () => void read();
-    const onUpdated = (_id: number, info: { status?: string }, tab: { active?: boolean }) => {
-      if (info.status === "complete" && tab.active) void read();
+    // A finished load, or a new address in the same tab (LinkedIn changes job without
+    // reloading the page).
+    const onUpdated = (_id: number, info: { status?: string; url?: string }, tab: { active?: boolean }) => {
+      if (tab.active && (info.status === "complete" || info.url)) void read();
     };
     browser.tabs.onActivated.addListener(onActivated);
     browser.tabs.onUpdated.addListener(onUpdated);
@@ -213,9 +257,11 @@ function Tailor({ user }: { user: User }) {
     };
   }, [read]);
 
-  async function allow(origin: string) {
-    // Asking needs this click (a user gesture), which is why it's a button.
-    const granted = await browser.permissions.request({ origins: [origin] });
+  async function allow(origin: string | null) {
+    // Asking needs this click (a user gesture), which is why it's a button. The job
+    // sites go together, plus this page's own site when it's another one.
+    const origins = origin && !JOB_SITES.some((p) => matches(p, origin)) ? [...JOB_SITES, origin] : JOB_SITES;
+    const granted = await browser.permissions.request({ origins });
     if (granted) await read();
   }
 
@@ -246,15 +292,29 @@ function Tailor({ user }: { user: User }) {
         ) : reading.kind === "needs-permission" ? (
           <>
             <p className="text-sm leading-normal">
-              To read job postings on <strong>{new URL(reading.origin.replace("/*", "")).hostname}</strong>,
-              {" "}{APP_NAME} needs your permission for this site.
+              To read this page, {APP_NAME} needs your permission
+              {reading.origin ? (
+                <>
+                  {" "}for <strong>{new URL(reading.origin.replace("/*", "")).hostname}</strong>
+                </>
+              ) : null}
+              . One click allows it on LinkedIn, Naukri, Indeed and other job sites — it only
+              reads a page when you use it.
             </p>
-            <button type="button" onClick={() => allow(reading.origin)} className={secondary}>
-              Allow on this site
+            <button type="button" onClick={() => allow(reading.origin)} className={primary}>
+              Allow on job sites
             </button>
+            <p className="text-xs leading-normal text-muted">
+              Or click the {APP_NAME} icon in Chrome&apos;s toolbar while on the job page.
+            </p>
           </>
         ) : reading.kind === "not-found" ? (
-          <p className="text-sm leading-normal text-muted">{reading.message}</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-sm leading-normal text-muted">{reading.message}</p>
+            <button type="button" onClick={() => void read()} className="self-start text-[13px] text-accent hover:underline">
+              Read this page again
+            </button>
+          </div>
         ) : (
           <>
             <span className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-accent-ink uppercase">

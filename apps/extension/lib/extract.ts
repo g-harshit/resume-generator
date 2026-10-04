@@ -9,8 +9,9 @@
  *  1. JSON-LD `JobPosting` — the structured data many job sites publish for Google
  *  2. known job sites' description containers (LinkedIn, Naukri, Indeed, Greenhouse,
  *     Lever, Workday)
- *  3. the page's main block of text that reads like a job description
- * or, when asked, 4. whatever the person has selected.
+ *  3. the text under an "About the job" / "Job description" heading
+ *  4. the page's main block of text that reads like a job description
+ * or, when asked, whatever the person has selected.
  */
 export type ExtractedJob = {
   source: "json-ld" | "site" | "page" | "selection";
@@ -42,6 +43,22 @@ export function extractJob(mode: "auto" | "selection" = "auto"): ExtractedJob | 
     }
     return null;
   };
+  // The longest match: a selector can match several boxes (LinkedIn's
+  // expandable-text-box holds the description, and the hiring person's bio).
+  const longest = (selectors: string[]) => {
+    for (const s of selectors) {
+      const els = Array.from(document.querySelectorAll(s)).filter((el) => textOf(el));
+      if (els.length) return els.sort((a, b) => textOf(b).length - textOf(a).length)[0]!;
+    }
+    return null;
+  };
+  // "Tech Lead | Swish | LinkedIn" (and "(3) " for unread notifications).
+  const titleParts = () =>
+    document.title
+      .replace(/^\(\d+\+?\)\s*/, "")
+      .split(/\s+[|·–-]\s+/)
+      .map((p) => p.trim())
+      .filter(Boolean);
   const url = location.href;
   const MIN = 200;
 
@@ -87,7 +104,14 @@ export function extractJob(mode: "auto" | "selection" = "auto"): ExtractedJob | 
   const sites: { match: RegExp; body: string[]; title: string[]; company: string[] }[] = [
     {
       match: /linkedin\.com$/,
-      body: [".jobs-description__content", ".jobs-box__html-content", "#job-details", ".description__text"],
+      // 2026 layout first: the description in an expandable-text-box under "About the job".
+      body: [
+        "[data-testid='expandable-text-box']",
+        ".jobs-description__content",
+        ".jobs-box__html-content",
+        "#job-details",
+        ".description__text",
+      ],
       title: [".job-details-jobs-unified-top-card__job-title", ".top-card-layout__title", "h1"],
       company: [".job-details-jobs-unified-top-card__company-name", ".topcard__org-name-link"],
     },
@@ -124,16 +148,47 @@ export function extractJob(mode: "auto" | "selection" = "auto"): ExtractedJob | 
   ];
   const site = sites.find((s) => s.match.test(host));
   if (site) {
-    const body = textOf(first(site.body));
+    const body = textOf(longest(site.body));
     if (body.length >= MIN) {
-      const title = textOf(first(site.title));
+      let title = textOf(first(site.title));
       const companyEl = first(site.company);
-      const company = companyEl?.tagName === "IMG" ? clean(companyEl.getAttribute("alt")) : textOf(companyEl);
+      let company = companyEl?.tagName === "IMG" ? clean(companyEl.getAttribute("alt")) : textOf(companyEl);
+      // LinkedIn's 2026 layout has no stable title/company markup (its only h1 can be the
+      // search box's "Search for more than just job titles"); its page title,
+      // "Title | Company | LinkedIn", always names the job on screen.
+      const parts = titleParts();
+      if (/linkedin/i.test(parts.at(-1) ?? "") && parts.length >= 3) {
+        title = parts[0]!;
+        company = parts[1]!;
+      }
       return { source: "site", title, company, text: [title, company, body].filter(Boolean).join("\n\n"), url };
     }
   }
 
-  // 3. The page's main text block that reads like a job description: the largest
+  // 3. A heading that says "this is the job": the smallest block around it that holds
+  // a description's worth of text.
+  const jobHeading = Array.from(document.querySelectorAll("h1, h2, h3, h4")).find((h) =>
+    /^(about (the|this) (job|role|position|opportunity)|job description|role description|the role|description)$/i.test(
+      textOf(h),
+    ),
+  );
+  if (jobHeading) {
+    let el: Element | null = jobHeading.parentElement;
+    while (el && el !== document.body && textOf(el).length < textOf(jobHeading).length + MIN) el = el.parentElement;
+    const text = el && el !== document.body ? textOf(el) : "";
+    if (text.length >= MIN && text.length <= 30000) {
+      const parts = titleParts();
+      return {
+        source: "page",
+        title: textOf(document.querySelector("h1")) || parts[0] || "",
+        company: parts.length >= 3 ? parts[1]! : "",
+        text,
+        url,
+      };
+    }
+  }
+
+  // 4. The page's main text block that reads like a job description: the largest
   // candidate that mentions what a posting always does.
   const looksLikeJob = /responsibilit|requirement|qualification|what you('|’)ll|experience|you will|we('|’)re looking/i;
   const candidates = Array.from(document.querySelectorAll("main, article, [role=main], section, div"))

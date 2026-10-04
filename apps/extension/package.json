@@ -2,7 +2,7 @@
   "name": "@rg/extension",
   "description": "Chrome extension: tailor your resume to the job posting you are looking at.",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

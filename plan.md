@@ -473,6 +473,16 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       description, category, single purpose, permission justifications, data-use
       answers; icon, two 1280×800 screenshots and the small promo tile from the
       real-Chromium run. Privacy policy mentions what the extension reads.
+- [x] Tried on real LinkedIn (2026 layout): the old selectors matched nothing. The
+      description now comes from the longest `[data-testid=expandable-text-box]` (the
+      other one is the hiring person's bio), title and company from the page title
+      ("Title | Company | LinkedIn"); plus a general "About the job / Job description"
+      heading rule for other sites. Checked live on a LinkedIn job list: right title,
+      company and the full ~3,000-character description. Panel opened without the icon
+      click had no access and dead-ended; it now offers "Allow on job sites" (LinkedIn,
+      Naukri, Indeed, Foundit, Instahyre, Wellfound, Glassdoor, Greenhouse, Lever,
+      Ashby, Workday, SmartRecruiters) and follows in-page job changes; retries while a
+      page fills in, and has "Read this page again". Version 1.0.1.
 - [ ] Publish (owner): $5 developer registration, upload, submit for review. Then add
       the Store's ID to `NEXT_PUBLIC_EXTENSION_IDS` and `CORS_ORIGINS` and deploy.
 
