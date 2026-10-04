@@ -417,18 +417,16 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] **Keywords per line, chosen by the person** (`services/keywords.py`, `POST
       /resumes/{id}/lines/{line_id}/keywords`). Under each experience/project line in
       the editor, "+ Add job keywords" offers the job's terms that no line names
-      (`match.missing_in_lines`) plus a box for any other; the person picks what that
-      work really involved and the line is rewritten to include them. The person is the
-      evidence here, so the keywords may be added — and nothing else: code checks every
-      chosen keyword is named and there's no new number, other skill/job term, padding
-      or much extra length; a second call (told the keywords are confirmed) checks for
-      any other new claim; two tries, else 422 and the line stays. Provenance
-      `keywords` with `keywords` and `base` (the line before any keyword rewrite):
-      "Rewrite again" rewrites from `base`, at temperature 0.7, avoiding the last
-      wording; "Use original" restores the person's own line. Found live: the verifier
-      first reported the chosen keywords themselves as "added" — fixed by telling it
-      they're confirmed and listing natural forms ("high throughput" for
-      "High-throughput systems", also accepted by `names`).
+      (`match.missing_in_lines`) plus a box for any other; the person picks keywords and
+      the line is rewritten to include **all** of them. Decided 2026-10-04 (the user):
+      no guard here — the person is the authority on their own line, so nothing
+      second-guesses the keywords; the only check is that each keyword is actually in
+      the line (one more try naming any left out; the closest try is kept). Model:
+      `OPENAI_KEYWORDS_MODEL=gpt-5.5`, low reasoning effort (~2 s). Provenance
+      `keywords` with `keywords` and `base`: "Rewrite again" rewrites from `base`
+      avoiding the last wording; "Use original" restores the person's own line.
+      Failures show under the line (they used to go to the page banner, off-screen,
+      which looked like "nothing happened").
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

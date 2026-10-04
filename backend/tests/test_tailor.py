@@ -731,16 +731,9 @@ def test_a_line_takes_the_keywords_the_person_chose_and_can_be_rewritten_again(c
     assert r.json()["provenance"]["b_kafka"]["base"] == base
 
 
-def test_keywords_that_cant_fit_leave_the_line_alone(client, auth, ready):
-    from tests.test_keywords import answers
-
+def test_keywords_for_a_line_not_in_the_resume_are_not_found(client, auth, ready):
     stub.answer("tailor", lambda text: plan())
     resume = make(client, auth, ready).json()
-    answers("Ran 40 Kafka services.", "Ran 40 Kafka services.")
-    url = f"/resumes/{resume['id']}/lines/b_kafka/keywords"
-    r = client.post(url, headers=auth, json={"version": 1, "keywords": ["gRPC"]})
-    assert r.status_code == 422 and "Couldn't work those keywords in" in r.text
-    assert client.get(f"/resumes/{resume['id']}", headers=auth).json()["version"] == 1
     missing = client.post(
         f"/resumes/{resume['id']}/lines/nope/keywords",
         headers=auth,

@@ -119,12 +119,20 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     });
   }
 
-  /** Run an AI edit on the saved resume; the server returns the new version. */
-  async function aiEdit(what: string, run: (version: number) => Promise<ResumeFull | FitResult>) {
+  /** Run an AI edit on the saved resume; the server returns the new version. Errors go
+   * to `onError` when given (shown next to what was clicked), else the page banner. */
+  async function aiEdit(
+    what: string,
+    run: (version: number) => Promise<ResumeFull | FitResult>,
+    onError: (message: string) => void = setProblem,
+  ) {
     setAiBusy(what);
     setProblem(null);
     try {
-      if (!(await flush())) return;
+      if (!(await flush())) {
+        onError("Your latest edits couldn't be saved, so the AI didn't run. Check the message above and try again.");
+        return;
+      }
       const before = { draft: data, provenance };
       const out = await run(currentVersion());
       if ("pages_after" in out) {
@@ -135,11 +143,13 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
       }
       setUndo(before);
     } catch (err) {
-      setProblem(err instanceof TypeError ? "Can't reach the server." : (err as Error).message);
+      onError(err instanceof TypeError ? "Can't reach the server." : (err as Error).message);
     } finally {
       setAiBusy(null);
     }
   }
+
+  const [keywordError, setKeywordError] = useState<{ line: string; message: string } | null>(null);
 
   type Line = { id: string; text: string };
   /**
@@ -341,8 +351,15 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
                     gaps: match.missing_in_lines ?? [],
                     busyLine: aiBusy?.startsWith("kw:") ? aiBusy.slice(3) : null,
                     disabled: aiBusy !== null,
-                    rewrite: (lineId, keywords, again) =>
-                      aiEdit(`kw:${lineId}`, (v) => api.lineKeywords(id, v, lineId, keywords, again)),
+                    error: keywordError,
+                    rewrite: (lineId, keywords, again) => {
+                      setKeywordError(null);
+                      void aiEdit(
+                        `kw:${lineId}`,
+                        (v) => api.lineKeywords(id, v, lineId, keywords, again),
+                        (message) => setKeywordError({ line: lineId, message }),
+                      );
+                    },
                   }
                 : undefined
             }

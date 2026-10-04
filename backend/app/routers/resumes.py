@@ -37,7 +37,7 @@ from app.services.fit import (
 )
 from app.services.keywords import KeywordError, add_keywords
 from app.services.match import match_job
-from app.services.tailor import skill_terms, tailor
+from app.services.tailor import tailor
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -512,7 +512,7 @@ def line_keywords(
     resume_id: int, line_id: str, body: KeywordsIn, user: CurrentUser, session: SessionDep
 ) -> ResumeOut:
     """Rewrite one line to include the keywords the person chose for it."""
-    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    resume, _ = _ai_edit_start(session, user, resume_id, body.version)
     content = ResumeData.model_validate(resume.content)
     entry = next(
         (
@@ -536,15 +536,12 @@ def line_keywords(
             base,
             keywords,
             f"{getattr(entry, 'title', '')} {where}".strip(),
-            skill_terms(content, job),
             get_ai_provider(),
             avoid=[bullet.text] if body.again else None,
         )
     except KeywordError as exc:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_CONTENT,
-            f"Couldn't work those keywords in without adding something else ({exc}). "
-            "Try fewer keywords, or edit the line yourself.",
+            status.HTTP_502_BAD_GATEWAY, f"Couldn't rewrite the line: {exc}."
         ) from None
     except AIProviderError as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None

@@ -74,6 +74,9 @@ class Settings(BaseSettings):
     # efficiency"), all reverted by the guard, leaving tailoring nearly a no-op;
     # gpt-4.1 reworded cleanly with 1 revert. The guard doesn't depend on the model.
     openai_tailor_model: str = "gpt-4.1"
+    # Works the keywords a person picked into one of their lines. A stronger model,
+    # since nothing second-guesses it: the person asked for exactly these keywords.
+    openai_keywords_model: str = "gpt-5.5"
 
     # Uploaded files, when stored on local disk (dev). R2 comes with deployment.
     upload_dir: str = "var/uploads"

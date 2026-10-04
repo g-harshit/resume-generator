@@ -25,6 +25,8 @@ export type KeywordAi = {
   /** The line being rewritten, if any. */
   busyLine: string | null;
   disabled: boolean;
+  /** The last rewrite's failure, for the line it was for. */
+  error: { line: string; message: string } | null;
   rewrite: (lineId: string, keywords: string[], again: boolean) => void;
 };
 
@@ -109,16 +111,24 @@ function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
   const busy = ai.busyLine === line.id;
 
   if (busy) return <span className="text-xs text-muted" role="status">Rewriting this line…</span>;
+  const failed = ai.error?.line === line.id ? ai.error.message : null;
   if (!open)
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        disabled={ai.disabled}
-        className="self-start text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
-      >
-        + Add job keywords
-      </button>
+      <div className="flex flex-col gap-1">
+        {failed && (
+          <span role="alert" className="rounded-md bg-warn-soft px-2 py-1 text-xs text-warn-ink">
+            {failed}
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          disabled={ai.disabled}
+          className="self-start text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
+        >
+          + Add job keywords
+        </button>
+      </div>
     );
 
   function toggle(k: string) {
@@ -133,7 +143,7 @@ function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-line bg-sunken/60 p-2.5">
       <span className="text-xs leading-snug text-muted">
-        Pick the keywords this work really involved. AI rewrites the line to include them, and adds nothing else.
+        Pick the keywords for this line. AI rewrites it to include all of them.
       </span>
       {offered.length > 0 ? (
         <ul className="flex flex-wrap gap-1.5" aria-label="Job keywords not in your lines">

@@ -15,6 +15,8 @@ _TRY_AGAIN = "The AI service didn't respond properly. Please try again in a minu
 # Low temperature where wording must stay close to the person's own: less drift, fewer
 # embellishments for the guard to revert. Reasoning models refuse the parameter; then
 # it's dropped and the call retried once.
+# Reasoning models think briefly on tasks where a person is waiting on one line.
+_REASONING = {"keyword_rewrite": "low"}
 _TEMPERATURE = {
     "tailor": 0.3,
     "repair_tailoring": 0.0,
@@ -23,9 +25,6 @@ _TEMPERATURE = {
     "judge_bridge_claims": 0.0,
     "bridge_rewrite": 0.0,
     "verify_bridge_rewrite": 0.0,
-    # Higher: "Rewrite again" should read differently.
-    "keyword_rewrite": 0.7,
-    "verify_keyword_rewrite": 0.0,
 }
 
 
@@ -47,8 +46,7 @@ class OpenAIProvider(AIProvider):
             "judge_bridge_claims": settings.openai_tailor_model,
             "bridge_rewrite": settings.openai_tailor_model,
             "verify_bridge_rewrite": settings.openai_tailor_model,
-            "keyword_rewrite": settings.openai_tailor_model,
-            "verify_keyword_rewrite": settings.openai_tailor_model,
+            "keyword_rewrite": settings.openai_keywords_model,
         }
 
     def _call(self, task: str, instructions: str, text: str, schema, temperature):
@@ -60,6 +58,7 @@ class OpenAIProvider(AIProvider):
             # Resumes are personal data: don't let OpenAI keep the conversation.
             store=False,
             **({"temperature": temperature} if temperature is not None else {}),
+            **({"reasoning": {"effort": _REASONING[task]}} if task in _REASONING else {}),
         )
 
     def extract[T](self, *, task: str, instructions: str, text: str, schema: type[T]) -> T:
