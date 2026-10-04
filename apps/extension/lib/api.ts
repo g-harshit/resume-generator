@@ -58,6 +58,10 @@ async function send(path: string, init: RequestInit = {}): Promise<Response> {
 const json = async <T,>(path: string, init?: RequestInit) => (await send(path, init)).json() as Promise<T>;
 
 export const api = {
+  /** Start the API waking up (it sleeps when idle on the free plan); nothing comes back. */
+  wake: () => {
+    fetch(`${API_URL}/health`, { cache: "no-store" }).catch(() => {});
+  },
   me: () => json<User>("/auth/me"),
   templates: () => json<TemplateInfo[]>("/templates"),
   addJob: (text: string, url: string) =>

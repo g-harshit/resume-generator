@@ -84,6 +84,21 @@ function matches(pattern: string, origin: string): boolean {
 
 // --- screens ---------------------------------------------------------------------------
 
+/** "Signing in…", and after a few seconds why it can take a while. */
+function SigningIn() {
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setSlow(true), 4000);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div role="status" className="flex flex-col gap-1 p-5 text-sm text-muted">
+      <span>Signing in…</span>
+      {slow && <span>Waking up the server — the first visit in a while can take up to a minute.</span>}
+    </div>
+  );
+}
+
 function SignedOut() {
   return (
     <div className="flex flex-col gap-5 px-5 pt-14">
@@ -407,6 +422,8 @@ function Tailor({ user }: { user: User }) {
 }
 
 export default function App() {
+  // Wake the API the moment the panel opens, so it's up by the time it's needed.
+  useEffect(() => api.wake(), []);
   const [token, setTokenState] = useState<string | null | undefined>(undefined);
   const [user, setUser] = useState<User | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -431,7 +448,7 @@ export default function App() {
   if (token === undefined) return null;
   if (!token) return <SignedOut />;
   if (problem && !user) return <p className="p-5 text-sm text-warn-ink">{problem}</p>;
-  if (!user) return <p className="p-5 text-sm text-muted">Signing in…</p>;
+  if (!user) return <SigningIn />;
 
   return (
     <main className="flex flex-col gap-4 p-4">

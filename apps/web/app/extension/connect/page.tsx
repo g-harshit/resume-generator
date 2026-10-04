@@ -48,12 +48,10 @@ export default function ConnectExtension() {
   const router = useRouter();
   const [state, setState] = useState<State>("sending");
 
+  // Hand over the login this browser already holds, straight away: no need to wait for
+  // the API to confirm it (on the free plan it may be asleep, and waking takes up to a
+  // minute). A token that turns out to be stale just signs the extension out again.
   useEffect(() => {
-    if (loading) return;
-    if (!user) {
-      router.replace(`/login?next=${encodeURIComponent("/extension/connect")}`);
-      return;
-    }
     const token = getToken();
     if (!token) return;
     let cancelled = false;
@@ -61,6 +59,13 @@ export default function ConnectExtension() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Not signed in on the website: sign in first, then come back here.
+  useEffect(() => {
+    if (!loading && !user && !getToken()) {
+      router.replace(`/login?next=${encodeURIComponent("/extension/connect")}`);
+    }
   }, [loading, user, router]);
 
   return (
