@@ -15,7 +15,13 @@ _TRY_AGAIN = "The AI service didn't respond properly. Please try again in a minu
 # Low temperature where wording must stay close to the person's own: less drift, fewer
 # embellishments for the guard to revert. Reasoning models refuse the parameter; then
 # it's dropped and the call retried once.
-_TEMPERATURE = {"tailor": 0.3, "repair_tailoring": 0.0, "verify_tailoring": 0.0}
+_TEMPERATURE = {
+    "tailor": 0.3,
+    "repair_tailoring": 0.0,
+    "verify_tailoring": 0.0,
+    "bridge_skills": 0.0,
+    "verify_bridge": 0.0,
+}
 
 
 class OpenAIProvider(AIProvider):
@@ -32,6 +38,8 @@ class OpenAIProvider(AIProvider):
             "tailor": settings.openai_tailor_model,
             "verify_tailoring": settings.openai_tailor_model,
             "repair_tailoring": settings.openai_tailor_model,
+            "bridge_skills": settings.openai_tailor_model,
+            "verify_bridge": settings.openai_tailor_model,
         }
 
     def _call(self, task: str, instructions: str, text: str, schema, temperature):

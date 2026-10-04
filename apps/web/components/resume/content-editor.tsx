@@ -22,6 +22,7 @@ const ORIGIN_LABEL: Record<LineHistory["status"], string> = {
   reverted: "Edited",
   condensed: "Merged from your lines",
   written: "Written from your resume",
+  bridged: "Named a skill this job wants",
 };
 
 function Card({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
@@ -56,7 +57,9 @@ function LineOrigin({
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
       <span className="font-medium text-accent-ink">
-        {ORIGIN_LABEL[history.status]}
+        {history.status === "bridged" && history.skill
+          ? `Added ${history.skill}: your line says “${history.evidence}”`
+          : ORIGIN_LABEL[history.status]}
       </span>
       {history.original && (
         <details className="text-muted">

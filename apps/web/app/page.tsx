@@ -110,7 +110,7 @@ const TEMPLATES = [
 const FAQ = [
   {
     q: "Does it make things up?",
-    a: "No. The AI can only choose, order and reword lines from your own profile. Code then checks every reworded line against your original — no new numbers, no skills the line didn't mention, no new claims — and a second check reads each one side by side. Anything that fails stays in your words, and the editor shows you what was kept and why.",
+    a: "No. The AI can only choose, order and reword lines from your own profile. Code then checks every reworded line against your original — no new numbers, no skills the line didn't mention, no new claims — and a second check reads each one side by side. The one exception is a skill your line already proves: if the job asks for Python and your line says Django, it may say Python (Django), and the editor marks it. Anything that fails stays in your words, and the editor shows you what was kept and why.",
   },
   {
     q: "What if the job asks for a skill I don't have listed?",

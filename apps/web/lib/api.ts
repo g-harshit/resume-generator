@@ -129,9 +129,12 @@ export type Preview = {
 /** What tailoring did to one line (by bullet id, or "summary"). */
 export type LineHistory = {
   original: string;
-  status: "kept" | "reworded" | "reverted" | "condensed" | "written";
+  status: "kept" | "reworded" | "reverted" | "condensed" | "written" | "bridged";
   /** For a "condensed" line: the ids of the person's lines it was merged from. */
   sources?: string[];
+  /** For a "bridged" line: the job's skill it now names, and the person's words that show it. */
+  skill?: string;
+  evidence?: string;
   /** What the model wrote, when it wasn't allowed to stand. */
   attempted: string | null;
   reason: string | null;

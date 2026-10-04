@@ -24,7 +24,9 @@ profile review, paste JD, templates, editor, my resumes, extension ×3).
 2. **Tailoring never invents facts.** The model may select, reorder and rephrase.
    It may not add a skill, employer, date, number or degree that isn't in the profile.
    This is enforced in code (see Phase 7), not only in the prompt. A skill the job wants
-   and the profile lacks is shown as a *gap* the user can answer ("I have this").
+   and the profile lacks is shown as a *gap* the user can answer ("I have this"). The
+   one exception is a skill a line already proves ("Django" → Python): see *skill
+   bridging* in Phase 7.
 3. **The user checks the parse.** Parsing is never perfect. Nothing built from a profile
    is trusted until the user has reviewed it once.
 4. **One template, two outputs.** The same HTML/CSS template renders the live preview
@@ -392,6 +394,18 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
   unchanged; tailoring is then mostly choosing, ordering, the summary and skill order.
   That's the intended trade-off for "never invent"; revisit with real users' resumes.
 - Tailoring is synchronous (~20–40 s). Move to a background job if it proves too slow.
+- [x] **Skill bridging** (`services/bridge.py`, after repair): for each job skill or
+      keyword the tailored resume never names, the model may pick one line whose own
+      words prove it and rewrite the line to name it ("Built REST APIs in Django" →
+      "…in Python (Django)"). It must quote the evidence; code checks the quote is in
+      the person's original line, the line names the skill, and adds nothing else (no
+      number, other skill/job term, padding, not much longer). A second strict call
+      decides whether the evidence *means* the skill was used — Django → Python, ECS →
+      AWS, GitHub Actions → CI/CD yes; Docker → Kubernetes, REST → GraphQL, SQL →
+      PostgreSQL no — and only a passing verdict is applied. Provenance `bridged` with
+      `skill` and `evidence`; the editor says "Added Python: your line says “Django”",
+      with Use original. Optional: an AI failure just skips it. Live run: Python, AWS,
+      CI/CD bridged; Kubernetes, GraphQL, Terraform refused (twice, same result).
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

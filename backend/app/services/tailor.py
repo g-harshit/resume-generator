@@ -550,4 +550,7 @@ def tailor(
     resume, provenance = apply_plan(profile, job, plan)
     verify(resume, provenance, profile, provider)
     repair(resume, provenance, profile, job, provider)
+    from app.services.bridge import bridge  # bridge builds on this module's checks
+
+    bridge(resume, provenance, profile, job, provider)
     return resume, provenance

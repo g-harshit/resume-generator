@@ -601,7 +601,8 @@ def test_tailoring_makes_a_resume_with_its_provenance_and_match(client, auth, re
     # The model was given the profile with its ids, but not contact details.
     sent = next(c["text"] for c in stub.calls if c["task"] == "tailor")
     assert '"b_rec"' in sent and "asha@example.com" not in sent
-    assert [c["task"] for c in stub.calls[-2:]] == ["tailor", "verify_tailoring"]
+    # Then a look for lines that prove a missing skill (no answer here: skipped).
+    assert [c["task"] for c in stub.calls[-3:]] == ["tailor", "verify_tailoring", "bridge_skills"]
 
 
 def test_a_resume_is_a_snapshot(client, auth, ready):
