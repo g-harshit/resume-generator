@@ -108,7 +108,6 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     setSavedVersion(fresh.version);
   }
 
-  /** Run an AI edit on the saved resume; the server returns the new version. */
   const [bridged, setBridged] = useState<string[] | null>(null);
 
   async function bridgeSkills() {
@@ -120,6 +119,7 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     });
   }
 
+  /** Run an AI edit on the saved resume; the server returns the new version. */
   async function aiEdit(what: string, run: (version: number) => Promise<ResumeFull | FitResult>) {
     setAiBusy(what);
     setProblem(null);
@@ -335,6 +335,17 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
               write: (length) => aiEdit("summary", (v) => api.writeSummary(id, v, length)),
               undo: undo && aiBusy === null && provenance.summary?.status === "written" ? undoAi : null,
             }}
+            keywordAi={
+              match
+                ? {
+                    gaps: match.missing_in_lines ?? [],
+                    busyLine: aiBusy?.startsWith("kw:") ? aiBusy.slice(3) : null,
+                    disabled: aiBusy !== null,
+                    rewrite: (lineId, keywords, again) =>
+                      aiEdit(`kw:${lineId}`, (v) => api.lineKeywords(id, v, lineId, keywords, again)),
+                  }
+                : undefined
+            }
           />
         </div>
 

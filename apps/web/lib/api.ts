@@ -129,11 +129,14 @@ export type Preview = {
 /** What tailoring did to one line (by bullet id, or "summary"). */
 export type LineHistory = {
   original: string;
-  status: "kept" | "reworded" | "reverted" | "condensed" | "written" | "bridged";
+  status: "kept" | "reworded" | "reverted" | "condensed" | "written" | "bridged" | "keywords";
   /** For a "condensed" line: the ids of the person's lines it was merged from. */
   sources?: string[];
   /** For a "bridged" line: the job's skills it now names, each with the person's words that prove it. */
   skills?: { skill: string; evidence: string }[];
+  /** For a "keywords" line: the keywords the person chose, and the line before them. */
+  keywords?: string[];
+  base?: string;
   /** What the model wrote, when it wasn't allowed to stand. */
   attempted: string | null;
   reason: string | null;
@@ -188,7 +191,8 @@ export type DraftedLines = { lines: string[]; left_out: { text: string; reason: 
 export type ResumeFull = ResumeSummary & {
   content: ResumeData;
   provenance: Record<string, LineHistory>;
-  match: Job["match"];
+  /** `missing_in_lines`: the job's terms no line names, to offer for a line. */
+  match: (NonNullable<Job["match"]> & { missing_in_lines?: string[] }) | null;
   cover_letter: CoverLetter | null;
   layout: Layout;
 };
@@ -390,6 +394,11 @@ export const api = {
   /** Write the summary from this resume's facts: shorter, about as long, or longer than now. */
   writeSummary: (id: number, version: number, length: SummaryLength) =>
     request<ResumeFull>(`/resumes/${id}/summary`, { method: "POST", body: JSON.stringify({ version, length }) }),
+  lineKeywords: (id: number, version: number, lineId: string, keywords: string[], again = false) =>
+    request<ResumeFull>(`/resumes/${id}/lines/${encodeURIComponent(lineId)}/keywords`, {
+      method: "POST",
+      body: JSON.stringify({ version, keywords, again }),
+    }),
   bridgeSkills: (id: number, version: number) =>
     request<{ resume: ResumeFull; added: string[] }>(`/resumes/${id}/bridge`, {
       method: "POST",

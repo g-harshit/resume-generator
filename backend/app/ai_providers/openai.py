@@ -23,6 +23,9 @@ _TEMPERATURE = {
     "judge_bridge_claims": 0.0,
     "bridge_rewrite": 0.0,
     "verify_bridge_rewrite": 0.0,
+    # Higher: "Rewrite again" should read differently.
+    "keyword_rewrite": 0.7,
+    "verify_keyword_rewrite": 0.0,
 }
 
 
@@ -44,6 +47,8 @@ class OpenAIProvider(AIProvider):
             "judge_bridge_claims": settings.openai_tailor_model,
             "bridge_rewrite": settings.openai_tailor_model,
             "verify_bridge_rewrite": settings.openai_tailor_model,
+            "keyword_rewrite": settings.openai_tailor_model,
+            "verify_keyword_rewrite": settings.openai_tailor_model,
         }
 
     def _call(self, task: str, instructions: str, text: str, schema, temperature):

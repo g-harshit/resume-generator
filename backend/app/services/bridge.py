@@ -184,11 +184,18 @@ def _key(term: str) -> str:
 
 def names(term: str, text: str) -> bool:
     """Does `text` name `term`, a synonym of it, or (for a phrase like "Backend
-    development") its first word ("backend")?"""
+    development") the phrase without its generic last word ("backend")?
+    "High-throughput" and "high throughput" are the same."""
     if any(appears_in(a, text) for a in alternatives(term)):
         return True
-    words = re.findall(r"[\w+#./-]+", term.lower())
-    return len(words) > 1 and all(w in _GENERIC for w in words[1:]) and appears_in(words[0], text)
+    flat_term, flat_text = term.replace("-", " "), text.replace("-", " ")
+    if (flat_term, flat_text) != (term, text) and appears_in(flat_term, flat_text):
+        return True
+    words = re.findall(r"[\w+#./]+", flat_term.lower())
+    core = list(words)
+    while len(core) > 1 and core[-1] in _GENERIC:
+        core.pop()
+    return core != words and appears_in(" ".join(core), flat_text)
 
 
 def missing_skills(resume: ResumeData, job: dict) -> list[str]:

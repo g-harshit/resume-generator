@@ -699,3 +699,51 @@ def test_an_existing_resume_can_name_the_skills_its_lines_prove(client, auth, re
 
     stale = client.post(f"/resumes/{resume['id']}/bridge", headers=auth, json={"version": 1})
     assert stale.status_code == 409
+
+
+def test_a_line_takes_the_keywords_the_person_chose_and_can_be_rewritten_again(client, auth, ready):
+    from tests.test_keywords import answers
+
+    stub.answer("tailor", lambda text: plan())
+    resume = make(client, auth, ready).json()
+    assert "gRPC" in resume["match"]["missing_in_lines"]
+    base = resume["content"]["experience"][0]["bullets"][0]["text"]
+    first = base[:-1] + " via gRPC."
+    answers(first)
+    url = f"/resumes/{resume['id']}/lines/b_kafka/keywords"
+    r = client.post(url, headers=auth, json={"version": 1, "keywords": ["gRPC"]})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["content"]["experience"][0]["bullets"][0]["text"] == first
+    prov = body["provenance"]["b_kafka"]
+    assert prov["status"] == "keywords" and prov["keywords"] == ["gRPC"]
+    assert prov["base"] == base
+    assert prov["original"] == PROFILE.experience[0].bullets[1].text
+    assert "gRPC" not in body["match"]["missing_in_lines"]
+
+    # Again: from the line before any keywords, avoiding the last wording.
+    second = "Using gRPC, " + base[0].lower() + base[1:]
+    answers(second)
+    r = client.post(url, headers=auth, json={"version": 2, "keywords": ["gRPC"], "again": True})
+    assert r.status_code == 200, r.text
+    sent = json.loads([c["text"] for c in stub.calls if c["task"] == "keyword_rewrite"][-1])
+    assert sent["line"] == base and sent["avoid"] == [first]
+    assert r.json()["provenance"]["b_kafka"]["base"] == base
+
+
+def test_keywords_that_cant_fit_leave_the_line_alone(client, auth, ready):
+    from tests.test_keywords import answers
+
+    stub.answer("tailor", lambda text: plan())
+    resume = make(client, auth, ready).json()
+    answers("Ran 40 Kafka services.", "Ran 40 Kafka services.")
+    url = f"/resumes/{resume['id']}/lines/b_kafka/keywords"
+    r = client.post(url, headers=auth, json={"version": 1, "keywords": ["gRPC"]})
+    assert r.status_code == 422 and "Couldn't work those keywords in" in r.text
+    assert client.get(f"/resumes/{resume['id']}", headers=auth).json()["version"] == 1
+    missing = client.post(
+        f"/resumes/{resume['id']}/lines/nope/keywords",
+        headers=auth,
+        json={"version": 1, "keywords": ["gRPC"]},
+    )
+    assert missing.status_code == 404

@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel, Field
@@ -24,7 +25,7 @@ from app.routers.templates import PreviewOut, pdf_filename, preview_of
 from app.schemas.layout import Layout, default_layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
-from app.services.bridge import bridge
+from app.services.bridge import bridge, missing_skills
 from app.services.cover_letter import write_cover_letter
 from app.services.fit import (
     FitError,
@@ -34,8 +35,9 @@ from app.services.fit import (
     fit_to_pages,
     write_summary,
 )
+from app.services.keywords import KeywordError, add_keywords
 from app.services.match import match_job
-from app.services.tailor import tailor
+from app.services.tailor import skill_terms, tailor
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -85,7 +87,15 @@ def _job(session: Session, resume: Resume) -> JobDescription | None:
 
 def _match(session: Session, resume: Resume) -> dict | None:
     job = _job(session, resume)
-    return match_job(ResumeData.model_validate(resume.content), job.parsed) if job else None
+    if job is None:
+        return None
+    content = ResumeData.model_validate(resume.content)
+    # The job's terms no line names (the Skills list doesn't count): what the editor
+    # offers to work into a line.
+    return {
+        **match_job(content, job.parsed),
+        "missing_in_lines": missing_skills(content, job.parsed),
+    }
 
 
 def _summary(session: Session, resume: Resume, match: dict | None) -> dict:
@@ -488,6 +498,70 @@ def bridge_skills(
     if added:
         _ai_edit_save(session, user, resume, body.version, content, provenance)
     return BridgeOut(resume=_out(session, resume), added=added)
+
+
+class KeywordsIn(AiEditIn):
+    keywords: list[Annotated[str, Field(min_length=1, max_length=60)]] = Field(
+        min_length=1, max_length=8
+    )
+    again: bool = False  # "Rewrite again": a different wording of the same keywords
+
+
+@router.post("/{resume_id}/lines/{line_id}/keywords")
+def line_keywords(
+    resume_id: int, line_id: str, body: KeywordsIn, user: CurrentUser, session: SessionDep
+) -> ResumeOut:
+    """Rewrite one line to include the keywords the person chose for it."""
+    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    content = ResumeData.model_validate(resume.content)
+    entry = next(
+        (
+            e
+            for e in [*content.experience, *content.projects]
+            if any(b.id == line_id for b in e.bullets)
+        ),
+        None,
+    )
+    if entry is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "That line isn't in this resume.")
+    bullet = next(b for b in entry.bullets if b.id == line_id)
+    before = resume.provenance.get(line_id, {})
+    # Rewrite from the line as it was before any keyword rewrite, so "again" doesn't
+    # stack keywords on keywords.
+    base = before.get("base") if before.get("status") == "keywords" else bullet.text
+    keywords = list(dict.fromkeys(k.strip() for k in body.keywords if k.strip()))
+    where = getattr(entry, "company", None) or getattr(entry, "name", "")
+    try:
+        text = add_keywords(
+            base,
+            keywords,
+            f"{getattr(entry, 'title', '')} {where}".strip(),
+            skill_terms(content, job),
+            get_ai_provider(),
+            avoid=[bullet.text] if body.again else None,
+        )
+    except KeywordError as exc:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            f"Couldn't work those keywords in without adding something else ({exc}). "
+            "Try fewer keywords, or edit the line yourself.",
+        ) from None
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    bullet.text = text
+    provenance = {
+        **resume.provenance,
+        line_id: {
+            "original": before.get("original") or base,
+            "status": "keywords",
+            "keywords": keywords,
+            "base": base,
+            "attempted": None,
+            "reason": None,
+        },
+    }
+    _ai_edit_save(session, user, resume, body.version, content, provenance)
+    return _out(session, resume)
 
 
 @router.post("/{resume_id}/fit")

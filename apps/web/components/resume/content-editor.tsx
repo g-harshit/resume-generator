@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Bullet, Project, ResumeData } from "@rg/schema";
 import { SummaryAi } from "@/components/summary-ai";
 import type { LineHistory, SummaryLength } from "@/lib/api";
@@ -14,6 +15,17 @@ type Props = {
   provenance: Record<string, LineHistory>;
   /** Write the summary with AI (from this resume's facts), and undo that. */
   summaryAi?: { busy: boolean; disabled: boolean; write: (length: SummaryLength) => void; undo: (() => void) | null };
+  keywordAi?: KeywordAi;
+};
+
+/** Rewrite one line with keywords the person picks from the job's missing ones. */
+export type KeywordAi = {
+  /** The job's terms that no line names yet. */
+  gaps: string[];
+  /** The line being rewritten, if any. */
+  busyLine: string | null;
+  disabled: boolean;
+  rewrite: (lineId: string, keywords: string[], again: boolean) => void;
 };
 
 const ORIGIN_LABEL: Record<LineHistory["status"], string> = {
@@ -23,6 +35,7 @@ const ORIGIN_LABEL: Record<LineHistory["status"], string> = {
   condensed: "Merged from your lines",
   written: "Written from your resume",
   bridged: "Named a skill this job wants",
+  keywords: "Rewritten with your keywords",
 };
 
 function Card({ title, note, children }: { title: string; note?: string; children: React.ReactNode }) {
@@ -42,10 +55,12 @@ function LineOrigin({
   text,
   history,
   onUseOriginal,
+  onRewriteAgain,
 }: {
   text: string;
   history: LineHistory | undefined;
   onUseOriginal: () => void;
+  onRewriteAgain?: () => void;
 }) {
   if (!history || text === history.original) {
     return history?.status === "reverted" ? (
@@ -59,7 +74,9 @@ function LineOrigin({
       <span className="font-medium text-accent-ink">
         {history.status === "bridged" && history.skills?.length
           ? `Added ${history.skills.map((s) => `${s.skill} (your line says “${s.evidence}”)`).join(", ")}`
-          : ORIGIN_LABEL[history.status]}
+          : history.status === "keywords" && history.keywords?.length
+            ? `Added your keywords: ${history.keywords.join(", ")}`
+            : ORIGIN_LABEL[history.status]}
       </span>
       {history.original && (
         <details className="text-muted">
@@ -73,6 +90,117 @@ function LineOrigin({
           Use original
         </button>
       )}
+      {history.status === "keywords" && onRewriteAgain && (
+        <button type="button" onClick={onRewriteAgain} className="text-accent underline-offset-2 hover:underline">
+          Rewrite again
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** "Add keywords" under a line: pick from the job's missing terms (or type one), rewrite. */
+function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
+  const [open, setOpen] = useState(false);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [other, setOther] = useState("");
+  const lower = line.text.toLowerCase();
+  const offered = [...ai.gaps.filter((g) => !lower.includes(g.toLowerCase())), ...picked.filter((p) => !ai.gaps.includes(p))];
+  const busy = ai.busyLine === line.id;
+
+  if (busy) return <span className="text-xs text-muted" role="status">Rewriting this line…</span>;
+  if (!open)
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        disabled={ai.disabled}
+        className="self-start text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
+      >
+        + Add job keywords
+      </button>
+    );
+
+  function toggle(k: string) {
+    setPicked((p) => (p.includes(k) ? p.filter((x) => x !== k) : p.length < 8 ? [...p, k] : p));
+  }
+  function addOther() {
+    const k = other.trim();
+    if (k && !picked.includes(k)) setPicked((p) => (p.length < 8 ? [...p, k] : p));
+    setOther("");
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-line bg-sunken/60 p-2.5">
+      <span className="text-xs leading-snug text-muted">
+        Pick the keywords this work really involved. AI rewrites the line to include them, and adds nothing else.
+      </span>
+      {offered.length > 0 ? (
+        <ul className="flex flex-wrap gap-1.5" aria-label="Job keywords not in your lines">
+          {offered.map((k) => {
+            const on = picked.includes(k);
+            return (
+              <li key={k}>
+                <button
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggle(k)}
+                  className={`rounded-full border px-2.5 py-0.5 text-[13px] ${
+                    on ? "border-accent bg-accent text-white" : "border-line-strong bg-surface text-ink hover:bg-sunken"
+                  }`}
+                >
+                  {on ? "✓ " : "+ "}
+                  {k}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <span className="text-xs text-muted">Every job keyword is already in your lines. You can type one below.</span>
+      )}
+      <div className="flex gap-1.5">
+        <input
+          value={other}
+          onChange={(e) => setOther(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              addOther();
+            }
+          }}
+          maxLength={60}
+          placeholder="Another keyword"
+          aria-label="Another keyword"
+          className="h-8 min-w-0 flex-1 rounded-md border border-line bg-surface px-2 text-[13px]"
+        />
+        <button type="button" onClick={addOther} className="h-8 rounded-md border border-line bg-surface px-2 text-[13px] hover:bg-sunken">
+          Add
+        </button>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={!picked.length || ai.disabled}
+          onClick={() => {
+            ai.rewrite(line.id, picked, false);
+            setOpen(false);
+          }}
+          className="h-8 rounded-md bg-accent px-3 text-[13px] font-medium text-white disabled:opacity-50"
+        >
+          {picked.length ? `Rewrite with ${picked.length} keyword${picked.length > 1 ? "s" : ""}` : "Pick keywords"}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setOpen(false);
+            setPicked([]);
+          }}
+          className="h-8 rounded-md px-2 text-[13px] text-muted hover:bg-sunken"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }
@@ -87,12 +215,14 @@ function Lines({
   available,
   provenance,
   onChange,
+  keywordAi,
 }: {
   label: string;
   included: Bullet[];
   available: Bullet[];
   provenance: Record<string, LineHistory>;
   onChange: (bullets: Bullet[]) => void;
+  keywordAi?: KeywordAi;
 }) {
   const inResume = new Set(included.map((b) => b.id));
   const left = available.filter((b) => !inResume.has(b.id));
@@ -123,12 +253,18 @@ function Lines({
               onRemove={() => onChange(removeAt(included, i))}
             />
           </div>
-          <div className="pl-6">
+          <div className="flex flex-col gap-1.5 pl-6">
             <LineOrigin
               text={b.text}
               history={provenance[b.id]}
               onUseOriginal={() => onChange(replaceAt(included, i, { ...b, text: provenance[b.id]!.original }))}
+              onRewriteAgain={
+                keywordAi && !keywordAi.disabled && provenance[b.id]?.keywords?.length
+                  ? () => keywordAi.rewrite(b.id, provenance[b.id]!.keywords!, true)
+                  : undefined
+              }
             />
+            {keywordAi && <LineKeywords line={b} ai={keywordAi} />}
           </div>
         </div>
       ))}
@@ -149,7 +285,7 @@ function Lines({
   );
 }
 
-export function ResumeContentEditor({ data, setData, profile, provenance, summaryAi }: Props) {
+export function ResumeContentEditor({ data, setData, profile, provenance, summaryAi, keywordAi }: Props) {
   const profileRole = (id: string) => profile?.experience.find((e) => e.id === id);
   const profileProject = (id: string) => profile?.projects.find((p) => p.id === id);
   const leftOutProjects = (profile?.projects ?? []).filter((p) => !data.projects.some((x) => x.id === p.id));
@@ -194,6 +330,7 @@ export function ResumeContentEditor({ data, setData, profile, provenance, summar
             included={e.bullets}
             available={profileRole(e.id)?.bullets ?? []}
             provenance={provenance}
+            keywordAi={keywordAi}
             onChange={(bullets) =>
               setData((d) => ({ ...d, experience: replaceAt(d.experience, i, { ...d.experience[i]!, bullets }) }))
             }
@@ -271,6 +408,7 @@ export function ResumeContentEditor({ data, setData, profile, provenance, summar
                 included={p.bullets}
                 available={profileProject(p.id)?.bullets ?? []}
                 provenance={provenance}
+                keywordAi={keywordAi}
                 onChange={(bullets) =>
                   setData((d) => ({ ...d, projects: replaceAt(d.projects, i, { ...d.projects[i]!, bullets }) }))
                 }
