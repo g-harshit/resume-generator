@@ -72,14 +72,11 @@ function LineOrigin({
   history,
   onUseOriginal,
   onRewriteAgain,
-  onRemoveKeyword,
 }: {
   text: string;
   history: LineHistory | undefined;
   onUseOriginal: () => void;
   onRewriteAgain?: () => void;
-  /** Rewrite the line without this keyword (the last one puts the line back). */
-  onRemoveKeyword?: (keyword: string) => void;
 }) {
   if (!history || text === history.original) {
     return history?.status === "reverted" ? (
@@ -98,19 +95,9 @@ function LineOrigin({
             <span
               key={k}
               title={evidenceFor(history, k)}
-              className="inline-flex items-center gap-0.5 rounded-full bg-accent-soft py-0.5 pr-0.5 pl-2 text-accent-ink"
+              className="rounded-full bg-accent-soft px-2 py-0.5 text-accent-ink"
             >
               {k}
-              {onRemoveKeyword && (
-                <button
-                  type="button"
-                  aria-label={`Remove ${k} from this line`}
-                  onClick={() => onRemoveKeyword(k)}
-                  className="flex size-5 items-center justify-center rounded-full hover:bg-accent hover:text-white"
-                >
-                  ×
-                </button>
-              )}
             </span>
           ))}
         </div>
@@ -178,17 +165,21 @@ function Chips({
 }
 
 /** "Add keywords" under a line: pick from the job's missing terms (or type one), rewrite. */
-function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
+function LineKeywords({ line, history, ai }: { line: Bullet; history: LineHistory | undefined; ai: KeywordAi }) {
+  const added = history ? addedKeywords(history) : [];
   const [open, setOpen] = useState(false);
-  const [picked, setPicked] = useState<string[]>([]);
+  const [picked, setPicked] = useState<string[]>(added);
   const [other, setOther] = useState("");
   const lower = line.text.toLowerCase();
   // Older data has no per-line list: fall back to the terms no line names.
-  const forLine = ai.byLine[line.id] ?? ai.gaps.filter((g) => !lower.includes(g.toLowerCase()));
+  const forLine = (ai.byLine[line.id] ?? ai.gaps.filter((g) => !lower.includes(g.toLowerCase()))).filter(
+    (k) => !added.includes(k),
+  );
   const nowhere = forLine.filter((k) => ai.gaps.includes(k));
   const elsewhere = forLine.filter((k) => !ai.gaps.includes(k));
-  const typed = picked.filter((p) => !forLine.includes(p));
-  const offered = [...nowhere, ...elsewhere, ...typed];
+  const typed = picked.filter((p) => !forLine.includes(p) && !added.includes(p));
+  const adding = picked.filter((k) => !added.includes(k));
+  const removing = added.filter((k) => !picked.includes(k));
   const busy = ai.busyLine === line.id;
 
   if (busy) return <span className="text-xs text-muted" role="status">Rewriting this line…</span>;
@@ -203,11 +194,14 @@ function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
         )}
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            setPicked(added); // start from what the line has now
+            setOpen(true);
+          }}
           disabled={ai.disabled}
           className="self-start text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
         >
-          + Add job keywords
+          {added.length ? "Edit keywords" : "+ Add job keywords"}
         </button>
       </div>
     );
@@ -221,17 +215,26 @@ function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
     setOther("");
   }
 
+  const changes = [
+    adding.length && `add ${adding.length}`,
+    removing.length && `remove ${removing.length}`,
+  ].filter(Boolean);
+  const label = !changes.length
+    ? "No changes"
+    : !picked.length
+      ? "Remove all keywords"
+      : `Apply: ${changes.join(", ")}`;
+
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-line bg-sunken/60 p-2.5">
       <span className="text-xs leading-snug text-muted">
-        Pick the keywords for this line. AI rewrites it to include all of them.
+        Tick the keywords this line should have, untick the ones to drop, then apply once. AI rewrites the line to
+        include all the ticked ones.
       </span>
-      {offered.length > 0 ? (
-        <>
-          <Chips label="Not in your resume yet" keys={[...nowhere, ...typed]} picked={picked} toggle={toggle} />
-          <Chips label="In other lines — add here too" keys={elsewhere} picked={picked} toggle={toggle} />
-        </>
-      ) : (
+      <Chips label="On this line" keys={added} picked={picked} toggle={toggle} />
+      <Chips label="Not in your resume yet" keys={[...nowhere, ...typed]} picked={picked} toggle={toggle} />
+      <Chips label="In other lines — add here too" keys={elsewhere} picked={picked} toggle={toggle} />
+      {!added.length && !forLine.length && !typed.length && (
         <span className="text-xs text-muted">This line already has every job keyword. You can type one below.</span>
       )}
       <div className="flex gap-1.5">
@@ -256,20 +259,20 @@ function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          disabled={!picked.length || ai.disabled}
+          disabled={!changes.length || ai.disabled}
           onClick={() => {
             ai.rewrite(line.id, picked, false);
             setOpen(false);
           }}
           className="h-8 rounded-md bg-accent px-3 text-[13px] font-medium text-white disabled:opacity-50"
         >
-          {picked.length ? `Rewrite with ${picked.length} keyword${picked.length > 1 ? "s" : ""}` : "Pick keywords"}
+          {label}
         </button>
         <button
           type="button"
           onClick={() => {
             setOpen(false);
-            setPicked([]);
+            setPicked(added);
           }}
           className="h-8 rounded-md px-2 text-[13px] text-muted hover:bg-sunken"
         >
@@ -338,13 +341,8 @@ function Lines({
                   ? () => keywordAi.rewrite(b.id, provenance[b.id]!.keywords!, true)
                   : undefined
               }
-              onRemoveKeyword={
-                keywordAi && !keywordAi.disabled && provenance[b.id]
-                  ? (k) => keywordAi.rewrite(b.id, addedKeywords(provenance[b.id]!).filter((x) => x !== k), false)
-                  : undefined
-              }
             />
-            {keywordAi && <LineKeywords line={b} ai={keywordAi} />}
+            {keywordAi && <LineKeywords line={b} history={provenance[b.id]} ai={keywordAi} />}
           </div>
         </div>
       ))}
