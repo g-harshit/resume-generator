@@ -169,8 +169,9 @@ export function FitPanel({
             {busy === "fit" ? "Fitting… (20–60 s)" : `Fit to ${plural(goal, "page")} for me`}
           </button>
           <p className="text-xs leading-normal text-muted">
-            Narrows the margins first; then keeps the most lines for your latest role and
-            condenses older ones. Nothing new is added — and you can undo it.
+            Takes out any extra spacing used to fill the page, then narrows the margins, then
+            keeps the most lines for your latest role and condenses older ones. Nothing new is
+            added — and you can undo it.
           </p>
         </>
       )}

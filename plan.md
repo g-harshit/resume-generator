@@ -436,6 +436,9 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
       keeps the pages (found by halving), so the last line sits on the bottom margin.
       When even that can't fill it, it says how full the page is and to add lines
       (it used to say "already full" once spacing was maxed, on a page 80% full).
+      Fitting to fewer pages takes the fill stretch out first (it was only filling room
+      the content no longer leaves), then refills; found when a section shown again
+      after filling pushed the resume to two pages and Fit couldn't bring it back.
       Margins are the person's choice and aren't touched. Runs automatically when a
       resume is made or re-tailored, from "Fill the page" in the Fit panel, and after
       shortening to spread the remainder. Page fill is measured from WeasyPrint's line

@@ -350,13 +350,40 @@ def fit_to_pages(
     if before <= target:
         return fill_page(resume, layout, slug, profile or resume, job, provider, provenance, target)
 
+    def respaced(result: FitResult) -> FitResult:
+        """`result`, spread again over its last page (layout only, nothing added)."""
+        spaced = fill_page(
+            result.resume,
+            result.layout,
+            slug,
+            result.resume,
+            job,
+            provider,
+            target=target,
+            add_content=False,
+        )
+        if spaced.layout != result.layout:
+            result.layout = spaced.layout
+            result.pages_after = spaced.pages_after
+            result.steps += [s for s in spaced.steps if "as far as" not in s]
+        return result
+
     steps: list[str] = []
+    # A page stretched to fill it (larger text, more spacing) is the first thing to
+    # give back: it was only ever filling room, which this content no longer leaves.
+    if layout.spacing or layout.font_scale:
+        layout = layout.model_copy(update={"spacing": None, "font_scale": None})
+        steps.append("Took out the extra spacing and text size used to fill the page.")
+        pages = count_pages(resume, slug, layout)
+        if pages <= target:
+            return respaced(FitResult(resume, layout, {}, before, pages, steps))
+
     narrow = layout.model_copy(update={"margins": "narrow"})
     if layout.margins != "narrow":
         steps.append("Narrowed the margins on all four sides.")
         pages = count_pages(resume, slug, narrow)
         if pages <= target:
-            return FitResult(resume, narrow, {}, before, pages, steps)
+            return respaced(FitResult(resume, narrow, {}, before, pages, steps))
 
     order = _by_recency(resume)
     result = FitResult(resume, narrow, {}, before, before, steps)
@@ -380,13 +407,7 @@ def fit_to_pages(
         )
         if pages <= target:
             # Shortening overshoots a little: spread what's left over the last page.
-            spaced = fill_page(
-                shorter, narrow, slug, resume, job, provider, target=target, add_content=False
-            )
-            if spaced.layout.spacing:
-                result.layout = spaced.layout
-                result.steps += spaced.steps
-            return result
+            return respaced(result)
     result.steps.append(
         f"Still {result.pages_after} pages. Try hiding a section, or shortening a role further."
     )

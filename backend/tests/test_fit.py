@@ -452,3 +452,15 @@ def test_fill_says_honestly_when_the_layout_cant_stretch_further():
     tiny = tiny.model_copy(update={"summary": "", "skills": [], "education": []})
     result = fill_page(tiny, Layout(), "classic", tiny, JOB, StubProvider(), add_content=False)
     assert any("as far as the layout can stretch" in s for s in result.steps)
+
+
+def test_fitting_takes_out_the_fill_stretch_first():
+    # Filled to one page, then a section came back and it ran to two: fitting to one
+    # page undoes the stretch and fills again, without condensing anything.
+    stretched = Layout(spacing=5.0, font_scale=1.2)
+    assert fit_service.count_pages(PROFILE, "classic", stretched) > 1
+    result = fit_to_pages(PROFILE, stretched, "classic", 1, JOB, StubProvider())
+    assert result.pages_after == 1
+    assert fit_service.count_pages(result.resume, "classic", result.layout) == 1
+    assert result.resume == PROFILE and result.layout.margins == "normal"
+    assert result.steps[0].startswith("Took out the extra spacing")
