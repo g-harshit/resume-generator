@@ -120,6 +120,11 @@ def _margin_css(mm: int) -> str:
     return f"@page {{ margin: {mm}mm; }}\n@media screen {{ .page {{ padding: {mm}mm; }} }}\n"
 
 
+def _font_size(slug: str) -> float:
+    found = re.search(r"body\s*{[^}]*font-size:\s*([\d.]+)pt", _css(f"{slug}.css"))
+    return float(found.group(1)) if found else 10.0
+
+
 def _line_height(slug: str) -> float:
     found = re.search(r"body\s*{[^}]*line-height:\s*([\d.]+)", _css(f"{slug}.css"))
     return float(found.group(1)) if found else 1.35
@@ -127,7 +132,7 @@ def _line_height(slug: str) -> float:
 
 def _spacing_css(s: float, slug: str) -> str:
     """base.css's gaps, `s` times over: more room between sections, entries and lines,
-    and a little more between the lines of text (up to 12% at the most spacing)."""
+    and a little more between the lines of text (at most 15% more)."""
     gaps = {
         ".head": ("margin-bottom", 0.9),
         ".section": ("margin-top", 0.85),
@@ -137,7 +142,8 @@ def _spacing_css(s: float, slug: str) -> str:
         ".skills p": ("margin-top", 0.2),
     }
     css = " ".join(f"{sel} {{ {prop}: {em * s:.3f}em; }}" for sel, (prop, em) in gaps.items())
-    leading = _line_height(slug) * (1 + 0.12 * (s - 1))
+    # Lines of one bullet stay close: their leading grows a little, the gaps the rest.
+    leading = _line_height(slug) * (1 + min(0.15, 0.12 * (s - 1)))
     return css + f" li {{ margin: {0.12 * s:.3f}em 0; }} body {{ line-height: {leading:.3f}; }}\n"
 
 
@@ -148,6 +154,8 @@ def _layout_css(layout: Layout, slug: str) -> Markup:
     elif layout.margins == "custom" and layout.margin_mm is not None:
         css = _margin_css(layout.margin_mm)
         css += _TIGHT_CSS if layout.margin_mm <= NARROW_MM else ""
+    if layout.font_scale and layout.font_scale > 1:
+        css += f"body {{ font-size: {_font_size(slug) * layout.font_scale:.2f}pt; }}\n"
     if layout.spacing and layout.spacing > 1:
         css += _spacing_css(layout.spacing, slug)
     return Markup(css)

@@ -354,6 +354,7 @@ def test_layout_is_saved_and_used_for_the_preview(client, auth, resume):
         "margin_mm": None,
         "hidden_header": [],
         "spacing": None,
+        "font_scale": None,
     }
     html = client.get(f"/resumes/{resume['id']}/preview", headers=auth).json()["html"]
     assert "<h2>Summary</h2>" not in html
@@ -435,3 +436,19 @@ def test_a_merge_no_longer_in_the_resume_doesnt_hide_lines():
     result = fill_page(short, Layout(), "classic", PROFILE, JOB, StubProvider(), stale)
     lines = {b.id for e in result.resume.experience for b in e.bullets}
     assert {"b_kafka", "b_team"} <= lines
+
+
+def test_a_short_resume_is_filled_to_the_bottom_margin():
+    # Larger text first, then spacing: a short resume reaches its bottom margin.
+    # Half a page of content (54%) to begin with.
+    result = fill_page(PROFILE, Layout(), "classic", PROFILE, JOB, StubProvider())
+    pages, fill = fit_service._fill(PROFILE, "classic", result.layout)
+    assert pages == 1 and fill >= fit_service.FULL
+    assert result.layout.font_scale and result.layout.font_scale > 1
+
+
+def test_fill_says_honestly_when_the_layout_cant_stretch_further():
+    tiny = _short(PROFILE).model_copy(update={"experience": _short(PROFILE).experience[:1]})
+    tiny = tiny.model_copy(update={"summary": "", "skills": [], "education": []})
+    result = fill_page(tiny, Layout(), "classic", tiny, JOB, StubProvider(), add_content=False)
+    assert any("as far as the layout can stretch" in s for s in result.steps)

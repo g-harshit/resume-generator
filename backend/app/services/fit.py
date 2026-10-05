@@ -402,7 +402,26 @@ def fit_to_pages(
 # lines grow until the last page is full. Margins are the person's choice: left alone.
 
 FULL = 0.93  # a last page this full is done
-_SPACINGS = [1.15, 1.3, 1.45, 1.6, 1.8, 2.0]
+MAX_FONT_SCALE = 1.2
+MAX_SPACING = 5.0
+
+
+def _largest(resume, layout: Layout, field: str, low: float, high: float, fits, rounds: int = 6):
+    """The largest `field` in (low, high] that keeps the pages, by halving: (layout,
+    pages, fill), or None if even a little more doesn't fit."""
+    best = None
+    ok, p, f = fits(resume, layout.model_copy(update={field: high}))
+    if ok:
+        return layout.model_copy(update={field: high}), p, f
+    for _ in range(rounds):
+        mid = round((low + high) / 2, 3)
+        trial = layout.model_copy(update={field: mid})
+        ok, p, f = fits(resume, trial)
+        if ok:
+            best, low = (trial, p, f), mid
+        else:
+            high = mid
+    return best
 
 
 def _fill(resume: ResumeData, slug: str, layout: Layout) -> tuple[int, float]:
@@ -514,23 +533,28 @@ def fill_page(
                 resume, pages, fill = trial, p, f
                 steps.append("Wrote a longer summary from what's in your resume.")
 
-    # 3. More room between sections, entries and lines.
+    # 3. Slightly larger text, then more room between sections, entries and lines: each
+    # the most that keeps the pages, so the last line sits on the bottom margin.
     if fill < FULL:
-        best = None
-        for spacing in _SPACINGS:
-            if spacing <= (layout.spacing or 1):
-                continue
-            trial = layout.model_copy(update={"spacing": spacing})
-            ok, p, f = fits(resume, trial)
-            if not ok:
-                break
-            best, pages, fill = trial, p, f
+        for field, top, step in (
+            ("font_scale", MAX_FONT_SCALE, "Made the text a little larger."),
+            ("spacing", MAX_SPACING, "Spaced sections and lines out to use the whole page."),
+        ):
             if fill >= FULL:
                 break
-        if best:
-            layout = best
-            steps.append("Spaced sections and lines out to use the whole page.")
+            low = getattr(layout, field) or 1.0
+            if low >= top:
+                continue
+            found = _largest(resume, layout, field, low, top, fits)
+            if found:
+                layout, pages, fill = found
+                steps.append(step)
 
-    if not steps:
+    if fill < FULL:
+        steps.append(
+            f"The last page is {fill:.0%} full: that's as far as the layout can stretch. "
+            "Add lines (yours left out, or new ones in your profile) to fill the rest."
+        )
+    elif not steps:
         steps.append("The page is already full.")
     return FitResult(resume, layout, provenance, before, pages, steps)

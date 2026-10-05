@@ -237,12 +237,14 @@ export function FitPanel({
         {layout.margins !== "normal" && (
           <p className="text-xs text-muted">The same on all four sides.</p>
         )}
-        {layout.spacing && layout.spacing > 1 && (
-          <p className="flex items-center gap-2 text-xs text-muted">
-            Spacing {layout.spacing.toFixed(2).replace(/0$/, "")}× to fill the page.
+        {((layout.spacing ?? 1) > 1 || (layout.font_scale ?? 1) > 1) && (
+          <p className="flex flex-wrap items-center gap-x-2 text-xs text-muted">
+            Stretched to fill the page:
+            {(layout.font_scale ?? 1) > 1 && ` text ${Math.round(((layout.font_scale ?? 1) - 1) * 100)}% larger,`}
+            {(layout.spacing ?? 1) > 1 && ` spacing ${(layout.spacing ?? 1).toFixed(1)}×.`}
             <button
               type="button"
-              onClick={() => actions.setLayout((l) => ({ ...l, spacing: null }))}
+              onClick={() => actions.setLayout((l) => ({ ...l, spacing: null, font_scale: null }))}
               className="text-accent underline-offset-2 hover:underline"
             >
               Reset

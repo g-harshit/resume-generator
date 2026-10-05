@@ -38,7 +38,10 @@ class Layout(BaseModel):
     order: list[Section] | None = None
     # Room between sections, entries and lines, as a multiple of the usual: set by
     # "fill the page" so a resume with room to spare uses its whole last page.
-    spacing: float | None = Field(default=None, ge=1.0, le=2.0)
+    spacing: float | None = Field(default=None, ge=1.0, le=5.0)
+    # The body text a little larger (×, up to 20%): "fill the page" tries this before
+    # spacing, so a short resume reads larger rather than full of gaps.
+    font_scale: float | None = Field(default=None, ge=1.0, le=1.2)
 
     @field_validator("order")
     @classmethod

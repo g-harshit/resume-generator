@@ -430,8 +430,12 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] **Fill the page** (`fill_page` in `services/fit.py`; `Layout.spacing`). A resume with
       room on its last page uses it, never adding a page: (1) the person's own lines and
       projects left out of this resume come back, newest role first; (2) a longer
-      summary from the resume's facts (Fit only, not at creation); (3) more room between
-      sections, entries and lines, and up to 12% more line height (`spacing` 1–2×).
+      summary from the resume's facts (Fit only, not at creation); (3) slightly larger body
+      text (`font_scale` up to 1.2×), then more room between sections, entries and
+      lines (`spacing` up to 5×, line height at most +15%), each the largest value that
+      keeps the pages (found by halving), so the last line sits on the bottom margin.
+      When even that can't fill it, it says how full the page is and to add lines
+      (it used to say "already full" once spacing was maxed, on a page 80% full).
       Margins are the person's choice and aren't touched. Runs automatically when a
       resume is made or re-tailored, from "Fill the page" in the Fit panel, and after
       shortening to spread the remainder. Page fill is measured from WeasyPrint's line
