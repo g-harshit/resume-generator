@@ -541,9 +541,9 @@ def bridge_skills(
 
 
 class KeywordsIn(AiEditIn):
-    keywords: list[Annotated[str, Field(min_length=1, max_length=60)]] = Field(
-        min_length=1, max_length=8
-    )
+    # The keywords the line should have now: adding one, or leaving one out to remove
+    # it. Empty puts the line back as it was before any keywords.
+    keywords: list[Annotated[str, Field(min_length=1, max_length=60)]] = Field(max_length=8)
     again: bool = False  # "Rewrite again": a different wording of the same keywords
 
 
@@ -551,7 +551,8 @@ class KeywordsIn(AiEditIn):
 def line_keywords(
     resume_id: int, line_id: str, body: KeywordsIn, user: CurrentUser, session: SessionDep
 ) -> ResumeOut:
-    """Rewrite one line to include the keywords the person chose for it."""
+    """Rewrite one line to include the keywords the person chose for it (and only
+    those: one left out of `keywords` is removed)."""
     resume, _ = _ai_edit_start(session, user, resume_id, body.version)
     content = ResumeData.model_validate(resume.content)
     entry = next(
@@ -566,10 +567,27 @@ def line_keywords(
         raise HTTPException(status.HTTP_404_NOT_FOUND, "That line isn't in this resume.")
     bullet = next(b for b in entry.bullets if b.id == line_id)
     before = resume.provenance.get(line_id, {})
-    # Rewrite from the line as it was before any keyword rewrite, so "again" doesn't
-    # stack keywords on keywords.
-    base = before.get("base") if before.get("status") == "keywords" else bullet.text
+    # Rewrite from the line as it was before any keywords (chosen, or named by
+    # bridging), so "again" and removing one don't stack keywords on keywords.
+    added_before = before.get("status") in ("keywords", "bridged")
+    base = (before.get("base") or before.get("original")) if added_before else bullet.text
     keywords = list(dict.fromkeys(k.strip() for k in body.keywords if k.strip()))
+    original = before.get("original") or base
+    if not keywords:
+        if not added_before:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Pick at least one keyword.")
+        bullet.text = base
+        provenance = {
+            **resume.provenance,
+            line_id: {
+                "original": original,
+                "status": "kept" if base == original else "reworded",
+                "attempted": None,
+                "reason": None,
+            },
+        }
+        _ai_edit_save(session, user, resume, body.version, content, provenance)
+        return _out(session, resume)
     where = getattr(entry, "company", None) or getattr(entry, "name", "")
     try:
         text = add_keywords(
@@ -589,7 +607,7 @@ def line_keywords(
     provenance = {
         **resume.provenance,
         line_id: {
-            "original": before.get("original") or base,
+            "original": original,
             "status": "keywords",
             "keywords": keywords,
             "base": base,

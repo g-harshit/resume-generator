@@ -740,3 +740,36 @@ def test_keywords_for_a_line_not_in_the_resume_are_not_found(client, auth, ready
         json={"version": 1, "keywords": ["gRPC"]},
     )
     assert missing.status_code == 404
+
+
+def test_keywords_can_be_removed_one_at_a_time_and_all(client, auth, ready):
+    from tests.test_keywords import answers
+
+    stub.answer("tailor", lambda text: plan())
+    resume = make(client, auth, ready).json()
+    url = f"/resumes/{resume['id']}/lines/b_kafka/keywords"
+    base = resume["content"]["experience"][0]["bullets"][0]["text"]
+
+    answers(base[:-1] + " via gRPC on Kubernetes.")
+    r = client.post(url, headers=auth, json={"version": 1, "keywords": ["gRPC", "Kubernetes"]})
+    assert r.json()["provenance"]["b_kafka"]["keywords"] == ["gRPC", "Kubernetes"]
+
+    # Remove one: rewritten from the line before any keywords, with the rest.
+    answers(base[:-1] + " via gRPC.")
+    r = client.post(url, headers=auth, json={"version": 2, "keywords": ["gRPC"]})
+    sent = json.loads([c["text"] for c in stub.calls if c["task"] == "keyword_rewrite"][-1])
+    assert sent["line"] == base and sent["keywords"] == ["gRPC"]
+    assert r.json()["provenance"]["b_kafka"]["keywords"] == ["gRPC"]
+
+    # Remove the last: the line goes back, no model call.
+    calls = len(stub.calls)
+    r = client.post(url, headers=auth, json={"version": 3, "keywords": []})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["content"]["experience"][0]["bullets"][0]["text"] == base
+    assert body["provenance"]["b_kafka"]["status"] == "reworded"  # tailoring's wording
+    assert "keyword_rewrite" not in [c["task"] for c in stub.calls[calls:]]
+
+    # Nothing to remove on a line without keywords.
+    r = client.post(url, headers=auth, json={"version": 4, "keywords": []})
+    assert r.status_code == 422

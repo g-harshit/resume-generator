@@ -394,6 +394,8 @@ def bridge(
             "original": original(line_id),
             "status": "bridged",
             "skills": [*earlier, *({"skill": c.skill, "evidence": c.evidence} for c in cs)],
+            # The line before any skills were named: where removing them goes back to.
+            "base": before.get("base") if earlier else lines[line_id].text,
             "attempted": None,
             "reason": None,
         }

@@ -447,6 +447,10 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] A keyword can go on several lines: each line's picker offers every job term that
       line doesn't name (`match.missing_by_line`), in two groups — "Not in your resume
       yet" and "In other lines — add here too".
+- [x] Added keywords are removable one by one: under the line, "Added keywords:" chips with
+      ×. Removing one rewrites the line from `base` (the line before any keywords) with
+      the rest; removing the last puts `base` back, with no model call. Works for the
+      person's picks and for bridged skills (bridging now records `base` too).
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

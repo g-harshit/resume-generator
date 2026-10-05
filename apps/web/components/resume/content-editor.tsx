@@ -54,17 +54,32 @@ function Card({ title, note, children }: { title: string; note?: string; childre
   );
 }
 
+/** The keywords added to a line: the person's picks, or skills its words proved. */
+function addedKeywords(history: LineHistory): string[] {
+  if (history.status === "keywords") return history.keywords ?? [];
+  if (history.status === "bridged") return (history.skills ?? []).map((s) => s.skill);
+  return [];
+}
+
+function evidenceFor(history: LineHistory, keyword: string): string | undefined {
+  const proof = history.skills?.find((s) => s.skill === keyword)?.evidence;
+  return proof ? `Your line says “${proof}”` : "You chose this keyword";
+}
+
 /** Where this line's wording came from, and the way back to the person's own. */
 function LineOrigin({
   text,
   history,
   onUseOriginal,
   onRewriteAgain,
+  onRemoveKeyword,
 }: {
   text: string;
   history: LineHistory | undefined;
   onUseOriginal: () => void;
   onRewriteAgain?: () => void;
+  /** Rewrite the line without this keyword (the last one puts the line back). */
+  onRemoveKeyword?: (keyword: string) => void;
 }) {
   if (!history || text === history.original) {
     return history?.status === "reverted" ? (
@@ -73,15 +88,35 @@ function LineOrigin({
       </span>
     ) : null;
   }
+  const added = addedKeywords(history);
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-      <span className="font-medium text-accent-ink">
-        {history.status === "bridged" && history.skills?.length
-          ? `Added ${history.skills.map((s) => `${s.skill} (your line says “${s.evidence}”)`).join(", ")}`
-          : history.status === "keywords" && history.keywords?.length
-            ? `Added your keywords: ${history.keywords.join(", ")}`
-            : ORIGIN_LABEL[history.status]}
-      </span>
+      {added.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="font-medium text-accent-ink">Added keywords:</span>
+          {added.map((k) => (
+            <span
+              key={k}
+              title={evidenceFor(history, k)}
+              className="inline-flex items-center gap-0.5 rounded-full bg-accent-soft py-0.5 pr-0.5 pl-2 text-accent-ink"
+            >
+              {k}
+              {onRemoveKeyword && (
+                <button
+                  type="button"
+                  aria-label={`Remove ${k} from this line`}
+                  onClick={() => onRemoveKeyword(k)}
+                  className="flex size-5 items-center justify-center rounded-full hover:bg-accent hover:text-white"
+                >
+                  ×
+                </button>
+              )}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <span className="font-medium text-accent-ink">{ORIGIN_LABEL[history.status]}</span>
+      )}
       {history.original && (
         <details className="text-muted">
           <summary className="cursor-pointer">See original</summary>
@@ -301,6 +336,11 @@ function Lines({
               onRewriteAgain={
                 keywordAi && !keywordAi.disabled && provenance[b.id]?.keywords?.length
                   ? () => keywordAi.rewrite(b.id, provenance[b.id]!.keywords!, true)
+                  : undefined
+              }
+              onRemoveKeyword={
+                keywordAi && !keywordAi.disabled && provenance[b.id]
+                  ? (k) => keywordAi.rewrite(b.id, addedKeywords(provenance[b.id]!).filter((x) => x !== k), false)
                   : undefined
               }
             />
