@@ -26,7 +26,7 @@ from app.routers.templates import PreviewOut, pdf_filename, preview_of
 from app.schemas.layout import Layout, default_layout
 from app.schemas.resume import ResumeData
 from app.services import rate_limit
-from app.services.bridge import bridge, missing_skills
+from app.services.bridge import bridge, missing_by_line, missing_skills
 from app.services.cover_letter import write_cover_letter
 from app.services.fit import (
     FitError,
@@ -99,6 +99,7 @@ def _match(session: Session, resume: Resume) -> dict | None:
     return {
         **match_job(content, job.parsed),
         "missing_in_lines": missing_skills(content, job.parsed),
+        "missing_by_line": missing_by_line(content, job.parsed),
     }
 
 

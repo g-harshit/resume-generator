@@ -177,11 +177,8 @@ def _key(term: str) -> str:
     return normalise(alternatives(term)[0])
 
 
-def missing_skills(resume: ResumeData, job: dict) -> list[str]:
-    """The job's skills and keywords that none of the resume's lines name, in the
-    job's order, must-haves first. The Skills list and the summary don't count: the
-    point is to show the skill in the work."""
-    lines = " \n ".join(b.text for e in [*resume.experience, *resume.projects] for b in e.bullets)
+def job_terms(job: dict) -> list[str]:
+    """The job's skills and keywords, once each, in the job's order: must-haves first."""
     seen: set[str] = set()
     out = []
     for term in [
@@ -192,9 +189,26 @@ def missing_skills(resume: ResumeData, job: dict) -> list[str]:
         key = _key(term)
         if key and key not in seen:
             seen.add(key)
-            if not names(term, lines):
-                out.append(term.strip())
-    return out[:MAX_SKILLS]
+            out.append(term.strip())
+    return out
+
+
+def missing_skills(resume: ResumeData, job: dict) -> list[str]:
+    """The job's skills and keywords that none of the resume's lines name. The Skills
+    list and the summary don't count: the point is to show the skill in the work."""
+    lines = " \n ".join(b.text for e in [*resume.experience, *resume.projects] for b in e.bullets)
+    return [t for t in job_terms(job) if not names(t, lines)][:MAX_SKILLS]
+
+
+def missing_by_line(resume: ResumeData, job: dict) -> dict[str, list[str]]:
+    """Per line: the job's terms that line doesn't name (it may still be elsewhere), so
+    a keyword used on one line can be added to others too."""
+    terms = job_terms(job)
+    return {
+        b.id: [t for t in terms if not names(t, b.text)]
+        for e in [*resume.experience, *resume.projects]
+        for b in e.bullets
+    }
 
 
 def _squash(text: str) -> str:

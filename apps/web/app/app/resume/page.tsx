@@ -349,6 +349,7 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
               match
                 ? {
                     gaps: match.missing_in_lines ?? [],
+                    byLine: match.missing_by_line ?? {},
                     busyLine: aiBusy?.startsWith("kw:") ? aiBusy.slice(3) : null,
                     disabled: aiBusy !== null,
                     error: keywordError,

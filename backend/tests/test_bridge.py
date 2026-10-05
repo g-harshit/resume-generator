@@ -259,3 +259,13 @@ def test_an_ai_failure_leaves_the_resume_as_it_was():
     stub.answer("bridge_claims", AIProviderError("down"))
     assert bridge(resume, prov, PROFILE, JOB, StubProvider()) == []
     assert resume == PROFILE
+
+
+def test_a_keyword_in_one_line_is_still_offered_for_the_others():
+    from app.services.bridge import missing_by_line
+
+    job = {"must_have": ["Django", "Kubernetes"]}
+    per_line = missing_by_line(PROFILE, job)
+    assert per_line["b_api"] == ["Kubernetes"]  # this line already says Django
+    assert per_line["b_ship"] == ["Django", "Kubernetes"]  # Django is elsewhere: still offered
+    assert missing_skills(PROFILE, job) == ["Kubernetes"]

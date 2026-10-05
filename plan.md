@@ -444,6 +444,9 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] "Not in this resume yet" (was "Not in your profile"): the job-match panel and the
       keyword editor now use the same matcher (`match.names`: "ecommerce" = "e-commerce",
       "backend" names "Backend development"), so a keyword added to a line leaves it.
+- [x] A keyword can go on several lines: each line's picker offers every job term that
+      line doesn't name (`match.missing_by_line`), in two groups — "Not in your resume
+      yet" and "In other lines — add here too".
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

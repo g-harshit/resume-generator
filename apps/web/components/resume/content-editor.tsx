@@ -22,6 +22,8 @@ type Props = {
 export type KeywordAi = {
   /** The job's terms that no line names yet. */
   gaps: string[];
+  /** Per line id: the job's terms that line doesn't name, wherever else they are. */
+  byLine: Record<string, string[]>;
   /** The line being rewritten, if any. */
   busyLine: string | null;
   disabled: boolean;
@@ -101,13 +103,57 @@ function LineOrigin({
   );
 }
 
+function Chips({
+  label,
+  keys,
+  picked,
+  toggle,
+}: {
+  label: string;
+  keys: string[];
+  picked: string[];
+  toggle: (k: string) => void;
+}) {
+  if (!keys.length) return null;
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">{label}</span>
+      <ul className="flex flex-wrap gap-1.5" aria-label={label}>
+        {keys.map((k) => {
+          const on = picked.includes(k);
+          return (
+            <li key={k}>
+              <button
+                type="button"
+                aria-pressed={on}
+                onClick={() => toggle(k)}
+                className={`rounded-full border px-2.5 py-0.5 text-[13px] ${
+                  on ? "border-accent bg-accent text-white" : "border-line-strong bg-surface text-ink hover:bg-sunken"
+                }`}
+              >
+                {on ? "✓ " : "+ "}
+                {k}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 /** "Add keywords" under a line: pick from the job's missing terms (or type one), rewrite. */
 function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<string[]>([]);
   const [other, setOther] = useState("");
   const lower = line.text.toLowerCase();
-  const offered = [...ai.gaps.filter((g) => !lower.includes(g.toLowerCase())), ...picked.filter((p) => !ai.gaps.includes(p))];
+  // Older data has no per-line list: fall back to the terms no line names.
+  const forLine = ai.byLine[line.id] ?? ai.gaps.filter((g) => !lower.includes(g.toLowerCase()));
+  const nowhere = forLine.filter((k) => ai.gaps.includes(k));
+  const elsewhere = forLine.filter((k) => !ai.gaps.includes(k));
+  const typed = picked.filter((p) => !forLine.includes(p));
+  const offered = [...nowhere, ...elsewhere, ...typed];
   const busy = ai.busyLine === line.id;
 
   if (busy) return <span className="text-xs text-muted" role="status">Rewriting this line…</span>;
@@ -146,28 +192,12 @@ function LineKeywords({ line, ai }: { line: Bullet; ai: KeywordAi }) {
         Pick the keywords for this line. AI rewrites it to include all of them.
       </span>
       {offered.length > 0 ? (
-        <ul className="flex flex-wrap gap-1.5" aria-label="Job keywords not in your lines">
-          {offered.map((k) => {
-            const on = picked.includes(k);
-            return (
-              <li key={k}>
-                <button
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => toggle(k)}
-                  className={`rounded-full border px-2.5 py-0.5 text-[13px] ${
-                    on ? "border-accent bg-accent text-white" : "border-line-strong bg-surface text-ink hover:bg-sunken"
-                  }`}
-                >
-                  {on ? "✓ " : "+ "}
-                  {k}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <>
+          <Chips label="Not in your resume yet" keys={[...nowhere, ...typed]} picked={picked} toggle={toggle} />
+          <Chips label="In other lines — add here too" keys={elsewhere} picked={picked} toggle={toggle} />
+        </>
       ) : (
-        <span className="text-xs text-muted">Every job keyword is already in your lines. You can type one below.</span>
+        <span className="text-xs text-muted">This line already has every job keyword. You can type one below.</span>
       )}
       <div className="flex gap-1.5">
         <input

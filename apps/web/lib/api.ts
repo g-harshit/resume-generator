@@ -193,8 +193,11 @@ export type DraftedLines = { lines: string[]; left_out: { text: string; reason: 
 export type ResumeFull = ResumeSummary & {
   content: ResumeData;
   provenance: Record<string, LineHistory>;
-  /** `missing_in_lines`: the job's terms no line names, to offer for a line. */
-  match: (NonNullable<Job["match"]> & { missing_in_lines?: string[] }) | null;
+  /** `missing_in_lines`: the job's terms no line names. `missing_by_line`: per line id,
+   * the job's terms that line doesn't name (they may be in other lines). */
+  match:
+    | (NonNullable<Job["match"]> & { missing_in_lines?: string[]; missing_by_line?: Record<string, string[]> })
+    | null;
   cover_letter: CoverLetter | null;
   layout: Layout;
 };
