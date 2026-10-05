@@ -133,6 +133,7 @@ def test_skills_the_line_proves_are_named_and_marked():
         "original": "Built REST APIs in Django for the billing team.",
         "status": "bridged",
         "skills": [{"skill": "Python", "evidence": "Django"}],
+        "base": "Built REST APIs in Django for the billing team.",
         "attempted": None,
         "reason": None,
     }
