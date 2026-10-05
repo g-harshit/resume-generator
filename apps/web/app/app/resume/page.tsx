@@ -198,16 +198,31 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
   }
 
   // The preview is rendered on the server from what's saved, so it follows saves.
+  // Which save and template the preview on screen was rendered from.
+  const previewKey = `${data.template}:${savedVersion}`;
+  const [renderedFor, setRenderedFor] = useState<string | null>(null);
   useEffect(() => {
     let cancelled = false;
+    const key = `${data.template}:${savedVersion}`;
     api
       .previewResume(id, data.template)
       .then((p) => !cancelled && setPreview(p))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => !cancelled && setRenderedFor(key));
     return () => {
       cancelled = true;
     };
   }, [id, data.template, savedVersion]);
+  const previewLoading = renderedFor !== previewKey;
+  // Not what the PDF will be yet: an edit not saved, the AI working, or a new render on
+  // its way. Said over the preview, so nobody downloads or judges a stale page.
+  const previewStale: string | null = aiBusy
+    ? "Applying changes…"
+    : save.kind === "unsaved" || save.kind === "saving"
+      ? "Saving your changes…"
+      : previewLoading
+        ? "Updating the preview…"
+        : null;
 
   async function download() {
     setBusy("pdf");
@@ -375,11 +390,34 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
           <span className="text-sm text-muted">
             {preview ? `${preview.pages} page${preview.pages > 1 ? "s" : ""} · A4 · updates as you save` : "Laying out…"}
           </span>
-          {preview ? (
-            <PdfPages images={preview.images} links={preview.links} title={resume.title} />
-          ) : (
-            <div className="aspect-[210/297] rounded-lg border border-line bg-surface" />
-          )}
+          <div className="relative" aria-busy={previewStale !== null}>
+            <div
+              className={`transition-[filter,opacity] duration-200 ${
+                previewStale ? "pointer-events-none opacity-60 blur-[3px]" : ""
+              }`}
+            >
+              {preview ? (
+                <PdfPages images={preview.images} links={preview.links} title={resume.title} />
+              ) : (
+                <div className="aspect-[210/297] rounded-lg border border-line bg-surface" />
+              )}
+            </div>
+            {previewStale && (
+              <div className="absolute inset-0 flex justify-center">
+                {/* Sticky, so the loader stays in view however far the pages are scrolled. */}
+                <div
+                  role="status"
+                  className="sticky top-1/3 mt-24 flex h-fit items-center gap-2.5 rounded-full border border-line bg-surface px-4 py-2 text-sm shadow-md"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="size-4 animate-spin rounded-full border-2 border-accent border-t-transparent"
+                  />
+                  {previewStale}
+                </div>
+              </div>
+            )}
+          </div>
         </section>
 
         <div className="flex flex-col gap-3 lg:col-span-2 xl:col-span-1">

@@ -1,5 +1,5 @@
 // The extension, end to end, in real Chromium: sign-in handoff from the website, reading
-// a job posting, tailoring, downloading the PDF. Against the local stack:
+// a job posting, tailoring, editing a line's keywords, downloading the PDF. Against the local stack:
 //
 //   make dev                                   # API on 8100, website on 3100
 //   E2E_TOKEN=<a local test account's token> pnpm --filter @rg/extension e2e
@@ -101,6 +101,23 @@ try {
   await panel.getByText("Your resume is ready").waitFor({ timeout: 180_000 });
   check(true, "resume tailored");
   await panel.screenshot({ path: path.join(OUT, "panel-ready.png") });
+
+  step("add a job keyword to a line, then remove it (one call each)");
+  const keywords = panel.getByRole("region", { name: "Job keywords" });
+  await keywords.getByRole("button", { name: /Add job keywords|Edit keywords/ }).first().click();
+  const chip = keywords.locator("button[aria-pressed=false]").first();
+  const term = (await chip.innerText()).replace(/^[+✓]\s*/, "");
+  await chip.click();
+  await keywords.getByRole("button", { name: /^Apply: add 1/ }).click();
+  await keywords.getByText("Rewriting this line…").waitFor({ state: "detached", timeout: 90_000 });
+  await keywords.getByRole("button", { name: "Edit keywords" }).first().waitFor({ timeout: 10_000 });
+  check(true, `"${term}" added to a line`);
+  await panel.screenshot({ path: path.join(OUT, "panel-keywords.png"), fullPage: true });
+  await keywords.getByRole("button", { name: "Edit keywords" }).first().click();
+  await keywords.locator("button[aria-pressed=true]").first().click();
+  await keywords.getByRole("button", { name: /Remove all keywords|Apply: remove 1/ }).click();
+  await keywords.getByText("Rewriting this line…").waitFor({ state: "detached", timeout: 60_000 });
+  check(true, `"${term}" removed again`);
 
   step("download the PDF");
   const [download] = await Promise.all([

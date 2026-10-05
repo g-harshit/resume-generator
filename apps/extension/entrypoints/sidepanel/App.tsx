@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiError, type Resume, type TemplateInfo, type User } from "@/lib/api";
 import { APP_NAME, WEB_URL } from "@/lib/config";
 import { type ExtractedJob, extractJob } from "@/lib/extract";
+import { Keywords } from "./Keywords";
 import { getToken, onTokenChange, setToken } from "@/lib/session";
 
 const MIN_CHARS = 200; // the API's minimum for a job description
@@ -151,8 +152,9 @@ function Header({ user, onSignOut }: { user: User; onSignOut: () => void }) {
   );
 }
 
-function Done({ resume, onBack }: { resume: Resume; onBack: () => void }) {
+function Done({ resume: tailored, onBack }: { resume: Resume; onBack: () => void }) {
   const [downloading, setDownloading] = useState(false);
+  const [resume, setResume] = useState(tailored);
   const missing = resume.match
     ? [...resume.match.must_have, ...resume.match.nice_to_have].filter((m) => !m.covered).map((m) => m.term)
     : [];
@@ -192,13 +194,14 @@ function Done({ resume, onBack }: { resume: Resume; onBack: () => void }) {
       {missing.length > 0 && (
         <div className="flex flex-col gap-1.5 rounded-xl bg-warn-soft px-4 py-3 text-warn-ink">
           <span className="text-sm font-semibold">
-            {missing.length === 1 ? "1 skill" : `${missing.length} skills`} not in your profile
+            {missing.length === 1 ? "1 skill" : `${missing.length} skills`} not in this resume yet
           </span>
           <span className="text-[13px] leading-normal">
-            {missing.join(", ")}. If you have them, open the editor and use &ldquo;I have this&rdquo;.
+            {missing.join(", ")}. If one fits a line, add it below under Job keywords.
           </span>
         </div>
       )}
+      {resume.content && <Keywords resume={resume} onChange={setResume} />}
       <div className="flex flex-col gap-2 pt-2">
         <button type="button" onClick={download} disabled={downloading} className={primary}>
           {downloading ? "Making PDF…" : "Download PDF"}

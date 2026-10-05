@@ -453,6 +453,11 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
       removing all puts `base` back with no model call. The endpoint rewrites from
       `base` (the line before any keywords), for the person's picks and bridged skills
       alike (bridging now records `base` too).
+- [x] The Chrome extension has the same keyword panel (1.0.3): after tailoring, "Job
+      keywords" lists the resume's lines by role, each with "+ Add job keywords" / "Edit
+      keywords" and one Apply. Covered by the extension e2e (add a keyword, remove it).
+- [x] The editor's preview blurs with a loader ("Saving your changes…", "Applying
+      changes…", "Updating the preview…") whenever it isn't what the PDF would be.
 
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)

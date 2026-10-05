@@ -21,12 +21,26 @@ export type Match = {
   total: number;
 };
 export type Job = { id: number; title: string; company: string; location: string; match: Match | null };
+export type Bullet = { id: string; text: string };
+export type LineHistory = {
+  status: string;
+  original: string;
+  keywords?: string[];
+  skills?: { skill: string; evidence: string }[];
+};
 export type Resume = {
   id: number;
   title: string;
   template: string;
-  match: Match | null;
-  provenance: Record<string, { status: string }>;
+  version: number;
+  content: {
+    experience: { id: string; title: string; company: string; bullets: Bullet[] }[];
+    projects: { id: string; name: string; bullets: Bullet[] }[];
+  };
+  /** `missing_in_lines`: job terms no line names; `missing_by_line`: per line, the
+   * job terms that line doesn't name. */
+  match: (Match & { missing_in_lines?: string[]; missing_by_line?: Record<string, string[]> }) | null;
+  provenance: Record<string, LineHistory>;
 };
 
 async function send(path: string, init: RequestInit = {}): Promise<Response> {
@@ -68,6 +82,12 @@ export const api = {
     json<Job>("/jobs", { method: "POST", body: JSON.stringify({ text, url, source: "extension" }) }),
   tailor: (jobId: number, template: string) =>
     json<Resume>("/resumes", { method: "POST", body: JSON.stringify({ job_id: jobId, template }) }),
+  /** Rewrite one line to have exactly these keywords (empty puts it back). */
+  lineKeywords: (resumeId: number, version: number, lineId: string, keywords: string[]) =>
+    json<Resume>(`/resumes/${resumeId}/lines/${encodeURIComponent(lineId)}/keywords`, {
+      method: "POST",
+      body: JSON.stringify({ version, keywords }),
+    }),
   pdf: async (resumeId: number) => {
     const res = await send(`/resumes/${resumeId}/pdf`);
     const name = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "")?.[1];
