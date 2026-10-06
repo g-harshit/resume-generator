@@ -46,12 +46,14 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
         aria-label="Main"
         // On wide screens the sidebar stays put, full height, so the account and sign-out
         // stay at its foot however far the page scrolls.
-        className="flex shrink-0 items-center justify-between gap-1 border-b border-line bg-sunken px-4 py-3 md:sticky md:top-0 md:h-dvh md:w-58 md:flex-col md:items-stretch md:justify-start md:self-start md:overflow-y-auto md:border-r md:border-b-0 md:px-3.5 md:py-6"
+        className="flex shrink-0 flex-wrap items-center md:flex-nowrap justify-between gap-1 border-b border-line bg-sunken px-4 py-3 md:sticky md:top-0 md:h-dvh md:w-58 md:flex-col md:items-stretch md:justify-start md:self-start md:overflow-y-auto md:border-r md:border-b-0 md:px-3.5 md:py-6"
       >
         <Link href="/app" className="font-display text-3xl text-ink hover:text-ink md:px-3 md:pb-6">
           {APP_NAME}
         </Link>
-        <div className="flex gap-1 md:flex-col">
+        {/* Phones: the links get their own row (scrolling sideways if need be), so the
+            header never makes the page wider than the screen. */}
+        <div className="order-last -mx-1 flex w-full gap-1 overflow-x-auto md:order-none md:mx-0 md:w-auto md:flex-col md:overflow-visible">
           {[...NAV, ...(user.is_admin ? [{ href: "/app/admin", label: "Admin" }] : [])].map(({ href, label }) => {
             // Trailing slashes come from the static export (/app/admin/).
             const here = pathname.replace(/\/$/, "") || "/";
@@ -61,7 +63,7 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
                 key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex h-11 items-center rounded-lg px-3 text-[15px] text-ink hover:text-ink ${
+                className={`flex h-11 shrink-0 items-center rounded-lg px-3 text-[15px] whitespace-nowrap text-ink hover:text-ink ${
                   active ? "border border-line bg-surface font-semibold" : "hover:bg-surface/60"
                 }`}
               >
