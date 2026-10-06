@@ -4,13 +4,13 @@ import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: { absolute: `${APP_NAME} — a resume for every job, from the one you already have` },
+  title: { absolute: `${APP_NAME} — a resume for every job, in your own words` },
   description:
-    "Upload your resume once, paste a job description, and get an ATS-friendly resume tailored to it — built only from what's true about you.",
+    "Upload your resume once. For each job, see which of its keywords you cover, add them to the lines they fit, rewrite only the lines you pick, and download an ATS-friendly PDF that fills the page.",
 };
 
 // Every claim on this page is something the product does today. The examples in
-// "It never makes things up" are real rewordings the guard rejected in testing.
+// "When you ask for a rewrite" are real rewordings the guard rejected in testing.
 
 function Check() {
   return (
@@ -20,11 +20,21 @@ function Check() {
   );
 }
 
+function Chip({ children, tone = "accent" }: { children: React.ReactNode; tone?: "accent" | "warn" | "plain" }) {
+  const tones = {
+    accent: "bg-accent-soft text-accent-ink",
+    warn: "border border-dashed border-warn bg-warn-soft text-warn-ink",
+    plain: "border border-line-strong bg-surface text-ink",
+  };
+  return <span className={`rounded-full px-2 py-0.5 text-[12px] ${tones[tone]}`}>{children}</span>;
+}
+
+/** The editor in miniature: the job match, a line given keywords, a line reworded on request. */
 function HeroVisual() {
   return (
     <div aria-hidden="true" className="relative flex flex-col gap-3">
       <div className="rounded-xl border border-line bg-surface p-4 shadow-sm">
-        <div className="text-[11px] font-semibold tracking-wider text-muted uppercase">Senior Backend Engineer — Northwind Labs</div>
+        <div className="text-[11px] font-semibold tracking-wider text-muted uppercase">Tech Lead — Swish</div>
         <div className="mt-3 flex items-center gap-3">
           <div
             className="flex size-14 shrink-0 items-center justify-center rounded-full"
@@ -32,34 +42,41 @@ function HeroVisual() {
           >
             <span className="flex size-10 items-center justify-center rounded-full bg-surface text-sm font-semibold">7/9</span>
           </div>
-          <div className="flex flex-wrap gap-1.5 text-[12px]">
-            {["Go", "PostgreSQL", "Kafka", "AWS", "Terraform", "on-call", "Kubernetes"].map((t) => (
-              <span key={t} className="rounded-full bg-accent-soft px-2 py-0.5 text-accent-ink">
-                ✓ {t}
-              </span>
+          <div className="flex flex-wrap gap-1.5">
+            {["Go", "Kafka", "AWS", "System design", "Microservices", "Mentoring", "CI/CD"].map((t) => (
+              <Chip key={t}>✓ {t}</Chip>
             ))}
-            {["gRPC", "Distributed systems"].map((t) => (
-              <span key={t} className="rounded-full border border-dashed border-warn bg-warn-soft px-2 py-0.5 text-warn-ink">
+            {["Kubernetes", "Low-latency systems"].map((t) => (
+              <Chip key={t} tone="warn">
                 {t}
-              </span>
+              </Chip>
             ))}
           </div>
         </div>
       </div>
       <div className="rounded-xl border border-line bg-surface p-4 shadow-sm">
         <div className="text-[13px] leading-relaxed">
-          Migrated settlement jobs from cron scripts to Kafka consumers on AWS ECS.
+          Designed and built a scalable, robust end-to-end event-driven Go microservice using queues, built for
+          high throughput.
         </div>
-        <div className="mt-2 flex items-center gap-2 text-[12px] text-muted">
-          <span className="font-medium text-accent-ink">Kept in your words</span>
-          <span>· the rewording added “optimizing job scheduling”</span>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[12px]">
+          <span className="font-medium text-accent-ink">Added keywords:</span>
+          <Chip>Microservices</Chip>
+          <Chip>Queues</Chip>
+          <Chip>High-throughput systems</Chip>
+          <span className="ml-1 text-accent">Edit keywords</span>
         </div>
       </div>
       <div className="rounded-xl border border-line bg-surface p-4 shadow-sm">
         <div className="text-[13px] leading-relaxed">
-          Built an order-matching API in Go handling 1,200 requests per second.
+          Reduced ledger API p99 latency from 800ms to 120ms by tuning PostgreSQL indexes.
         </div>
-        <div className="mt-2 text-[12px] font-medium text-accent-ink">Reworded for this job · checked against your original</div>
+        <div className="mt-2 flex flex-wrap gap-x-3 text-[12px]">
+          <span className="font-medium text-accent-ink">Reworded for this job</span>
+          <span className="text-muted">See original</span>
+          <span className="text-accent">Use original</span>
+          <span className="text-accent">Rewrite again</span>
+        </div>
       </div>
     </div>
   );
@@ -67,31 +84,61 @@ function HeroVisual() {
 
 const STEPS = [
   {
-    title: "Upload the resume you have",
-    body: "PDF or Word. We read it into a profile you check and correct once — every resume after that is built from it.",
+    title: "Your profile, once",
+    body: "Upload your resume (PDF or Word) and check what we read — or build one step by step, with a projects section if you're just starting out.",
   },
   {
-    title: "Paste the job description",
-    body: "We pick out the role and the skills it asks for, and show which ones your profile already covers — and where.",
+    title: "Paste the job",
+    body: "Or open it on LinkedIn, Naukri or Indeed and use the Chrome extension (coming to the Chrome Web Store). You see which of the job's skills and keywords your resume covers, and which it doesn't.",
   },
   {
-    title: "Get a tailored resume",
-    body: "Your most relevant lines first, worded for the job, in an ATS-friendly template. Edit anything, then download the PDF.",
+    title: "Your resume, as you wrote it",
+    body: "In seconds: every line, in your words and your order, in an ATS-friendly template. Nothing changes until you say so.",
+  },
+  {
+    title: "You choose what changes",
+    body: "Add the job's keywords to the lines they fit. Rewrite a line or a whole role for the job. Fit it to one page, or fill the page. Download the PDF.",
   },
 ];
 
-// Real: each was written by a model in testing and rejected (rule or second check).
-const GUARDS = [
+const FEATURES = [
   {
-    rule: "No skills the line didn't mention",
-    tried:
-      "Developed a reconciliation service in Go for processing over 3 million bank transactions daily, reducing manual review efforts significantly.",
-    kept: "Designed the reconciliation service that matches 3M bank transactions a day, cutting manual review by 60%.",
+    title: "Keywords where you want them",
+    body: "Under every line, the job's keywords that line doesn't have — the ones missing from your resume first, then ones used elsewhere. Tick the ones that fit, untick any to drop, apply once.",
   },
+  {
+    title: "Rewrite only what you pick",
+    body: "“Rewrite for this job” on one line, or all the lines of a role in one go. Don't like it? Use original, or rewrite again.",
+  },
+  {
+    title: "Fits the page — and fills it",
+    body: "Fit to one or two pages without losing your latest role's detail. Or fill the empty space: your own left-out lines first, then larger text and spacing, down to the bottom margin.",
+  },
+  {
+    title: "Your layout",
+    body: "Margins (the same on all four sides), section order, which sections and header details show, how many lines each role keeps. A live preview of every page as you edit.",
+  },
+  {
+    title: "A cover letter, too",
+    body: "Written for the job from what's in the resume — and checked the same way, so it doesn't claim what your resume doesn't.",
+  },
+  {
+    title: "From the job page",
+    body: "The Chrome extension reads the posting on LinkedIn, Naukri, Indeed, Greenhouse, Lever or Workday, makes the resume and lets you add keywords right in the side panel. Coming to the Chrome Web Store.",
+  },
+];
+
+// Real: each was written by a model in testing and rejected (a rule or the second check).
+const GUARDS = [
   {
     rule: "No added claims",
     tried: "Migrated settlement jobs to Kafka consumers on AWS ECS for more robust processing.",
     kept: "Migrated settlement jobs from cron scripts to Kafka consumers on AWS ECS.",
+  },
+  {
+    rule: "No dropped numbers",
+    tried: "Reduced ledger API p99 latency by tuning PostgreSQL indexes.",
+    kept: "Cut p99 latency of the ledger API from 800ms to 120ms with PostgreSQL index tuning.",
   },
   {
     rule: "No added scale",
@@ -101,20 +148,28 @@ const GUARDS = [
 ];
 
 const TEMPLATES = [
-  { name: "Classic", note: "Serif, centred header" },
-  { name: "Modern", note: "Sans-serif, one accent colour" },
-  { name: "Compact", note: "Fits a long career on a page" },
-  { name: "Executive", note: "Summary-led, for senior roles" },
+  { slug: "classic", name: "Classic", note: "Serif, centred header" },
+  { slug: "modern", name: "Modern", note: "Sans-serif, one accent colour" },
+  { slug: "compact", name: "Compact", note: "Fits a long career on a page" },
+  { slug: "executive", name: "Executive", note: "Summary-led, for senior roles" },
 ];
 
 const FAQ = [
   {
-    q: "Does it make things up?",
-    a: "No. A new resume is your profile exactly as you wrote it — nothing is reworded unless you ask. Pick a line (or a whole role) and \"Rewrite for this job\": code checks the new wording against yours — no new numbers, no skills the line didn't mention, no new claims — and a second check reads each one side by side. Anything that fails stays in your words, and the editor says why. Job keywords go only into the lines you choose.",
+    q: "Do you change my resume when I paste a job?",
+    a: "No. A new resume is your profile exactly as you wrote it — every line, in your words and order. You decide what changes: which keywords go into which lines, and which lines (or roles) get rewritten for the job.",
+  },
+  {
+    q: "Does the AI make things up?",
+    a: "Not when it rewrites. “Rewrite for this job” is checked against your line: no new numbers, skills, claims or scale, no dropped metrics, and a second check reads each one side by side. Anything that fails stays in your words, and the editor says why.",
+  },
+  {
+    q: "Can I add a keyword my line doesn't mention?",
+    a: "Yes — that's your call, not ours. You pick the keywords for each line, and the line is rewritten to include them. Only add what that work really involved: you'll be asked about it.",
   },
   {
     q: "What if the job asks for a skill I don't have listed?",
-    a: "It shows up as missing. If you do have it, click “I have this”, say where you used it and write the line yourself; it's saved to your profile for every future resume. If you don't, it stays missing — we never add it for you.",
+    a: "It shows as “Not in this resume yet”. Add it to a line that fits, or click “I have this” to save it to your profile for every future resume. If you don't have it, leave it — we never add it for you.",
   },
   {
     q: "Will my resume get past an ATS?",
@@ -122,10 +177,10 @@ const FAQ = [
   },
   {
     q: "Which files can I upload?",
-    a: "PDF and Word (.docx), up to 5 MB. Scanned images don't work yet — export a PDF from your editor instead.",
+    a: "PDF and Word (.docx), up to 5 MB. Scanned images don't work yet — export a PDF from your editor instead. No resume yet? Build one step by step.",
   },
   {
-    q: "Does editing my profile change resumes I've already sent?",
+    q: "Does editing my profile change resumes I've already made?",
     a: "No. Each resume is a snapshot. Use “Refresh from profile” if you want it rebuilt from your profile as it is now.",
   },
 ];
@@ -145,22 +200,25 @@ export default function Home() {
         <section className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 sm:py-24 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-center">
           <div className="flex flex-col gap-6">
             <h1 className="font-display text-5xl leading-[1.05] sm:text-6xl">
-              A resume for every job, built from the one you already have.
+              A resume for every job, in your own words.
             </h1>
             <p className="max-w-xl text-lg leading-relaxed text-muted">
-              Upload your resume once. Paste a job description, and get an ATS-friendly resume
-              tailored to it — using only what&apos;s true about you.
+              Upload your resume once. For each job, see which of its keywords you cover, add them to
+              the lines they fit, and rewrite only the lines you choose — then download an
+              ATS-friendly PDF that fills the page.
             </p>
             <HomeActions />
             <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted">
-              {["Never invents a skill or a number", "PDF in four ATS-friendly templates", "Edit everything"].map((t) => (
-                <li key={t} className="flex items-center gap-1.5">
-                  <span className="text-accent">
-                    <Check />
-                  </span>
-                  {t}
-                </li>
-              ))}
+              {["Nothing changes unless you ask", "Keywords exactly where you want them", "Four ATS-friendly templates"].map(
+                (t) => (
+                  <li key={t} className="flex items-center gap-1.5">
+                    <span className="text-accent">
+                      <Check />
+                    </span>
+                    {t}
+                  </li>
+                ),
+              )}
             </ul>
           </div>
           <HeroVisual />
@@ -170,7 +228,7 @@ export default function Home() {
         <section aria-labelledby="how" className="border-t border-line bg-surface">
           <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6">
             <h2 id="how" className="font-display text-4xl">How it works</h2>
-            <ol className="grid gap-6 md:grid-cols-3">
+            <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {STEPS.map((s, i) => (
                 <li key={s.title} className="flex flex-col gap-3 rounded-xl border border-line bg-ground p-6">
                   <span className="flex size-8 items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">
@@ -184,14 +242,75 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Features */}
+        <section aria-labelledby="features" className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6">
+          <div className="flex max-w-2xl flex-col gap-3">
+            <h2 id="features" className="font-display text-4xl">You&apos;re in charge of every line</h2>
+            <p className="text-lg leading-relaxed text-muted">
+              The AI does the typing; you make the calls. Everything it changes is marked, and every
+              change can be undone.
+            </p>
+          </div>
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <li key={f.title} className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-5">
+                <h3 className="text-base font-semibold">{f.title}</h3>
+                <p className="text-[15px] leading-relaxed text-muted">{f.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Keywords + honest gaps */}
+        <section aria-labelledby="keywords" className="border-t border-line bg-surface">
+          <div className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col gap-5">
+              <h2 id="keywords" className="font-display text-4xl">Every keyword, accounted for</h2>
+              <p className="leading-relaxed text-muted">
+                See which of the job&apos;s skills your resume already shows. For the rest, pick the lines
+                they belong in — one keyword on several lines is fine — and add or remove any of them
+                in a single apply. Missing one you actually have? Save it to your profile with
+                “I have this”. Missing one you don&apos;t? It stays missing.
+              </p>
+            </div>
+            <div aria-hidden="true" className="flex flex-col gap-2.5 rounded-xl border border-line bg-ground p-4">
+              <span className="text-[13px] leading-snug">
+                Led system design and technical architecture for a Spark- and Airflow-based data archival
+                pipeline…
+              </span>
+              <div className="flex flex-col gap-2 rounded-lg border border-line bg-surface p-3">
+                <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">On this line</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="rounded-full border border-accent bg-accent px-2.5 py-0.5 text-[12px] text-white">✓ system design</span>
+                  <span className="rounded-full border border-accent bg-accent px-2.5 py-0.5 text-[12px] text-white">✓ technical architecture</span>
+                </div>
+                <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">Not in your resume yet</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <span className="rounded-full border border-accent bg-accent px-2.5 py-0.5 text-[12px] text-white">✓ microservices</span>
+                  <Chip tone="plain">+ Kubernetes</Chip>
+                  <Chip tone="plain">+ observability</Chip>
+                </div>
+                <span className="text-[11px] font-semibold tracking-wide text-muted uppercase">In other lines — add here too</span>
+                <div className="flex flex-wrap gap-1.5">
+                  <Chip tone="plain">+ system reliability</Chip>
+                  <Chip tone="plain">+ engineering standards</Chip>
+                </div>
+                <span className="mt-1 self-start rounded-md bg-accent px-3 py-1.5 text-[12px] font-medium text-white">
+                  Apply: add 1
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* The guard */}
         <section aria-labelledby="guard" className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-16 sm:px-6">
           <div className="flex max-w-2xl flex-col gap-3">
-            <h2 id="guard" className="font-display text-4xl">It never makes things up</h2>
+            <h2 id="guard" className="font-display text-4xl">When you ask for a rewrite, it doesn&apos;t embellish</h2>
             <p className="text-lg leading-relaxed text-muted">
-              AI loves to embellish a resume. That gets people caught out in interviews. So every
-              line it rewords is checked against what you actually wrote — and when it overreaches,
-              your own words stay. These are real rewordings it refused while we tested it:
+              AI loves to puff a resume up — and that gets people caught out in interviews. So every
+              rewrite is checked against what you actually wrote, and when it overreaches, your own
+              words stay. These are real rewordings it refused while we tested it:
             </p>
           </div>
           <ul className="grid gap-5 md:grid-cols-3">
@@ -211,66 +330,34 @@ export default function Home() {
           </ul>
         </section>
 
-        {/* Templates + honest gaps */}
+        {/* Templates */}
         <section aria-labelledby="templates" className="border-t border-line bg-surface">
-          <div className="mx-auto grid w-full max-w-6xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2">
-            <div className="flex flex-col gap-5">
+          <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-16 sm:px-6">
+            <div className="flex max-w-2xl flex-col gap-3">
               <h2 id="templates" className="font-display text-4xl">Templates an ATS can read</h2>
               <p className="leading-relaxed text-muted">
-                One column, real text, standard headings, contact details on the page. Every
-                template is checked by reading its PDF back the way an applicant tracking system
-                does.
-              </p>
-              <ul className="grid grid-cols-2 gap-3">
-                {TEMPLATES.map((t) => (
-                  <li key={t.name} className="flex flex-col gap-2 rounded-lg border border-line bg-ground p-3">
-                    <div aria-hidden="true" className="flex aspect-[3/4] flex-col gap-1.5 rounded bg-surface p-3">
-                      <div className={`h-2 w-1/2 rounded-sm bg-ink ${t.name === "Classic" ? "self-center" : ""}`} />
-                      <div className="h-1 w-3/4 rounded-sm bg-line" />
-                      {[0, 1, 2, 3].map((i) => (
-                        <div key={i} className="mt-1.5 flex flex-col gap-1">
-                          <div className={`h-1.5 w-1/3 rounded-sm ${t.name === "Modern" ? "bg-accent" : "bg-muted"}`} />
-                          <div className="h-1 rounded-sm bg-line" />
-                          <div className="h-1 w-5/6 rounded-sm bg-line" />
-                          <div className="h-1 w-11/12 rounded-sm bg-line" />
-                          {i < 2 && <div className="h-1 w-4/5 rounded-sm bg-line" />}
-                        </div>
-                      ))}
-                    </div>
-                    <span className="text-sm font-semibold">{t.name}</span>
-                    <span className="-mt-1.5 text-xs text-muted">{t.note}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="flex flex-col gap-5">
-              <h2 className="font-display text-4xl">Honest about the gaps</h2>
-              <p className="leading-relaxed text-muted">
-                You see which of the job&apos;s skills your resume covers, and where each one comes
-                from. Missing one you actually have? Say “I have this”, write a line about where you
-                used it, and it&apos;s in your profile for good. Missing one you don&apos;t? It stays
-                missing.
-              </p>
-              <div aria-hidden="true" className="flex flex-col gap-2 rounded-xl bg-warn-soft p-4 text-warn-ink">
-                <span className="text-sm font-semibold">Not in your profile</span>
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span>
-                    <strong>Kubernetes</strong> · must have
-                  </span>
-                  <span className="rounded-lg border border-warn bg-surface px-2.5 py-1 text-[13px]">I have this</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 text-sm">
-                  <span>
-                    <strong>gRPC</strong> · must have
-                  </span>
-                  <span className="rounded-lg border border-warn bg-surface px-2.5 py-1 text-[13px]">I have this</span>
-                </div>
-              </div>
-              <p className="text-sm text-muted">
-                A Chrome extension that reads the job straight from LinkedIn, Naukri, Indeed or a
-                careers page is coming to the Chrome Web Store.
+                One column, real text, standard headings, contact details on the page. Every template&apos;s
+                PDF is checked by reading it back the way an applicant tracking system does. Shown here
+                with a sample resume.
               </p>
             </div>
+            <ul className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {TEMPLATES.map((t) => (
+                <li key={t.slug} className="flex flex-col gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a static export: no image optimiser */}
+                  <img
+                    src={`/templates/${t.slug}.jpg`}
+                    alt={`The ${t.name} template, with a sample resume`}
+                    width={1191}
+                    height={1684}
+                    loading="lazy"
+                    className="block h-auto w-full rounded-lg border border-line bg-white shadow-sm"
+                  />
+                  <span className="text-sm font-semibold">{t.name}</span>
+                  <span className="-mt-1.5 text-xs text-muted">{t.note}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -301,7 +388,7 @@ export default function Home() {
       <footer className="border-t border-line">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-3 px-4 py-6 text-sm text-muted sm:px-6">
           <span>{APP_NAME}</span>
-          <span>Built only from what&apos;s true about you.</span>
+          <span>Your resume, in your own words.</span>
           <nav aria-label="Legal" className="flex gap-4">
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
