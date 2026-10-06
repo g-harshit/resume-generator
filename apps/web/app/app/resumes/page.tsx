@@ -161,7 +161,7 @@ function Row({
               })}
               className={action}
             >
-              {busy === "retailor" ? "Re-tailoring…" : "Re-tailor"}
+              {busy === "retailor" ? "Refreshing…" : "Refresh from profile"}
             </button>
             <button type="button" disabled={busy !== null} onClick={() => setConfirmDelete(true)} className={`${action} text-warn-ink`}>
               Delete
@@ -245,7 +245,7 @@ export default function ResumesPage() {
       {resumes && resumes.length > 0 && (
         <p className="text-[13px] text-muted">
           Each resume is a snapshot: editing your profile later doesn&apos;t change one you&apos;ve
-          already sent. Re-tailor to rebuild it from your profile as it is now.
+          already sent. Refresh it to rebuild it from your profile as it is now.
         </p>
       )}
     </div>

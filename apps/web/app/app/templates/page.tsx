@@ -192,9 +192,9 @@ function Templates() {
                 tailorError.message
               )
             ) : tailoring ? (
-              "Tailoring your resume to the job — this takes 20–40 seconds…"
+              "Making your resume…"
             ) : job ? (
-              "Built only from your profile. Every reworded line is checked against your original."
+              "Your profile, as you wrote it. Then you choose which lines to rewrite for the job."
             ) : (
               <>
                 To tailor a resume, <Link href="/app/new">start from a job description</Link>. Or
@@ -217,7 +217,7 @@ function Templates() {
               onClick={tailorIt}
               className="h-12 rounded-[10px] bg-accent px-5 text-[15px] font-medium text-white hover:bg-accent-hover disabled:opacity-50"
             >
-              {tailoring ? "Tailoring…" : `Tailor my resume${current ? ` with ${current.name}` : ""}`}
+              {tailoring ? "Making…" : `Make my resume${current ? ` with ${current.name}` : ""}`}
             </button>
           </div>
         </div>

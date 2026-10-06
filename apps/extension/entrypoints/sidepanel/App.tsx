@@ -413,8 +413,8 @@ function Tailor({ user }: { user: User }) {
           {working === "job"
             ? "Reading the job…"
             : working === "tailor"
-              ? "Tailoring… (20–40 s)"
-              : "Tailor my resume"}
+              ? "Making your resume…"
+              : "Make my resume"}
         </button>
         <span className="text-center text-xs text-muted">
           Built from your profile, {user.name.split(/\s+/)[0]}. Nothing is added that isn&apos;t in it.

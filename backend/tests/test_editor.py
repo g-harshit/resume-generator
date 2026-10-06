@@ -4,7 +4,7 @@ import pytest
 from sqlmodel import select
 
 from app.ai_providers import stub
-from app.models import Resume, ResumeRevision
+from app.models import ResumeRevision
 from app.routers import resumes as resumes_router
 from tests.test_tailor import PROFILE, plan, ready  # noqa: F401  (ready is a fixture)
 
@@ -109,18 +109,16 @@ def test_retailor_rebuilds_from_the_profile_as_it_is_now(client, auth, resume, s
     assert revisions(session, resume["id"]) == ["tailor", "retailor"]
 
 
-def test_an_edit_made_while_retailoring_is_not_thrown_away(client, auth, resume, session):
-    def tailor_while_someone_saves(text):
-        # The editor autosaves during the 20-40 s the model takes.
-        row = session.get(Resume, resume["id"])
-        row.version += 1
-        session.commit()
-        return plan()
-
-    stub.answer("tailor", tailor_while_someone_saves)
+def test_retailoring_starts_again_from_the_profile_as_it_is_now(client, auth, resume, session):
+    profile = client.get("/profile", headers=auth).json()
+    profile["data"]["summary"] = "Changed in the profile since."
+    client.put(
+        "/profile", headers=auth, json={"version": profile["version"], "data": profile["data"]}
+    )
     r = client.post(f"/resumes/{resume['id']}/retailor", headers=auth)
-    assert r.status_code == 409
-    assert revisions(session, resume["id"]) == ["tailor"]
+    assert r.status_code == 200, r.text
+    assert r.json()["content"]["summary"] == "Changed in the profile since."
+    assert r.json()["provenance"] == {}
 
 
 def test_retailoring_counts_towards_the_daily_cap(client, auth, resume, monkeypatch):

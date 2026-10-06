@@ -96,10 +96,10 @@ try {
   await panel.getByText("Job found on this page").waitFor({ timeout: 30_000 });
   check(true, "back on the posting, the panel reads it again");
 
-  step("tailor (real model calls: ~20–60 s)");
-  await panel.getByRole("button", { name: "Tailor my resume" }).click();
+  step("make the resume (the profile as it is: no model call)");
+  await panel.getByRole("button", { name: "Make my resume" }).click();
   await panel.getByText("Your resume is ready").waitFor({ timeout: 180_000 });
-  check(true, "resume tailored");
+  check(true, "resume made");
   await panel.screenshot({ path: path.join(OUT, "panel-ready.png") });
 
   step("add a job keyword to a line, then remove it (one call each)");

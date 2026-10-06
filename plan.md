@@ -466,6 +466,20 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
 - [x] The editor's preview blurs with a loader ("Saving your changes…", "Applying
       changes…", "Updating the preview…") whenever it isn't what the PDF would be.
 
+- [x] **Decided 2026-10-06 (the user): a new resume changes nothing.** It is the profile
+      as it is — every line, in the person's words and order, the profile's summary and
+      skills — with no model call (instant; it took 20–40 s). The person decides what
+      changes: "Rewrite for this job" on a line, or "Rewrite all N lines for this job"
+      on a role (one call, `POST /resumes/{id}/reword`, `services/reword.py`), under the
+      invention guard (`check_rewording`, the side-by-side verifier) plus one more rule:
+      a rewording may not drop a number the line has (found live: "from 800ms to 120ms"
+      disappeared). Refused lines keep their words and say why; reworded lines get "Use
+      original" and "Rewrite again" (from the person's line, avoiding the last wording).
+      Keywords stay the person's choice per line. Skill bridging runs only from its
+      button; filling the page at creation is layout only. "Re-tailor" is now "Refresh
+      from profile". The plan-based tailoring above (`tailor()`) is no longer called on
+      create; its checks are what rewording uses.
+
 ### Phase 8 — Editor
 - [x] Web: three-pane editor at `/app/resume?id=` (mockup 5)
   - left: summary; per role, **every line from the profile** — ticked ones in the

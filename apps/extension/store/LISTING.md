@@ -1,7 +1,7 @@
 # Chrome Web Store listing — QuickFit CV
 
 Everything the Developer Dashboard asks for, ready to paste. Upload
-`apps/extension/dist/1.0.3/quickfitcv-chrome-store-1.0.3.zip`
+`apps/extension/dist/1.0.4/quickfitcv-chrome-store-1.0.4.zip`
 (rebuild with `pnpm zip:extension:store`).
 
 ## Store listing tab
@@ -17,10 +17,11 @@ Everything the Developer Dashboard asks for, ready to paste. Upload
 > HOW IT WORKS
 > 1. Open any job posting: LinkedIn, Naukri, Indeed, Greenhouse, Lever, Workday or a company's careers page.
 > 2. Click the QuickFit CV icon. The side panel finds the job description on the page.
-> 3. Pick a template and click "Tailor my resume". In about half a minute you have an ATS-friendly PDF.
+> 3. Pick a template and click "Make my resume". In seconds you have an ATS-friendly PDF, built from your profile exactly as you wrote it.
+> 4. Add the job's keywords to the lines they fit, right in the side panel — or rewrite lines for the job in the editor.
 >
 > NOTHING INVENTED
-> QuickFit CV only reorders, selects and rewords what's already in your profile. It never adds a skill, employer, date or number you didn't give it — every change is checked against your profile, and anything it can't verify stays in your own words.
+> Nothing changes unless you ask. Your resume starts as your profile, word for word; you pick the lines to rewrite and the keywords to add. A rewrite for the job never adds a skill, employer, date or number you didn't give it — it's checked against your line, and anything it can't verify stays in your own words.
 >
 > ALSO
 > • See which of the job's skills your resume covers, and which it doesn't.

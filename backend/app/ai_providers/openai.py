@@ -20,6 +20,7 @@ _REASONING = {"keyword_rewrite": "low"}
 _TEMPERATURE = {
     "tailor": 0.3,
     "write_summary": 0.3,
+    "reword_lines": 0.5,
     "repair_tailoring": 0.0,
     "verify_tailoring": 0.0,
     "bridge_claims": 0.0,
@@ -42,6 +43,7 @@ class OpenAIProvider(AIProvider):
             "parse_jd": settings.openai_parse_model,
             "tailor": settings.openai_tailor_model,
             "write_summary": settings.openai_tailor_model,
+            "reword_lines": settings.openai_tailor_model,
             "verify_tailoring": settings.openai_tailor_model,
             "repair_tailoring": settings.openai_tailor_model,
             "bridge_claims": settings.openai_tailor_model,

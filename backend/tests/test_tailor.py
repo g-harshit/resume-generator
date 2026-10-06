@@ -589,20 +589,19 @@ def make(client, auth, job_id, template="classic"):
     return client.post("/resumes", headers=auth, json={"job_id": job_id, "template": template})
 
 
-def test_tailoring_makes_a_resume_with_its_provenance_and_match(client, auth, ready):
-    stub.answer("tailor", lambda text: plan())
+def test_a_new_resume_is_the_profile_as_it_is_with_no_model_call(client, auth, ready):
+    calls = len(stub.calls)
     r = make(client, auth, ready)
     assert r.status_code == 201, r.text
     resume = r.json()
     assert resume["title"] == "Senior Backend Engineer — Northwind Labs"
     assert resume["template"] == "classic"
-    assert resume["provenance"]["b_rec"]["status"] == "reworded"
+    # Every line, in the person's words and order; nothing reworded.
+    assert resume["content"]["experience"] == PROFILE.model_dump(mode="json")["experience"]
+    assert resume["content"]["summary"] == PROFILE.summary
+    assert resume["provenance"] == {}
     assert resume["match"]["total"] == resume["total"] > 0
-    # The model was given the profile with its ids, but not contact details.
-    sent = next(c["text"] for c in stub.calls if c["task"] == "tailor")
-    assert '"b_rec"' in sent and "asha@example.com" not in sent
-    # Then a look for lines that prove a missing skill (no answer here: skipped).
-    assert [c["task"] for c in stub.calls[-3:]] == ["tailor", "verify_tailoring", "bridge_claims"]
+    assert stub.calls[calls:] == []
 
 
 def test_a_resume_is_a_snapshot(client, auth, ready):
@@ -643,10 +642,9 @@ def test_an_unknown_template_is_refused(client, auth, ready):
     assert make(client, auth, ready, "fancy").status_code == 422
 
 
-def test_an_ai_failure_makes_no_resume(client, auth, ready):
+def test_a_resume_is_made_even_when_the_ai_is_down(client, auth, ready):
     stub.answer("tailor", AIProviderError("The AI service didn't respond properly."))
-    assert make(client, auth, ready).status_code == 502
-    assert client.get("/resumes", headers=auth).json() == []
+    assert make(client, auth, ready).status_code == 201
 
 
 def test_list_preview_and_pdf(client, auth, ready):
@@ -655,7 +653,7 @@ def test_list_preview_and_pdf(client, auth, ready):
     listed = client.get("/resumes", headers=auth).json()
     assert [r["id"] for r in listed] == [resume_id]
     preview = client.get(f"/resumes/{resume_id}/preview?template=modern", headers=auth).json()
-    assert "Moved settlement jobs from cron to Kafka consumers on AWS." in preview["html"]
+    assert "Moved settlement jobs from cron to Kafka consumers on AWS ECS." in preview["html"]
     r = client.get(f"/resumes/{resume_id}/pdf", headers=auth)
     assert r.headers["content-type"] == "application/pdf"
     assert r.headers["content-disposition"] == 'attachment; filename="Asha-Rao-Resume.pdf"'
@@ -683,14 +681,14 @@ def test_an_existing_resume_can_name_the_skills_its_lines_prove(client, auth, re
     claim = Claim(
         skill="Distributed systems", line_id="b_kafka", evidence="Kafka consumers", reasoning=""
     )
-    new = "Moved settlement jobs from cron to distributed Kafka consumers on AWS."
+    new = "Moved settlement jobs from cron to distributed Kafka consumers on AWS ECS."
     answer([claim], rewrites={"b_kafka": new})
 
     r = client.post(f"/resumes/{resume['id']}/bridge", headers=auth, json={"version": 1})
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["added"] == ["Distributed systems"]
-    line = body["resume"]["content"]["experience"][0]["bullets"][0]
+    line = body["resume"]["content"]["experience"][0]["bullets"][1]
     assert line == {"id": "b_kafka", "text": new}
     prov = body["resume"]["provenance"]["b_kafka"]
     assert prov["status"] == "bridged"
@@ -707,14 +705,14 @@ def test_a_line_takes_the_keywords_the_person_chose_and_can_be_rewritten_again(c
     stub.answer("tailor", lambda text: plan())
     resume = make(client, auth, ready).json()
     assert "gRPC" in resume["match"]["missing_in_lines"]
-    base = resume["content"]["experience"][0]["bullets"][0]["text"]
+    base = resume["content"]["experience"][0]["bullets"][1]["text"]
     first = base[:-1] + " via gRPC."
     answers(first)
     url = f"/resumes/{resume['id']}/lines/b_kafka/keywords"
     r = client.post(url, headers=auth, json={"version": 1, "keywords": ["gRPC"]})
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["content"]["experience"][0]["bullets"][0]["text"] == first
+    assert body["content"]["experience"][0]["bullets"][1]["text"] == first
     prov = body["provenance"]["b_kafka"]
     assert prov["status"] == "keywords" and prov["keywords"] == ["gRPC"]
     assert prov["base"] == base
@@ -748,7 +746,7 @@ def test_keywords_can_be_removed_one_at_a_time_and_all(client, auth, ready):
     stub.answer("tailor", lambda text: plan())
     resume = make(client, auth, ready).json()
     url = f"/resumes/{resume['id']}/lines/b_kafka/keywords"
-    base = resume["content"]["experience"][0]["bullets"][0]["text"]
+    base = resume["content"]["experience"][0]["bullets"][1]["text"]
 
     answers(base[:-1] + " via gRPC on Kubernetes.")
     r = client.post(url, headers=auth, json={"version": 1, "keywords": ["gRPC", "Kubernetes"]})
@@ -766,8 +764,8 @@ def test_keywords_can_be_removed_one_at_a_time_and_all(client, auth, ready):
     r = client.post(url, headers=auth, json={"version": 3, "keywords": []})
     assert r.status_code == 200, r.text
     body = r.json()
-    assert body["content"]["experience"][0]["bullets"][0]["text"] == base
-    assert body["provenance"]["b_kafka"]["status"] == "reworded"  # tailoring's wording
+    assert body["content"]["experience"][0]["bullets"][1]["text"] == base
+    assert body["provenance"]["b_kafka"]["status"] == "kept"  # the person's own words
     assert "keyword_rewrite" not in [c["task"] for c in stub.calls[calls:]]
 
     # Nothing to remove on a line without keywords.

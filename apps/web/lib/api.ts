@@ -401,6 +401,11 @@ export const api = {
   /** Write the summary from this resume's facts: shorter, about as long, or longer than now. */
   writeSummary: (id: number, version: number, length: SummaryLength) =>
     request<ResumeFull>(`/resumes/${id}/summary`, { method: "POST", body: JSON.stringify({ version, length }) }),
+  rewordLines: (id: number, version: number, lineIds: string[], again = false) =>
+    request<{ resume: ResumeFull; refused: Record<string, string> }>(`/resumes/${id}/reword`, {
+      method: "POST",
+      body: JSON.stringify({ version, line_ids: lineIds, again }),
+    }),
   lineKeywords: (id: number, version: number, lineId: string, keywords: string[], again = false) =>
     request<ResumeFull>(`/resumes/${id}/lines/${encodeURIComponent(lineId)}/keywords`, {
       method: "POST",

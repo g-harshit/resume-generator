@@ -24,12 +24,14 @@ export type KeywordAi = {
   gaps: string[];
   /** Per line id: the job's terms that line doesn't name, wherever else they are. */
   byLine: Record<string, string[]>;
-  /** The line being rewritten, if any. */
-  busyLine: string | null;
+  /** The lines being rewritten right now. */
+  busyLines: string[];
   disabled: boolean;
-  /** The last rewrite's failure, for the line it was for. */
-  error: { line: string; message: string } | null;
+  /** Per line: why the last rewrite left it as it was, or failed. */
+  notes: Record<string, string>;
   rewrite: (lineId: string, keywords: string[], again: boolean) => void;
+  /** Reword these lines for the job (one call), or again from the person's own words. */
+  reword: (lineIds: string[], again: boolean) => void;
 };
 
 const ORIGIN_LABEL: Record<LineHistory["status"], string> = {
@@ -116,7 +118,7 @@ function LineOrigin({
           Use original
         </button>
       )}
-      {history.status === "keywords" && onRewriteAgain && (
+      {(history.status === "keywords" || history.status === "reworded") && onRewriteAgain && (
         <button type="button" onClick={onRewriteAgain} className="text-accent underline-offset-2 hover:underline">
           Rewrite again
         </button>
@@ -180,29 +182,39 @@ function LineKeywords({ line, history, ai }: { line: Bullet; history: LineHistor
   const typed = picked.filter((p) => !forLine.includes(p) && !added.includes(p));
   const adding = picked.filter((k) => !added.includes(k));
   const removing = added.filter((k) => !picked.includes(k));
-  const busy = ai.busyLine === line.id;
+  const busy = ai.busyLines.includes(line.id);
 
   if (busy) return <span className="text-xs text-muted" role="status">Rewriting this line…</span>;
-  const failed = ai.error?.line === line.id ? ai.error.message : null;
+  const note = ai.notes[line.id];
   if (!open)
     return (
       <div className="flex flex-col gap-1">
-        {failed && (
+        {note && (
           <span role="alert" className="rounded-md bg-warn-soft px-2 py-1 text-xs text-warn-ink">
-            {failed}
+            {note}
           </span>
         )}
-        <button
-          type="button"
-          onClick={() => {
-            setPicked(added); // start from what the line has now
-            setOpen(true);
-          }}
-          disabled={ai.disabled}
-          className="self-start text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
-        >
-          {added.length ? "Edit keywords" : "+ Add job keywords"}
-        </button>
+        <div className="flex flex-wrap gap-x-3 gap-y-1">
+          <button
+            type="button"
+            onClick={() => ai.reword([line.id], false)}
+            disabled={ai.disabled}
+            className="text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
+          >
+            Rewrite for this job
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPicked(added); // start from what the line has now
+              setOpen(true);
+            }}
+            disabled={ai.disabled}
+            className="text-xs text-accent underline-offset-2 hover:underline disabled:opacity-60"
+          >
+            {added.length ? "Edit keywords" : "+ Add job keywords"}
+          </button>
+        </div>
       </div>
     );
 
@@ -306,6 +318,18 @@ function Lines({
   const left = available.filter((b) => !inResume.has(b.id));
   return (
     <div className="flex flex-col gap-2.5">
+      {keywordAi && included.length > 1 && (
+        <button
+          type="button"
+          onClick={() => keywordAi.reword(included.map((b) => b.id), false)}
+          disabled={keywordAi.disabled}
+          className="self-start rounded-md border border-line px-2.5 py-1 text-xs text-accent hover:bg-sunken disabled:opacity-60"
+        >
+          {included.some((b) => keywordAi.busyLines.includes(b.id))
+            ? "Rewriting these lines…"
+            : `Rewrite all ${included.length} lines for this job`}
+        </button>
+      )}
       {included.map((b, i) => (
         <div key={b.id} className="flex flex-col gap-1">
           <div className="flex items-start gap-1.5">
@@ -337,9 +361,13 @@ function Lines({
               history={provenance[b.id]}
               onUseOriginal={() => onChange(replaceAt(included, i, { ...b, text: provenance[b.id]!.original }))}
               onRewriteAgain={
-                keywordAi && !keywordAi.disabled && provenance[b.id]?.keywords?.length
-                  ? () => keywordAi.rewrite(b.id, provenance[b.id]!.keywords!, true)
-                  : undefined
+                !keywordAi || keywordAi.disabled
+                  ? undefined
+                  : provenance[b.id]?.status === "keywords" && provenance[b.id]?.keywords?.length
+                    ? () => keywordAi.rewrite(b.id, provenance[b.id]!.keywords!, true)
+                    : provenance[b.id]?.status === "reworded"
+                      ? () => keywordAi.reword([b.id], true)
+                      : undefined
               }
             />
             {keywordAi && <LineKeywords line={b} history={provenance[b.id]} ai={keywordAi} />}

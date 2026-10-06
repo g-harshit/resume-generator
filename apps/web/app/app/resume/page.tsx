@@ -149,7 +149,8 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     }
   }
 
-  const [keywordError, setKeywordError] = useState<{ line: string; message: string } | null>(null);
+  // Per line: why the last rewrite (keywords or rewording) left it as it was.
+  const [lineNotes, setLineNotes] = useState<Record<string, string>>({});
 
   type Line = { id: string; text: string };
   /**
@@ -298,7 +299,7 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
             disabled={busy !== null || !resume.job_id}
             className="h-11 rounded-[10px] border border-line-strong bg-surface px-4 text-sm hover:bg-sunken disabled:opacity-50"
           >
-            {busy === "retailor" ? "Re-tailoring… (20–40 s)" : "Re-tailor"}
+            {busy === "retailor" ? "Refreshing…" : "Refresh from profile"}
           </button>
           <button
             type="button"
@@ -312,13 +313,13 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
       </header>
 
       {confirmRetailor && (
-        <div role="alertdialog" aria-label="Re-tailor this resume?" className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+        <div role="alertdialog" aria-label="Refresh this resume from your profile?" className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
           <span className="flex-1">
-            Re-tailoring builds this resume again from your profile as it is now. Your edits here
+            This builds the resume again from your profile as it is now. Your edits here
             are replaced (the current version stays in its history).
           </span>
           <button type="button" onClick={retailor} className="h-10 rounded-lg bg-accent px-3 font-medium text-white">
-            Re-tailor
+            Refresh
           </button>
           <button type="button" onClick={() => setConfirmRetailor(false)} className="h-10 rounded-lg px-3 text-muted hover:bg-sunken">
             Cancel
@@ -365,15 +366,31 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
                 ? {
                     gaps: match.missing_in_lines ?? [],
                     byLine: match.missing_by_line ?? {},
-                    busyLine: aiBusy?.startsWith("kw:") ? aiBusy.slice(3) : null,
+                    busyLines: aiBusy?.startsWith("line:") ? aiBusy.slice(5).split(",") : [],
                     disabled: aiBusy !== null,
-                    error: keywordError,
+                    notes: lineNotes,
                     rewrite: (lineId, keywords, again) => {
-                      setKeywordError(null);
+                      setLineNotes({});
                       void aiEdit(
-                        `kw:${lineId}`,
+                        `line:${lineId}`,
                         (v) => api.lineKeywords(id, v, lineId, keywords, again),
-                        (message) => setKeywordError({ line: lineId, message }),
+                        (message) => setLineNotes({ [lineId]: message }),
+                      );
+                    },
+                    reword: (lineIds, again) => {
+                      setLineNotes({});
+                      void aiEdit(
+                        `line:${lineIds.join(",")}`,
+                        async (v) => {
+                          const out = await api.rewordLines(id, v, lineIds, again);
+                          setLineNotes(
+                            Object.fromEntries(
+                              Object.entries(out.refused).map(([k, why]) => [k, `Kept your wording: ${why}.`]),
+                            ),
+                          );
+                          return out.resume;
+                        },
+                        (message) => setLineNotes(Object.fromEntries(lineIds.map((k) => [k, message]))),
                       );
                     },
                   }

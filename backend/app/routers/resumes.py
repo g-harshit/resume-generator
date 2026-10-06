@@ -39,7 +39,7 @@ from app.services.fit import (
 )
 from app.services.keywords import KeywordError, add_keywords
 from app.services.match import match_job
-from app.services.tailor import tailor
+from app.services.reword import reword_lines
 
 log = logging.getLogger(__name__)
 
@@ -180,8 +180,8 @@ def _fill(
     slug: str,
     layout: Layout,
 ) -> tuple[ResumeData, dict, Layout]:
-    """Use the room left on the last page (the person's own left-out lines first). A
-    nicety: if it fails, the resume is as tailored."""
+    """Use the room left on the last page: layout only (text size, spacing), since the
+    resume already has every line. A nicety: if it fails, the resume is as it was."""
     try:
         result = fill_page(
             content,
@@ -191,8 +191,7 @@ def _fill(
             job.parsed,
             get_ai_provider(),
             provenance,
-            # Tailoring just wrote the summary for this job; no second model call.
-            longer_summary=False,
+            add_content=False,
         )
     except Exception:
         log.exception("filling the page failed")
@@ -200,18 +199,17 @@ def _fill(
     return result.resume, result.provenance, result.layout
 
 
-def _tailor(profile: Profile, job: JobDescription) -> tuple[ResumeData, dict]:
-    try:
-        return tailor(
-            ResumeData.model_validate(profile.data), job.parsed, job.raw_text, get_ai_provider()
-        )
-    except AIProviderError as exc:
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+def _snapshot(profile: Profile) -> tuple[ResumeData, dict]:
+    """A new resume is the profile as it is: every line, in the person's words and
+    order. Nothing is reworded until the person asks (decided 2026-10-06): they pick the
+    lines to rewrite for the job and the keywords to add."""
+    return ResumeData.model_validate(profile.data), {}
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> ResumeOut:
-    """Tailor the profile to a job. Waits for the model (usually 10-30 s)."""
+    """A resume for a job: the profile as it is, laid out to use its pages. Instant: no
+    model call. Rewording and keywords are the person's choice, line by line."""
     if body.template not in BY_SLUG:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "No such template")
     job = session.get(JobDescription, body.job_id)
@@ -219,7 +217,7 @@ def create_resume(body: TailorIn, user: CurrentUser, session: SessionDep) -> Res
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Job not found")
     profile = _reviewed_profile(session, user)
     _check_daily_cap(session, user)
-    content, provenance = _tailor(profile, job)
+    content, provenance = _snapshot(profile)
     content, provenance, layout = _fill(
         profile, job, content, provenance, body.template, default_layout(content)
     )
@@ -322,8 +320,8 @@ def save_resume(resume_id: int, body: SaveIn, user: CurrentUser, session: Sessio
 
 @router.post("/{resume_id}/retailor")
 def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOut:
-    """Tailor again from the profile as it is now (say, after adding a skill). The
-    edits made to this resume are replaced; the previous version stays in its history."""
+    """Start again from the profile as it is now (say, after adding a skill). The edits
+    made to this resume are replaced; the previous version stays in its history."""
     resume = _own(session, user, resume_id)
     job = _job(session, resume)
     if job is None:
@@ -331,7 +329,7 @@ def retailor(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOu
     profile = _reviewed_profile(session, user)
     _check_daily_cap(session, user)
     started_at_version = resume.version
-    content, provenance = _tailor(profile, job)  # 20-40 s; the editor may save meanwhile
+    content, provenance = _snapshot(profile)
     content, provenance, layout = _fill(
         profile, job, content, provenance, resume.template, _layout(resume)
     )
@@ -617,6 +615,60 @@ def line_keywords(
     }
     _ai_edit_save(session, user, resume, body.version, content, provenance)
     return _out(session, resume)
+
+
+class RewordIn(AiEditIn):
+    line_ids: list[Annotated[str, Field(max_length=40)]] = Field(min_length=1, max_length=30)
+    # "Rewrite again": from the person's own line, worded differently from now.
+    again: bool = False
+
+
+class RewordOut(BaseModel):
+    resume: ResumeOut
+    # Lines left as they were, and why ("it added a number…").
+    refused: dict[str, str]
+
+
+@router.post("/{resume_id}/reword")
+def reword(resume_id: int, body: RewordIn, user: CurrentUser, session: SessionDep) -> RewordOut:
+    """Reword the chosen lines for this resume's job (one model call for all of them),
+    under the invention guard. Lines that fail keep their words."""
+    resume, job = _ai_edit_start(session, user, resume_id, body.version)
+    job_row = _job(session, resume)
+    if job_row is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "The job this resume was made for is gone.")
+    content = ResumeData.model_validate(resume.content)
+    bullets = {b.id: b for e in [*content.experience, *content.projects] for b in e.bullets}
+    if not any(i in bullets for i in body.line_ids):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Those lines aren't in this resume.")
+    source = content.model_copy(deep=True)
+    avoid: dict[str, str] = {}
+    if body.again:
+        # Reword from the person's own line, not from the last rewording.
+        for e in [*source.experience, *source.projects]:
+            for b in e.bullets:
+                if b.id in body.line_ids and resume.provenance.get(b.id, {}).get("original"):
+                    avoid[b.id] = b.text
+                    b.text = resume.provenance[b.id]["original"]
+    try:
+        new, refused = reword_lines(
+            source, body.line_ids, job, job_row.raw_text, get_ai_provider(), avoid
+        )
+    except AIProviderError as exc:
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
+    if new:
+        provenance = dict(resume.provenance)
+        for i, text in new.items():
+            before = provenance.get(i, {})
+            provenance[i] = {
+                "original": before.get("original") or bullets[i].text,
+                "status": "reworded",
+                "attempted": None,
+                "reason": None,
+            }
+            bullets[i].text = text
+        _ai_edit_save(session, user, resume, body.version, content, provenance)
+    return RewordOut(resume=_out(session, resume), refused=refused)
 
 
 @router.post("/{resume_id}/fit")

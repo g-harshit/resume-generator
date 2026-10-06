@@ -110,7 +110,7 @@ const TEMPLATES = [
 const FAQ = [
   {
     q: "Does it make things up?",
-    a: "No. The AI can only choose, order and reword lines from your own profile. Code then checks every reworded line against your original — no new numbers, no skills the line didn't mention, no new claims — and a second check reads each one side by side. The one exception is a skill your line already proves: if the job asks for Python and your line says Django, it may say Python (Django), and the editor marks it. Anything that fails stays in your words, and the editor shows you what was kept and why.",
+    a: "No. A new resume is your profile exactly as you wrote it — nothing is reworded unless you ask. Pick a line (or a whole role) and \"Rewrite for this job\": code checks the new wording against yours — no new numbers, no skills the line didn't mention, no new claims — and a second check reads each one side by side. Anything that fails stays in your words, and the editor says why. Job keywords go only into the lines you choose.",
   },
   {
     q: "What if the job asks for a skill I don't have listed?",
@@ -126,7 +126,7 @@ const FAQ = [
   },
   {
     q: "Does editing my profile change resumes I've already sent?",
-    a: "No. Each resume is a snapshot. Re-tailor it if you want it rebuilt from your profile as it is now.",
+    a: "No. Each resume is a snapshot. Use “Refresh from profile” if you want it rebuilt from your profile as it is now.",
   },
 ];
 
