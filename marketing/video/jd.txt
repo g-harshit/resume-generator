@@ -1,0 +1,24 @@
+Senior Data Analyst — Northwind Commerce (Bengaluru, Hybrid)
+
+About the role
+Northwind Commerce is an online marketplace for home goods. We're looking for a Senior Data Analyst to join our Growth team and help us understand what drives customer retention and repeat purchases.
+
+What you'll do
+- Own dashboards and reporting for the Growth team in Tableau or Looker.
+- Write complex SQL to analyse orders, customer behaviour and marketing performance.
+- Design and analyse A/B tests with product managers and share clear recommendations.
+- Build customer segmentation and cohort analyses to guide retention campaigns.
+- Automate recurring reports with Python.
+- Present findings to senior stakeholders and leadership.
+
+What we're looking for
+- 3+ years of experience as a data analyst, ideally in e-commerce or retail.
+- Strong SQL and Python (pandas).
+- Experience with Tableau or Looker.
+- Solid grasp of statistics and experimentation (A/B testing).
+- Excellent stakeholder communication.
+
+Nice to have
+- dbt and BigQuery.
+- Cohort and retention analysis.
+- Experience with customer lifetime value (CLV) modelling.
