@@ -445,6 +445,13 @@ Each phase ends with passing tests and something runnable. Tick boxes as they la
       boxes (`render.measure`). Roles may now break across pages between their lines —
       a whole role pushed over left half of page 1 empty. A local resume went from page
       2 at 44% to 90%. Found: stale merge `sources` in provenance hid left-out lines.
+      **Edits keep the page count** (`keep_pages`): a page filled to its bottom margin
+      had no room for a reworded line a few words longer, so "Rewrite for this job" on a
+      new one-page resume made it "2 pages". Every save (the person's typing and every AI
+      edit but Fit) now checks a stretched resume: if it has more pages than before the
+      edit, the stretch comes out and the page is filled again within the old count
+      (content too long even unstretched fills its new last page instead). The editor
+      takes a smaller stretch back from an autosave so the next save doesn't undo it.
 - [x] **Template picker shows a sample resume**: the same invented resume in each
       template, as static images (`apps/web/public/templates/*.jpg`, made by `make
       samples`), instead of laying out the person's profile four times per visit.

@@ -10,10 +10,13 @@ person's own lines:
 - `write_summary`: a summary from the resume's own facts, checked like tailoring's.
 - `fit_to_pages`: narrow margins first (no content lost); then, round by round, fewer
   lines for older roles — the latest keeps the most — until the PDF fits.
+- `keep_pages`: after an edit, a page stretched to fill it gives back stretch rather
+  than run onto another page.
 """
 
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -476,15 +479,15 @@ def fill_page(
     slug: str,
     profile: ResumeData,
     job: dict,
-    provider: AIProvider,
+    provider: AIProvider | None,
     provenance: dict | None = None,
     target: int | None = None,
     add_content: bool = True,
     longer_summary: bool = True,
 ) -> FitResult:
     """Use the room left on the last page, without going past `target` pages (default:
-    as many as it has now). `add_content=False` only adjusts the layout;
-    `longer_summary=False` skips the one step that needs the model."""
+    as many as it has now). `add_content=False` only adjusts the layout (and needs no
+    `provider`); `longer_summary=False` skips the one step that needs the model."""
     provenance = dict(provenance or {})
     pages, fill = _fill(resume, slug, layout)
     target = target or pages
@@ -579,3 +582,24 @@ def fill_page(
     elif not steps:
         steps.append("The page is already full.")
     return FitResult(resume, layout, provenance, before, pages, steps)
+
+
+def keep_pages(resume: ResumeData, layout: Layout, slug: str, fitted: Callable[[], int]) -> Layout:
+    """The layout for `resume` after an edit, so a page stretched to fill it doesn't run
+    onto another: a longer line on a resume filled to its bottom margin would otherwise
+    add a page. If it now has more pages than `fitted()` (the count before the edit,
+    asked only when needed), the stretch comes out and the page is filled again within
+    that count. Content that runs over even unstretched fills its own new last page."""
+    if not (layout.spacing or layout.font_scale):
+        return layout
+    pages = count_pages(resume, slug, layout)
+    if pages <= 1:
+        return layout
+    target = fitted()
+    if pages <= target:
+        return layout
+    plain = layout.model_copy(update={"spacing": None, "font_scale": None})
+    result = fill_page(resume, plain, slug, resume, {}, None, target=target, add_content=False)
+    if result.pages_after > target:
+        result = fill_page(resume, plain, slug, resume, {}, None, add_content=False)
+    return result.layout

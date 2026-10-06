@@ -35,6 +35,7 @@ from app.services.fit import (
     count_pages,
     fill_page,
     fit_to_pages,
+    keep_pages,
     write_summary,
 )
 from app.services.keywords import KeywordError, add_keywords
@@ -199,6 +200,24 @@ def _fill(
     return result.resume, result.provenance, result.layout
 
 
+def _keep_pages(resume: Resume, content: ResumeData, slug: str, layout: Layout) -> Layout:
+    """The layout for an edit to `resume`: a page stretched to fill it gives back
+    stretch rather than run onto another page (a reworded line a few words longer).
+    `resume` is still as it was before the edit. If measuring fails, `layout` as it is."""
+    try:
+        return keep_pages(
+            content,
+            layout,
+            slug,
+            lambda: count_pages(
+                ResumeData.model_validate(resume.content), resume.template, _layout(resume)
+            ),
+        )
+    except Exception:
+        log.exception("keeping the page count failed")
+        return layout
+
+
 def _snapshot(profile: Profile) -> tuple[ResumeData, dict]:
     """A new resume is the profile as it is: every line, in the person's words and
     order. Nothing is reworded until the person asks (decided 2026-10-06): they pick the
@@ -283,6 +302,8 @@ def save_resume(resume_id: int, body: SaveIn, user: CurrentUser, session: Sessio
     if body.template not in BY_SLUG:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "No such template")
     data = body.content.model_dump(mode="json")
+    layout = body.layout or _layout(resume)
+    kept = _keep_pages(resume, body.content, body.template, layout)
     now = utcnow()
     result = session.exec(
         update(Resume)
@@ -292,7 +313,7 @@ def save_resume(resume_id: int, body: SaveIn, user: CurrentUser, session: Sessio
             template=body.template,
             version=Resume.version + 1,
             updated_at=now,
-            **({"layout": body.layout.model_dump()} if body.layout else {}),
+            **({"layout": kept.model_dump()} if body.layout or kept != layout else {}),
         )
     )
     if result.rowcount != 1:
@@ -440,6 +461,11 @@ def _ai_edit_save(
     provenance: dict,
     layout: Layout | None = None,
 ) -> None:
+    """Save an AI edit. Without a `layout` of its own, the one there is kept, given back
+    any fill stretch the edit no longer leaves room for."""
+    if layout is None:
+        kept = _keep_pages(resume, content, resume.template, _layout(resume))
+        layout = kept if kept != _layout(resume) else None
     data = content.model_dump(mode="json")
     result = session.exec(
         update(Resume)
@@ -509,7 +535,7 @@ def condense_entry(
     return FitOut(
         resume=_out(session, resume),
         pages_before=before,
-        pages_after=count_pages(shorter, resume.template, layout),
+        pages_after=count_pages(shorter, resume.template, _layout(resume)),
         steps=[],
         notes=notes,
     )

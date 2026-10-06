@@ -95,6 +95,13 @@ function Editor({ resume, templates, profile: initialProfile }: Loaded) {
     onSaved: (saved) => {
       setMatch(saved.match);
       setSavedVersion(saved.version);
+      // An edit that no longer fits a page stretched to fill it gets less stretch from
+      // the server; take it, or the next save would send the old stretch back. Only
+      // less: more would undo a "remove the stretch" clicked while saving.
+      const { spacing = null, font_scale = null } = saved.layout;
+      const less = (theirs: number | null, mine: number | null | undefined) => (theirs ?? 1) < (mine ?? 1);
+      if (less(spacing, data.layout.spacing) || less(font_scale, data.layout.font_scale))
+        setLayout((l) => ({ ...l, spacing, font_scale }));
     },
   });
   const setContent = (update: (c: ResumeData) => ResumeData) =>

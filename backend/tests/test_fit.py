@@ -21,6 +21,7 @@ from app.services.fit import (
     fit_to_pages,
     write_summary,
 )
+from app.services.reword import Reworded, RewordPlan
 from tests.test_jobs import northwind
 from tests.test_tailor import PROFILE, approve_all, flag, plan, ready  # noqa: F401
 
@@ -464,3 +465,86 @@ def test_fitting_takes_out_the_fill_stretch_first():
     assert fit_service.count_pages(result.resume, "classic", result.layout) == 1
     assert result.resume == PROFILE and result.layout.margins == "normal"
     assert result.steps[0].startswith("Took out the extra spacing")
+
+
+# --- edits to a stretched page ----------------------------------------------------------
+
+
+def _filled(resume: ResumeData = PROFILE) -> Layout:
+    """`resume` stretched down to its bottom margin, as a new resume is."""
+    layout = fill_page(resume, Layout(), "classic", resume, JOB, None, add_content=False).layout
+    assert layout.spacing and layout.spacing > 1
+    return layout
+
+
+def _longer(resume: ResumeData, words: int = 25) -> ResumeData:
+    """`resume` with its first line a few lines longer (in its own words, repeated)."""
+    longer = resume.model_copy(deep=True)
+    bullet = longer.experience[0].bullets[0]
+    bullet.text = " ".join([bullet.text, *bullet.text.split()[:words]])
+    return longer
+
+
+def test_a_longer_line_on_a_stretched_page_gives_back_stretch_not_a_page():
+    stretched = _filled()
+    longer = _longer(PROFILE)
+    assert fit_service.count_pages(longer, "classic", stretched) == 2  # the bug
+    layout = fit_service.keep_pages(longer, stretched, "classic", lambda: 1)
+    assert fit_service.count_pages(longer, "classic", layout) == 1
+    assert layout.spacing and layout.spacing < stretched.spacing  # still filled, just less
+    assert layout.margins == stretched.margins
+
+
+def test_an_edit_that_still_fits_keeps_the_stretch_without_asking_the_page_count():
+    stretched = _filled()
+
+    def fitted():
+        raise AssertionError("not needed: one page can't be over")
+
+    assert fit_service.keep_pages(PROFILE, stretched, "classic", fitted) == stretched
+    assert fit_service.keep_pages(PROFILE, Layout(), "classic", fitted) == Layout()
+
+
+def test_content_too_long_even_unstretched_fills_its_new_last_page():
+    stretched = _filled()
+    long = long_resume(roles=3, lines=8)  # a fifth of a second page
+    assert fit_service.count_pages(long, "classic", Layout()) == 2
+    layout = fit_service.keep_pages(long, stretched, "classic", lambda: 1)
+    assert fit_service.count_pages(long, "classic", layout) == 2
+    assert layout != stretched
+
+
+def test_saving_a_longer_line_keeps_a_stretched_resume_to_its_page(client, auth, resume):
+    assert resume["layout"]["spacing"] or resume["layout"]["font_scale"]  # new: stretched
+    longer = _longer(ResumeData.model_validate(resume["content"]))
+    body = {
+        "version": resume["version"],
+        "content": longer.model_dump(mode="json"),
+        "template": "classic",
+        "layout": resume["layout"],
+    }
+    saved = client.put(f"/resumes/{resume['id']}", headers=auth, json=body).json()
+    assert saved["layout"] != resume["layout"]
+    assert fit_service.count_pages(longer, "classic", Layout(**saved["layout"])) == 1
+
+
+def test_rewording_a_line_longer_keeps_a_stretched_resume_to_its_page(client, auth, resume):
+    content = ResumeData.model_validate(resume["content"])
+    line = content.experience[0].bullets[0]
+    # A few words longer: within what rewording allows, one more line on the page.
+    longer = _longer(content, words=8).experience[0].bullets[0].text
+    assert len(longer) - len(line.text) < 60
+    stretched = Layout(**resume["layout"])
+    assert fit_service.count_pages(_longer(content, words=8), "classic", stretched) == 2
+    stub.answer("reword_lines", lambda text: RewordPlan(lines=[Reworded(id=line.id, text=longer)]))
+    stub.answer("verify_tailoring", approve_all)
+    r = client.post(
+        f"/resumes/{resume['id']}/reword",
+        headers=auth,
+        json={"version": resume["version"], "line_ids": [line.id]},
+    )
+    assert r.status_code == 200, r.text
+    out = r.json()
+    assert out["refused"] == {}
+    after = ResumeData.model_validate(out["resume"]["content"])
+    assert fit_service.count_pages(after, "classic", Layout(**out["resume"]["layout"])) == 1
