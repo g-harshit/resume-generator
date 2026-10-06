@@ -134,6 +134,48 @@ def _page_text(page) -> str:
     return "\n".join(out)
 
 
+_DATEISH = re.compile(
+    r"[\w.,' ]{0,40}?(?:19|20)\d{2}(?:\s*[-–—]\s*[\w.' ]{0,20})?",
+    re.IGNORECASE,
+)
+
+
+def page_has_columns(page) -> bool:
+    """Does this PDF page lay text out in two or more real columns somewhere?"""
+    width = page.rect.width
+    run: list[_Block] = []
+    segments: list[list[_Block]] = []
+    for b in sorted(
+        (
+            _Block(b[0], b[1], b[2], b[3], b[4].strip())
+            for b in page.get_text("blocks")
+            if b[6] == 0 and b[4].strip()
+        ),
+        key=lambda b: (b.y0, b.x0),
+    ):
+        if (b.x1 - b.x0) >= _WIDE * width:
+            segments.append(run)
+            run = []
+        else:
+            run.append(b)
+    segments.append(run)
+    for blocks in segments:
+        if not blocks:
+            continue
+        columns = _columns(blocks, width)
+        total = sum(len(b.text) for b in blocks)
+        # A strip of right-aligned dates ("Apr 2022 – Present") isn't a column; a sidebar
+        # of short items (name, email, skills) is.
+        if len(columns) > 1 and all(
+            len(col) >= 3
+            and sum(len(b.text) for b in col) >= 0.1 * total
+            and sum(1 for b in col if _DATEISH.fullmatch(b.text)) < len(col) / 2
+            for col in columns
+        ):
+            return True
+    return False
+
+
 def _segment_text(blocks: list[_Block], width: float) -> list[str]:
     if not blocks:
         return []

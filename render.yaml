@@ -147,6 +147,9 @@ services:
         source: /privacy
         destination: /privacy/index.html
       - type: rewrite
+        source: /ats-checker
+        destination: /ats-checker/index.html
+      - type: rewrite
         source: /terms
         destination: /terms/index.html
     headers:

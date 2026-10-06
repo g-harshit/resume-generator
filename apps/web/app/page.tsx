@@ -191,7 +191,12 @@ export default function Home() {
       <header className="sticky top-0 z-10 border-b border-line bg-ground/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
           <span className="font-display text-3xl">{APP_NAME}</span>
-          <HomeActions compact />
+          <div className="flex items-center gap-2">
+            <Link href="/ats-checker" className="hidden h-10 items-center rounded-[10px] px-3.5 text-[15px] text-ink hover:bg-sunken hover:text-ink sm:inline-flex">
+              Free ATS check
+            </Link>
+            <HomeActions compact />
+          </div>
         </div>
       </header>
 
@@ -208,6 +213,9 @@ export default function Home() {
               ATS-friendly PDF that fills the page.
             </p>
             <HomeActions />
+            <p className="text-sm text-muted">
+              Not ready to sign up? <Link href="/ats-checker">Check your resume against an ATS — free</Link>.
+            </p>
             <ul className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-muted">
               {["Nothing changes unless you ask", "Keywords exactly where you want them", "Four ATS-friendly templates"].map(
                 (t) => (
@@ -390,6 +398,7 @@ export default function Home() {
           <span>{APP_NAME}</span>
           <span>Your resume, in your own words.</span>
           <nav aria-label="Legal" className="flex gap-4">
+            <Link href="/ats-checker">Free ATS checker</Link>
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </nav>

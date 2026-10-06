@@ -5,5 +5,5 @@ import { SITE_URL } from "@/lib/config";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return ["/", "/register", "/login", "/privacy", "/terms"].map((path) => ({ url: `${SITE_URL}${path}` }));
+  return ["/", "/ats-checker", "/register", "/login", "/privacy", "/terms"].map((path) => ({ url: `${SITE_URL}${path}` }));
 }

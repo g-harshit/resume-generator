@@ -274,3 +274,24 @@ class AdminAction(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=utcnow, sa_column=Column(DateTime(timezone=True), nullable=False)
     )
+
+
+class AtsCheck(SQLModel, table=True):
+    """One run of the free ATS checker, by someone who may not have an account. Kept
+    24 hours (so the file can become their profile if they sign up), then deleted with
+    its file; claiming it at sign-up deletes it at once. No user: nobody owns it."""
+
+    __tablename__ = "ats_checks"
+
+    # Random and unguessable: whoever holds it is whoever ran the check.
+    id: str = Field(primary_key=True, max_length=64)
+    filename: str = Field(max_length=255)
+    mime: str = Field(max_length=100)
+    storage_key: str = Field(max_length=200)
+    report: dict = Field(sa_column=Column(JSONB, nullable=False))
+    job_text: str | None = Field(default=None, sa_column=Column(Text, nullable=True))
+    parsed_job: dict | None = Field(default=None, sa_column=Column(JSONB, nullable=True))
+    created_at: datetime = Field(
+        default_factory=utcnow,
+        sa_column=Column(DateTime(timezone=True), nullable=False, index=True),
+    )

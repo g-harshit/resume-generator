@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy policy" };
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy policy" updated="4 October 2026">
+    <LegalPage title="Privacy policy" updated="6 October 2026">
       <p>
         {APP_NAME} turns the resume you already have into a profile, and tailors it to job
         descriptions you choose. This page says what we keep, why, who helps us run the
@@ -29,6 +29,12 @@ export default function PrivacyPage() {
           <strong>From the Chrome extension:</strong> the text of the job posting on the page
           you open it on — only that page, only when you use it — to read the job. It
           doesn&apos;t look at other tabs or your browsing history.
+        </li>
+        <li>
+          <strong>From the free ATS checker</strong> (no account needed): the file you check,
+          the job description you paste, and the report, for 24 hours — so the file can become
+          your profile if you sign up — then deleted. The number of checks from your IP address
+          is counted for a day to stop abuse.
         </li>
         <li>
           <strong>Security records:</strong> failed sign-in attempts and similar events,

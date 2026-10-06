@@ -712,6 +712,27 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
 
 ---
 
+### Phase 12 — Free ATS checker (to bring people in)
+- [x] Public page `/ats-checker`, no account: upload a PDF or Word file, optionally paste
+      a job. `POST /ats-check` (5 per IP per day), `GET /ats-check/{token}` (the result
+      again, `?r=` in the URL), `POST /ats-check/{token}/claim` (signed in).
+- [x] **No score** (decided): real ATSs don't give one. It shows the text a simple ATS
+      reads — the file's text in stored order, columns not untangled; for Word, the body
+      without headers, footers or text boxes — and plain-code checks, each pass / warn /
+      fail with a fix (`services/ats_check.py`): readable text (not a scan), garbled
+      characters, columns (`extract.page_has_columns`, which ignores a strip of dates),
+      tables, text boxes, contact details in a Word header/footer, images, email, phone,
+      LinkedIn, standard headings, readable dates, length, file type. A pasted job adds
+      keyword coverage (the editor's matcher over that text); the only model call.
+- [x] Kept 24 hours (decided by the user), then deleted with its file: on each new check,
+      and hourly in the API. Signing up claims it: the file becomes the person's upload
+      (read into their profile as any upload), the job one of their jobs (not read
+      again), and the check is deleted. The browser remembers the token
+      (`lib/ats-claim.ts`); Home claims it after sign-up and offers "Make my resume for
+      that job" once the profile is confirmed.
+- [x] Linked from the landing page (header, hero, footer), in the sitemap, and in the
+      privacy policy. Our four templates pass every layout check (a test).
+
 ## Open decisions
 
 | Decision | Status |

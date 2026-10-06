@@ -88,6 +88,8 @@ class Settings(BaseSettings):
     r2_bucket: str = ""
     # Each parse is a paid model call, so these are capped per account per day.
     uploads_per_day: int = 20
+    # The free ATS checker, per IP address per day (no account needed).
+    ats_checks_per_day: int = 5
     jobs_per_day: int = 50
     resumes_per_day: int = 30
     cover_letters_per_day: int = 20

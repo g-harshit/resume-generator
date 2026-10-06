@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import { toShow } from "@/lib/notes";
 import { Loading } from "@/components/loading";
+import { checkedJob, forgetAtsCheck, pendingAtsCheck, rememberCheckedJob } from "@/lib/ats-claim";
 
 const POLL_MS = 1500;
 
@@ -39,20 +40,8 @@ export default function AppHome() {
     setState({ kind: "ready", profile, upload: latest && !latest.applied ? latest : null });
   }, []);
 
-  useEffect(() => {
-    // Deferred a tick so the effect body itself doesn't set state.
-    const t = setTimeout(() => {
-      showProfile().catch((err) => setState({ kind: "failed", message: errorMessage(err) }));
-    }, 0);
-    alive.current = true;
-    return () => {
-      clearTimeout(t);
-      alive.current = false;
-    };
-  }, [showProfile]);
-
   // Poll until the parse finishes; stops if the page is left.
-  async function watch(id: number, filename: string) {
+  const watch = useCallback(async (id: number, filename: string) => {
     while (alive.current) {
       await new Promise((r) => setTimeout(r, POLL_MS));
       let upload: Upload;
@@ -68,7 +57,33 @@ export default function AppHome() {
       }
       setState({ kind: "working", upload, filename });
     }
-  }
+  }, [showProfile]);
+
+  useEffect(() => {
+    // Deferred a tick so the effect body itself doesn't set state.
+    const t = setTimeout(async () => {
+      // Just signed up from the free ATS checker: that file becomes the profile.
+      const token = pendingAtsCheck();
+      if (token) {
+        forgetAtsCheck();
+        try {
+          const claimed = await api.claimAtsCheck(token);
+          rememberCheckedJob(claimed.job_id);
+          setState({ kind: "working", upload: null, filename: "the resume you checked" });
+          await watch(claimed.upload_id, "the resume you checked");
+          return;
+        } catch {
+          // Expired or already claimed: carry on as usual.
+        }
+      }
+      showProfile().catch((err) => setState({ kind: "failed", message: errorMessage(err) }));
+    }, 0);
+    alive.current = true;
+    return () => {
+      clearTimeout(t);
+      alive.current = false;
+    };
+  }, [showProfile, watch]);
 
   async function start(file: File) {
     setState({ kind: "working", upload: null, filename: file.name });
@@ -92,6 +107,7 @@ export default function AppHome() {
   }
 
   const firstName = user?.name.split(/\s+/)[0];
+  const jobFromChecker = state.kind === "ready" ? checkedJob() : null;
 
   if (state.kind === "loading") {
     return <Loading />;
@@ -119,6 +135,25 @@ export default function AppHome() {
                 : "We read your resume. Here's what we found."}
           </p>
         </div>
+
+        {jobFromChecker !== null && (
+          <div className="flex flex-col gap-3 rounded-xl border border-accent bg-accent-soft p-5 sm:flex-row sm:items-center">
+            <p className="flex-1 text-sm text-accent-ink">
+              {profile.reviewed_at
+                ? "Ready to fix the job keywords the ATS checker found missing?"
+                : "Next: check your profile, then make a resume for the job you pasted into the ATS checker."}
+            </p>
+            {profile.reviewed_at && (
+              <Link
+                href={`/app/templates?job=${jobFromChecker}`}
+                onClick={() => rememberCheckedJob(null)}
+                className="inline-flex h-11 items-center rounded-[10px] bg-accent px-4 text-sm font-medium text-white hover:bg-accent-hover hover:text-white"
+              >
+                Make my resume for that job
+              </Link>
+            )}
+          </div>
+        )}
 
         {pending && (
           <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-5 sm:flex-row sm:items-center">

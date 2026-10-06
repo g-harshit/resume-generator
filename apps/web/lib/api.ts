@@ -307,6 +307,20 @@ export function saveFile({ blob, filename }: { blob: Blob; filename: string }) {
   URL.revokeObjectURL(url);
 }
 
+/** The free ATS checker's report on one file. */
+export type AtsCheckItem = { id: string; title: string; status: "pass" | "warn" | "fail"; detail: string };
+export type AtsReport = {
+  filename: string;
+  file_type: "pdf" | "docx";
+  pages: number;
+  words: number;
+  /** The text a simple ATS reads from the file, in the order it reads it. */
+  ats_text: string;
+  checks: AtsCheckItem[];
+  keywords: { job_title: string; covered: string[]; missing: string[] } | null;
+};
+export type AtsResult = { token: string; report: AtsReport };
+
 export const api = {
   register: (email: string, password: string, name: string) =>
     request<TokenResponse>("/auth/register", {
@@ -359,6 +373,19 @@ export const api = {
     body.append("file", file);
     return request<Upload>("/uploads", { method: "POST", body });
   },
+  /** Public: no account needed. */
+  atsCheck: (file: File, jobText: string) => {
+    const body = new FormData();
+    body.append("file", file);
+    if (jobText.trim()) body.append("job_text", jobText);
+    return request<AtsResult>("/ats-check", { method: "POST", body });
+  },
+  getAtsCheck: (token: string) => request<AtsResult>(`/ats-check/${encodeURIComponent(token)}`),
+  /** After signing up: the checked file becomes your upload, the pasted job one of your jobs. */
+  claimAtsCheck: (token: string) =>
+    request<{ upload_id: number; job_id: number | null }>(`/ats-check/${encodeURIComponent(token)}/claim`, {
+      method: "POST",
+    }),
   getUpload: (id: number) => request<Upload>(`/uploads/${id}`),
   /** The original file, as a blob (it needs the auth header, so no plain URL). */
   getUploadFile: async (id: number) => (await send(`/uploads/${id}/file`)).blob(),
