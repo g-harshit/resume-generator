@@ -143,3 +143,20 @@ def test_coverage_accepts_what_the_editor_accepts(term, line):
         }
     )
     assert match(data, [term], [], [])["covered"] == 1
+
+
+def test_a_job_with_no_skills_listed_is_scored_on_its_keywords():
+    data = ResumeData.model_validate(
+        {
+            "basics": {"name": "A"},
+            "experience": [
+                {
+                    "id": "e",
+                    "company": "C",
+                    "bullets": [{"id": "b", "text": "Ran the trainee program."}],
+                }
+            ],
+        }
+    )
+    result = match(data, [], [], ["trainee program", "risk solutions", "life insurance"])
+    assert (result["covered"], result["total"]) == (1, 3)

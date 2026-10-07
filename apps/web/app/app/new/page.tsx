@@ -179,6 +179,13 @@ function WhatWeFound({ job, reading }: { job: Job | null; reading: boolean }) {
             </span>
           </div>
 
+          {job.match && job.match.must_have.length + job.match.nice_to_have.length === 0 && (
+            <p role="alert" className="rounded-lg bg-warn-soft px-3.5 py-3 text-[13px] leading-normal text-warn-ink">
+              <strong>No required skills listed.</strong> This reads like a company or campus-hiring overview
+              rather than one role&apos;s job description, so we&apos;ll match on the words it uses. For a better
+              match, paste the posting for a single role — its responsibilities and requirements.
+            </p>
+          )}
           {job.match ? (
             <>
               <Terms title="Must have" terms={job.match.must_have} />

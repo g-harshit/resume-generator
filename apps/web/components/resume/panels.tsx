@@ -120,15 +120,36 @@ export function MatchPanel({
   /** Name the job's skills in the lines that already prove them. `added`: the last run's result. */
   bridge?: { busy: boolean; disabled: boolean; run: () => void; added: string[] | null };
 }) {
-  const missing = [
-    ...match.must_have.filter((m) => !m.covered).map((m) => ({ ...m, kind: "must have" })),
-    ...match.nice_to_have.filter((m) => !m.covered).map((m) => ({ ...m, kind: "nice to have" })),
-  ];
-  const covered: TermMatch[] = [...match.must_have, ...match.nice_to_have].filter((m) => m.covered);
+  // A posting with no skills listed (a company overview) is matched on the words it uses.
+  const skillless = match.must_have.length + match.nice_to_have.length === 0;
+  const missing = skillless
+    ? match.keywords.filter((m) => !m.covered).map((m) => ({ ...m, kind: "keyword" }))
+    : [
+        ...match.must_have.filter((m) => !m.covered).map((m) => ({ ...m, kind: "must have" })),
+        ...match.nice_to_have.filter((m) => !m.covered).map((m) => ({ ...m, kind: "nice to have" })),
+      ];
+  const covered: TermMatch[] = (skillless ? match.keywords : [...match.must_have, ...match.nice_to_have]).filter(
+    (m) => m.covered,
+  );
   const pct = match.total ? (100 * match.covered) / match.total : 0;
+
+  const others = skillless ? [] : match.keywords;
 
   return (
     <section aria-label="Job match" className={panel}>
+      {match.total === 0 ? (
+        <div className="flex flex-col gap-1.5 rounded-lg bg-warn-soft p-3 text-warn-ink">
+          <span className="text-sm font-semibold">Nothing to match in this job</span>
+          <span className="text-[13px] leading-normal">
+            What was pasted has no skills or keywords to match — it reads like a company overview rather than
+            one role&apos;s requirements. For a keyword match,{" "}
+            <Link href="/app/new" className="font-medium text-warn-ink underline">
+              start a new resume
+            </Link>{" "}
+            from the role&apos;s job description — its responsibilities and requirements.
+          </span>
+        </div>
+      ) : (
       <div className="flex items-center gap-3">
         <div
           aria-hidden="true"
@@ -142,10 +163,13 @@ export function MatchPanel({
         <div className="flex flex-col">
           <h2 className="text-[15px] font-semibold">Job keywords covered</h2>
           <span className="text-[13px] leading-snug text-muted">
-            {match.covered} of the job&apos;s {match.total} skills appear in this resume&apos;s text.
+            {match.covered} of the job&apos;s {match.total} {skillless ? "keywords" : "skills"} appear in this
+            resume&apos;s text.
+            {skillless && " The posting lists no required skills, so these are the words it uses."}
           </span>
         </div>
       </div>
+      )}
 
       {bridge && (
         <div className="flex flex-col gap-1.5 rounded-lg bg-sunken p-3">
@@ -188,6 +212,27 @@ export function MatchPanel({
             Add one to a line with &ldquo;+ Add job keywords&rdquo;, or to your profile with &ldquo;I have this&rdquo;.
             If you don&apos;t have one of these, leave it.
           </span>
+        </div>
+      )}
+
+      {others.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-semibold">Other words the job uses</span>
+          <ul className="flex flex-wrap gap-1.5">
+            {others.map((m) => (
+              <li
+                key={m.term}
+                title={m.covered ? "In this resume" : "Not in this resume"}
+                className={`rounded-full px-2.5 py-0.5 text-[13px] ${
+                  m.covered ? "bg-accent-soft text-accent-ink" : "border border-dashed border-line-strong text-muted"
+                }`}
+              >
+                {m.covered ? "✓ " : ""}
+                {m.term}
+              </li>
+            ))}
+          </ul>
+          <span className="text-xs text-muted">Add any that fit a line with &ldquo;+ Add job keywords&rdquo;.</span>
         </div>
       )}
 

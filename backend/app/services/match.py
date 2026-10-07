@@ -215,7 +215,9 @@ def match(profile: ResumeData, must_have: list[str], nice_to_have: list[str], ke
         "nice_to_have": [index.find(t) for t in nice],
         "keywords": [index.find(t) for t in keys],
     }
-    scored = result["must_have"] + result["nice_to_have"]
+    # A posting that lists no skills (a company or campus-hiring overview) is scored on
+    # the words it does use, rather than showing 0 of 0.
+    scored = result["must_have"] + result["nice_to_have"] or result["keywords"]
     return {
         **result,
         "covered": sum(m.covered for m in scored),
