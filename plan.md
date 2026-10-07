@@ -729,11 +729,18 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       (one or two examples in fresh words, at most two numbers), how they'd approach the
       job (intent), and a full closing; ~250-350 words, no repeated phrases. A sentence
       that mostly repeats a resume line (≥70% of its words) is sent back to be said in
-      letter voice (`copied_line`). An optional "In your own words" box (why this
-      company, how they work) is used in the letter and counts as true alongside the
-      resume; it's kept with the letter. The verifier accepts motivation and intent,
+      letter voice (`copied_line`). (An optional "In your own words" box was tried
+      and removed at the user's request; the API still accepts `notes`.) The verifier accepts motivation and intent,
       and now rejects work placed at the wrong employer or time (found live: "Earlier,
       I migrated…" for the current job's work).
+
+- [x] Degree requirements are matched against Education ("Bachelor's degree" is met by
+      B.Com, B.Tech, BBA… or any higher degree; found live: a B.Com + MBA resume showed
+      it missing).
+- [x] The cover letter page shows the letter as the PDF prints it (its pages, from `GET
+      /resumes/{id}/cover-letter/preview`), with Edit → greeting, letter and sign-off
+      (all editable, saved with the letter) → Save. Preview and PDF render from the same
+      parts (`_letter_html`). The "In your own words" box was removed (the user).
 
 ### Phase 12 — Free ATS checker (to bring people in)
 - [x] Public page `/ats-checker`, no account: upload a PDF or Word file, optionally paste

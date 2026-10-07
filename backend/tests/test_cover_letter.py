@@ -278,3 +278,24 @@ def test_letter_text_is_escaped_in_the_pdf_html(client, auth, resume):
         ResumeData.model_validate(resume["content"]), "<script>x</script>", "Acme", "classic"
     )
     assert "<script>x" not in html and "&lt;script&gt;" in html
+
+
+def test_the_preview_is_the_pdf_and_greeting_and_sign_off_can_be_edited(client, auth, resume):
+    url = f"/resumes/{resume['id']}/cover-letter"
+    letter = client.post(url, headers=auth).json()["cover_letter"]
+    assert letter["greeting"] == "Dear hiring team at Northwind Labs,"
+    assert letter["sign_off"] == "Sincerely,\nAsha Rao"
+
+    saved = client.put(
+        url,
+        headers=auth,
+        json={"text": OPENING, "greeting": "Dear Priya,", "sign_off": "Warm regards,\nAsha"},
+    ).json()["cover_letter"]
+    assert (saved["greeting"], saved["sign_off"]) == ("Dear Priya,", "Warm regards,\nAsha")
+
+    preview = client.get(f"{url}/preview", headers=auth).json()
+    pdf = client.get(f"{url}/pdf", headers=auth).content
+    text = "".join(page.get_text() for page in pymupdf.open(stream=pdf, filetype="pdf"))
+    for part in ("Dear Priya,", "Warm regards,", "bring my payments work to Northwind"):
+        assert part in preview["html"] and part in text
+    assert preview["pages"] == 1 and preview["images"]

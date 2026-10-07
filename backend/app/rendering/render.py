@@ -186,10 +186,25 @@ def render_html(data: ResumeData, slug: str, layout: Layout | None = None) -> st
     )
 
 
+def default_greeting(company: str) -> str:
+    return f"Dear hiring team at {company}," if company else "Dear hiring team,"
+
+
+def default_sign_off(name: str) -> str:
+    return f"Sincerely,\n{name}".strip()
+
+
 def render_letter_html(
-    data: ResumeData, body: str, company: str, slug: str, layout: Layout | None = None
+    data: ResumeData,
+    body: str,
+    company: str,
+    slug: str,
+    layout: Layout | None = None,
+    greeting: str | None = None,
+    sign_off: str | None = None,
 ) -> str:
-    """The letter's header matches its resume's: the same items left off."""
+    """The letter's header matches its resume's: the same items left off. The greeting
+    and sign-off are the person's, or the defaults."""
     layout = layout or Layout()
     if slug not in BY_SLUG:
         raise UnknownTemplate(slug)
@@ -205,7 +220,12 @@ def render_letter_html(
             base_css=_css("base.css"),
             template_css=_css(f"{slug}.css"),
             paragraphs=[p.strip() for p in body.split("\n\n") if p.strip()],
-            company=company,
+            greeting=(greeting or default_greeting(company)).strip(),
+            sign_off=[
+                line.strip()
+                for line in (sign_off or default_sign_off(data.basics.name)).splitlines()
+                if line.strip()
+            ],
             today=f"{today.day} {today.strftime('%B %Y')}",
         )
     )

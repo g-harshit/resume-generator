@@ -161,8 +161,9 @@ export type CoverLetter = {
   text: string;
   /** Sentences left out: they claimed something the resume doesn't say, or copied it. */
   removed: { text: string; reason: string }[];
-  /** What the person wrote about themselves for this letter. */
-  notes?: string;
+  /** As printed: "Dear hiring team at …," and "Sincerely,\nName" unless edited. */
+  greeting: string;
+  sign_off: string;
   generated_at: string;
 };
 
@@ -455,10 +456,12 @@ export const api = {
   /** Tailor again from the profile as it is now; replaces this resume's edits. */
   retailorResume: (id: number) => request<ResumeFull>(`/resumes/${id}/retailor`, { method: "POST" }),
   /** Write (or rewrite) the cover letter from this resume: waits for the model, ~15–30 s. */
-  writeCoverLetter: (id: number, notes = "") =>
-    request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "POST", body: JSON.stringify({ notes }) }),
-  saveCoverLetter: (id: number, text: string) =>
-    request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "PUT", body: JSON.stringify({ text }) }),
+  writeCoverLetter: (id: number) => request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "POST" }),
+  saveCoverLetter: (id: number, letter: { text: string; greeting: string; sign_off: string }) =>
+    request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "PUT", body: JSON.stringify(letter) }),
+  /** The letter exactly as the PDF prints it. */
+  coverLetterPreview: (id: number, template: string) =>
+    request<Preview>(`/resumes/${id}/cover-letter/preview?template=${encodeURIComponent(template)}`),
   coverLetterPdf: (id: number, template: string) =>
     pdfDownload(`/resumes/${id}/cover-letter/pdf?template=${encodeURIComponent(template)}`),
   duplicateResume: (id: number) => request<ResumeFull>(`/resumes/${id}/duplicate`, { method: "POST" }),

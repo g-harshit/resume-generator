@@ -154,6 +154,35 @@ class TermMatch:
     where: list[Evidence] = field(default_factory=list)
 
 
+# Degree levels: 1 bachelor's, 2 master's, 3 doctorate. Matched on the degree with its
+# dots removed ("B.Com (Hons)" → "bcom (hons)").
+_BACHELOR = re.compile(
+    r"\b(b(tech|e|sc|com|a|s|ba|ca|bm|des|arch|pharm|ed)|bachelors?|undergraduate|graduate)\b"
+)
+_MASTER = re.compile(r"\b(m(tech|e|sc|com|a|s|ba|ca|des|phil)|masters?|pgdm|pgdba|postgraduate)\b")
+_DOCTORATE = re.compile(r"\b(phd|doctorate|doctoral)\b")
+
+
+def _degree_level(text: str) -> int:
+    t = text.lower().replace(".", "")
+    if _DOCTORATE.search(t):
+        return 3
+    if _MASTER.search(t):
+        return 2
+    if _BACHELOR.search(t):
+        return 1
+    return 0
+
+
+def _degree_requirement(term: str) -> int:
+    """The degree level a job term asks for ("Bachelor's degree" → 1), or 0 if it isn't
+    a degree requirement."""
+    t = term.lower().replace(".", "").replace("'", "").replace("’", "")
+    if not re.search(r"\b(degree|bachelors?|masters?|phd|doctorate|graduate|mba)\b", t):
+        return 0
+    return _degree_level(t) or 1  # "a degree", "graduate" → any degree
+
+
 class _ProfileIndex:
     def __init__(self, profile: ResumeData):
         self.skills = {normalise(s) for s in profile.all_skills()}
@@ -169,11 +198,19 @@ class _ProfileIndex:
         for p in profile.projects:
             text = " ".join([p.name, *(b.text for b in p.bullets)])
             self.prose.append((Evidence("projects", p.name, p.id), text))
+        # Degree levels held, highest counting for the lower ones (an MBA meets
+        # "Bachelor's degree").
+        self.degree_level = max(
+            (_degree_level(f"{ed.degree} {ed.field}") for ed in profile.education), default=0
+        )
 
     def find(self, term: str) -> TermMatch:
         canonicals = {normalise(a) for a in alternatives(term)}
         spellings = [s for c in canonicals for s in _spellings(c)]
         where: list[Evidence] = []
+        wanted = _degree_requirement(term)
+        if wanted and self.degree_level >= wanted:
+            where.append(Evidence("education", "Education"))
         if canonicals & self.skills:
             where.append(Evidence("skills", "Skills"))
         for evidence, text in self.prose:

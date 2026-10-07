@@ -21,7 +21,13 @@ from app.models import (
     utcnow,
 )
 from app.rendering.catalog import BY_SLUG
-from app.rendering.render import render_html, render_letter_html, render_pdf
+from app.rendering.render import (
+    default_greeting,
+    default_sign_off,
+    render_html,
+    render_letter_html,
+    render_pdf,
+)
 from app.routers.templates import PreviewOut, pdf_filename, preview_of
 from app.schemas.layout import Layout, default_layout
 from app.schemas.resume import ResumeData
@@ -128,7 +134,9 @@ def _out(session: Session, resume: Resume) -> ResumeOut:
         content=ResumeData.model_validate(resume.content),
         provenance=resume.provenance,
         match=match,
-        cover_letter=resume.cover_letter,
+        cover_letter={**resume.cover_letter, **_letter_parts(session, resume)}
+        if resume.cover_letter
+        else None,
         layout=_layout(resume),
     )
 
@@ -757,17 +765,37 @@ def write_letter(
 
 class LetterIn(BaseModel):
     text: str = Field(max_length=10_000)
+    greeting: str | None = Field(default=None, max_length=200)
+    sign_off: str | None = Field(default=None, max_length=300)
+
+
+def _letter_parts(session: Session, resume: Resume) -> dict:
+    """The letter as it's printed: greeting, body, sign-off (the person's, or defaults)."""
+    letter = resume.cover_letter or {}
+    job = _job(session, resume)
+    data = ResumeData.model_validate(resume.content)
+    return {
+        "text": letter.get("text", ""),
+        "greeting": letter.get("greeting") or default_greeting(job.company if job else ""),
+        "sign_off": letter.get("sign_off") or default_sign_off(data.basics.name),
+    }
 
 
 @router.put("/{resume_id}/cover-letter")
 def save_letter(
     resume_id: int, body: LetterIn, user: CurrentUser, session: SessionDep
 ) -> ResumeOut:
-    """The person's own edits to the letter: theirs, so not checked."""
+    """The person's own edits to the letter — body, greeting, sign-off: theirs, so not
+    checked."""
     resume = _own(session, user, resume_id)
     if resume.cover_letter is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "There's no cover letter yet.")
-    resume.cover_letter = {**resume.cover_letter, "text": body.text}
+    resume.cover_letter = {
+        **resume.cover_letter,
+        "text": body.text,
+        **({"greeting": body.greeting.strip()} if body.greeting is not None else {}),
+        **({"sign_off": body.sign_off.strip()} if body.sign_off is not None else {}),
+    }
     resume.updated_at = utcnow()
     session.add(resume)
     session.commit()
@@ -775,23 +803,37 @@ def save_letter(
     return _out(session, resume)
 
 
+def _letter_html(session: Session, resume: Resume, template: str | None) -> str:
+    if not resume.cover_letter:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "There's no cover letter yet.")
+    parts = _letter_parts(session, resume)
+    job = _job(session, resume)
+    return render_letter_html(
+        ResumeData.model_validate(resume.content),
+        parts["text"],
+        job.company if job else "",
+        _template(resume, template),
+        _layout(resume),
+        greeting=parts["greeting"],
+        sign_off=parts["sign_off"],
+    )
+
+
+@router.get("/{resume_id}/cover-letter/preview")
+def letter_preview(
+    resume_id: int, user: CurrentUser, session: SessionDep, template: str | None = None
+) -> PreviewOut:
+    """The letter exactly as the PDF prints it, page by page."""
+    return preview_of(_letter_html(session, _own(session, user, resume_id), template))
+
+
 @router.get("/{resume_id}/cover-letter/pdf")
 def letter_pdf(
     resume_id: int, user: CurrentUser, session: SessionDep, template: str | None = None
 ) -> Response:
     resume = _own(session, user, resume_id)
-    if not resume.cover_letter:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "There's no cover letter yet.")
+    rendered = render_pdf(_letter_html(session, resume, template))
     data = ResumeData.model_validate(resume.content)
-    job = _job(session, resume)
-    html = render_letter_html(
-        data,
-        resume.cover_letter["text"],
-        job.company if job else "",
-        _template(resume, template),
-        _layout(resume),
-    )
-    rendered = render_pdf(html)
     filename = pdf_filename(data).replace("-Resume.pdf", "-Cover-Letter.pdf")
     return Response(
         rendered.content,

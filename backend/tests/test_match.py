@@ -160,3 +160,21 @@ def test_a_job_with_no_skills_listed_is_scored_on_its_keywords():
     )
     result = match(data, [], [], ["trainee program", "risk solutions", "life insurance"])
     assert (result["covered"], result["total"]) == (1, 3)
+
+
+@pytest.mark.parametrize(
+    ("degree", "term", "covered"),
+    [
+        ("B.COM (HONS)", "Bachelor's degree", True),
+        ("M.B.A.", "Bachelor's degree", True),  # a higher degree meets it
+        ("B.Tech", "Master's degree in Computer Science", False),
+        ("PGDM", "Master's degree", True),
+        ("12TH", "Bachelor's degree", False),
+        ("B.E.", "Degree in Engineering", True),
+    ],
+)
+def test_degree_requirements_are_checked_against_education(degree, term, covered):
+    data = ResumeData.model_validate(
+        {"basics": {"name": "A"}, "education": [{"id": "ed", "institution": "X", "degree": degree}]}
+    )
+    assert match(data, [term], [], [])["covered"] == int(covered)

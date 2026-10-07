@@ -1,6 +1,6 @@
 {#-
   A cover letter in the same template as its resume: same stylesheet, same header.
-  The greeting, sign-off and name come from here, never from the model.
+  The greeting and sign-off are the person's (defaults from `letter_parts`), never the model's.
 -#}
 <!doctype html>
 <html lang="en">
@@ -31,10 +31,10 @@
   {% endif %}
 </header>
 <p class="date">{{ today }}</p>
-<p>Dear {{ ("hiring team at " ~ company) if company else "hiring team" }},</p>
+<p>{{ greeting }}</p>
 {% for paragraph in paragraphs %}<p>{{ paragraph }}</p>
 {% endfor %}
-<p class="sign">Sincerely,<br>{{ b.name }}</p>
+<p class="sign">{% for line in sign_off %}{% if not loop.first %}<br>{% endif %}{{ line }}{% endfor %}</p>
 </main>
 </body>
 </html>
