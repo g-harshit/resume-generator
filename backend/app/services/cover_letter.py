@@ -28,13 +28,20 @@ class Letter(BaseModel):
 
 WRITE_INSTRUCTIONS = """\
 You write the body of a cover letter for one job, for the person whose resume you are
-given. Return 3 or 4 short paragraphs (no greeting, no sign-off, no name).
+given. Return 4 paragraphs (no greeting, no sign-off, no name).
 
 - Open with the role and why it fits them, using what the posting says about the job
   and the company.
 - Then connect two or three of their real achievements from the resume to what the job
   asks for. Use the resume's own facts and numbers; don't round, inflate or combine them.
-- Close briefly.
+- End with a full closing paragraph of 3 or 4 sentences that reads as a natural
+  conclusion, not an afterthought: link back to what the posting says the team or
+  company is working on and name, from the resume, the experience they would bring to
+  it ("I'd like to bring my work on payment reconciliation and Kafka-based settlement to
+  Northwind's ledger platform"); say they would welcome a conversation about the role;
+  and thank the reader for their time. Warm and confident, plain words. Express
+  interest and intent ("I'd like to", "I'd welcome"), never promised results ("I will
+  drive growth", "help scale the team", "deliver impact").
 
 Never state anything about the person that isn't in the resume: no skill, tool,
 employer, number, title, responsibility, outcome or quality they haven't written down.
@@ -69,7 +76,10 @@ Characterising the person or their work is a claim too: "improved reliability",
 that, it adds information.
 
 Statements about the job or the company are fine when the POSTING supports them.
-Plain interest in the role ("I'd like to bring this to your team") is fine.
+Plain interest in the role is fine, and so is a closing's courtesy: wanting to bring
+experience the RESUME shows to work the POSTING describes ("I'd like to bring my work
+on X to your Y"), welcoming a conversation, thanking the reader. A promised outcome
+("supporting the team's growth", "driving impact", "helping you scale") is a claim.
 Restating the resume's facts in other words is fine.
 
 For each id, give one or two sentences of reasoning first, then the verdict, and in
@@ -255,4 +265,19 @@ def write_cover_letter(resume: ResumeData, job: dict, posting: str, provider: AI
             continue
         seen.add(sentence.lower())
         paragraphs.setdefault(k.split(".")[0], []).append(sentence)
-    return {"text": "\n\n".join(" ".join(p) for p in paragraphs.values()), "removed": removed}
+    texts = [" ".join(p) for p in paragraphs.values()]
+    # The closing went (every sentence of it failed a check): end plainly rather than
+    # stop on a list of facts.
+    last = f"p{len({k.split('.')[0] for k in body}) - 1}"
+    if body and last not in paragraphs:
+        texts.append(_closing(job))
+    return {"text": "\n\n".join(texts), "removed": removed}
+
+
+def _closing(job: dict) -> str:
+    role = " ".join(x for x in (job.get("title", ""), "role") if x).strip()
+    at = f" at {job['company']}" if job.get("company") else ""
+    return (
+        f"I'd welcome the chance to talk about the {role}{at} and how my experience fits "
+        "what you're looking for. Thank you for your time and consideration."
+    )

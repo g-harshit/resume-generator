@@ -170,6 +170,21 @@ def test_a_sentence_the_rewrite_drops_is_left_out():
     assert letter["removed"][0]["text"] == "I have a proven track record."
 
 
+def test_a_letter_whose_closing_was_all_cut_still_ends_properly():
+    promise = "I will help Northwind scale its platform and drive growth."
+    stub.answer("tailor", lambda text: Letter(paragraphs=[OPENING, HONEST, promise]))
+    stub.answer("verify_tailoring", verdicts({promise: "promised growth"}))
+    stub.answer("repair_tailoring", repair_with(""))
+    letter = write_cover_letter(PROFILE, JOB, JD, StubProvider())
+    ending = letter["text"].split("\n\n")[-1]
+    assert ending == (
+        "I'd welcome the chance to talk about the Senior Backend Engineer role at Northwind "
+        "Labs and how my experience fits what you're looking for. Thank you for your time and "
+        "consideration."
+    )
+    assert letter["removed"][0]["text"] == promise
+
+
 # --- the endpoints -------------------------------------------------------------------
 
 

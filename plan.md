@@ -717,6 +717,13 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       (`match`: must+nice, else keywords) instead of showing "0 of 0"; the editor's match
       panel says so, and the new-job page warns that it reads like an overview.
 
+- [x] Cover letters end with a full closing paragraph (3–4 sentences: a link back to
+      what the posting says the team works on and the experience they'd bring, an
+      invitation to talk, thanks). Found live: the old one-line close was removed by the
+      verifier ("supporting the team's growth"), so letters stopped on a list of facts.
+      The verifier now accepts interest and courtesy but not promised results; if a
+      closing is still cut entirely, a plain true one is added.
+
 ### Phase 12 — Free ATS checker (to bring people in)
 - [x] Public page `/ats-checker`, no account: upload a PDF or Word file, optionally paste
       a job. `POST /ats-check` (5 per IP per day), `GET /ats-check/{token}` (the result
