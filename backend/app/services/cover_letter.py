@@ -1,5 +1,6 @@
-"""A cover letter for one resume's job, with the same rule as tailoring: nothing about
-the person that isn't in their resume.
+"""A cover letter for one resume's job: what the resume can't say (why this role, the
+thread through the person's work, how they'd approach the job), with the same rule as
+tailoring: nothing about the person that isn't in their resume or their own words.
 
 The model writes the body paragraphs only; the greeting, sign-off, name and contact
 details come from code. Each paragraph then gets the tailoring checks — no number and
@@ -30,26 +31,34 @@ WRITE_INSTRUCTIONS = """\
 You write the body of a cover letter for one job, for the person whose resume you are
 given. Return 4 paragraphs (no greeting, no sign-off, no name).
 
-- Open with the role and why it fits them, using what the posting says about the job
-  and the company.
-- Then connect two or three of their real achievements from the resume to what the job
-  asks for. Use the resume's own facts and numbers; don't round, inflate or combine them.
-- End with a full closing paragraph of 3 or 4 sentences that reads as a natural
-  conclusion, not an afterthought: link back to what the posting says the team or
-  company is working on and name, from the resume, the experience they would bring to
-  it ("I'd like to bring my work on payment reconciliation and Kafka-based settlement to
-  Northwind's ledger platform"); say they would welcome a conversation about the role;
-  and thank the reader for their time. Warm and confident, plain words. Express
-  interest and intent ("I'd like to", "I'd welcome"), never promised results ("I will
-  drive growth", "help scale the team", "deliver impact").
+A cover letter says what the resume can't. The recruiter has the resume: don't walk
+through it, don't list its bullets or tools, and never copy a resume line. Instead:
 
-Never state anything about the person that isn't in the resume: no skill, tool,
-employer, number, title, responsibility, outcome or quality they haven't written down.
-That includes characterising their work: no "track record of scalable solutions",
-"strong experience", "which improved reliability", "demonstrates my focus on" — state
-what they did and let it speak. If the job asks for something the resume doesn't show,
-leave it out; don't claim it and don't apologise for it. Plain, specific; no clichés
-("I am writing to express my interest", "team player", "passionate").
+1. Why this role, at this company: what in the POSTING draws them (the problem the
+   team works on, the product, the stage of the company), and how it follows from the
+   direction of their own work.
+2. The thread through their experience: what kind of problems they have worked on and
+   what that work has been about — told as a short story, pointing to one or two real
+   examples from the resume in fresh words (at most two numbers in the whole letter).
+3. How they would approach this team's work: what they'd want to learn first, which
+   parts of the role match how they like to work — as intent ("I'd want to…", "I'd
+   start by…"), grounded in the posting and their experience.
+4. A closing of 3 or 4 sentences that reads as a natural conclusion: what they'd bring,
+   an invitation to talk, thanks.
+
+YOUR_WORDS, when given, is the person writing about themselves (why this company, what
+they care about, how they work): use it, in their voice, as the heart of paragraphs 1
+and 3. It's as true as the resume.
+
+Never state anything about the person that isn't in the resume or YOUR_WORDS: no skill,
+tool, employer, number, title, responsibility, outcome or quality they haven't given.
+No characterising their work ("track record", "strong experience", "robust",
+"ensuring reliability", "demonstrates my focus on"). Interest, motivation and intent
+are fine; claimed results ("I will drive growth") are not. If the job asks for
+something they don't show, leave it out. Plain, warm, specific; no clichés ("I am
+writing to express my interest", "team player", "passionate", "excited to leverage").
+Each sentence says something new: never repeat a phrase or an idea ("much of my
+career", "correctness is essential") across the letter. About 250-350 words.
 """
 
 
@@ -70,12 +79,20 @@ POSTING. For each sentence, decide whether it states anything about the PERSON t
 RESUME does not support: a skill, tool, employer, number, title, responsibility,
 achievement, outcome, scale or quality claim.
 
+Placing work at the wrong employer or time is a claim too: "earlier, I migrated…"
+when the RESUME has it at the current job, "at Tolexo I…" for Paylane's work, "led"
+when the RESUME says "designed".
 Characterising the person or their work is a claim too: "improved reliability",
 "track record of", "strong experience", "ensuring", "demonstrates my focus on",
 "commitment to", "practical exposure to leadership" — unless the RESUME says exactly
 that, it adds information.
 
+RESUME includes, at its end, the person's own words about themselves (motivation,
+what they care about, how they work); anything they wrote there is supported.
 Statements about the job or the company are fine when the POSTING supports them.
+Why the person wants this role, what they'd want to learn or work on, and how they
+would approach it ("I'd want to start by…") are intent, not claims — fine as long as
+they claim no past experience, skill or result the RESUME doesn't support.
 Plain interest in the role is fine, and so is a closing's courtesy: wanting to bring
 experience the RESUME shows to work the POSTING describes ("I'd like to bring my work
 on X to your Y"), welcoming a conversation, thanking the reader. A promised outcome
@@ -91,7 +108,9 @@ REPAIR_INSTRUCTIONS = """\
 These sentences of a cover letter were rejected for claiming things the person's
 RESUME doesn't support (the reason is given; CONTEXT is the paragraph around each).
 Rewrite each so it states only what the RESUME supports — usually by cutting the
-claim and keeping the fact. Return {id, text} for each; text "" to drop it.
+claim and keeping the fact. When the reason is that it copies a line of the resume,
+make the same point in the letter's own words, shorter and as part of the story, not
+a restatement of the line. Return {id, text} for each; text "" to drop it.
 """
 
 
@@ -137,6 +156,26 @@ _SENTENCE_END = re.compile(r"(?<=[.!?])\s+(?=[A-Z\"“'‘(])")
 
 def sentences(paragraph: str) -> list[str]:
     return [s.strip() for s in _SENTENCE_END.split(paragraph) if s.strip()]
+
+
+_WORD = re.compile(r"[a-z0-9][a-z0-9+#.-]{2,}")
+
+
+def _words(text: str) -> set[str]:
+    return set(_WORD.findall(text.lower()))
+
+
+def copied_line(sentence: str, lines: list[str]) -> str | None:
+    """The resume line this sentence mostly repeats, if any: a letter that walks
+    through the resume's bullets adds nothing the recruiter doesn't already have."""
+    mine = _words(sentence)
+    if len(mine) < 6:
+        return None
+    for line in lines:
+        theirs = _words(line)
+        if theirs and len(mine & theirs) / len(theirs) >= 0.7:
+            return line
+    return None
 
 
 def check_sentence(text: str, facts: str, posting: str, terms: list[str]) -> str | None:
@@ -185,9 +224,14 @@ def _verify(
     return flagged
 
 
-def write_cover_letter(resume: ResumeData, job: dict, posting: str, provider: AIProvider) -> dict:
-    """{"text": the letter body, "removed": [{"text", "reason"}]}."""
-    facts = facts_text(resume)
+def write_cover_letter(
+    resume: ResumeData, job: dict, posting: str, provider: AIProvider, notes: str = ""
+) -> dict:
+    """{"text": the letter body, "removed": [{"text", "reason"}]}. `notes` is the
+    person in their own words (why this company, how they work): as true as the resume."""
+    notes = notes.strip()
+    facts = facts_text(resume) + (f"\n\nIn the person's own words:\n{notes}" if notes else "")
+    resume_lines = [b.text for e in [*resume.experience, *resume.projects] for b in e.bullets]
     # Skills the letter may not claim unless the resume has them. Job keywords are
     # left to the verifier, as in tailoring.
     terms = skill_terms(resume, job)
@@ -204,6 +248,7 @@ def write_cover_letter(resume: ResumeData, job: dict, posting: str, provider: AI
                 "resume": resume.model_dump(
                     mode="json", exclude={"basics": {"email", "phone", "links"}}
                 ),
+                **({"your_words": notes} if notes else {}),
             },
             ensure_ascii=False,
         ),
@@ -217,6 +262,9 @@ def write_cover_letter(resume: ResumeData, job: dict, posting: str, provider: AI
 
     def problems(ids: list[str]) -> dict[str, str]:
         found = {k: r for k in ids if (r := check_sentence(body[k], facts, posting, terms))}
+        for k in ids:
+            if k not in found and copied_line(body[k], resume_lines):
+                found[k] = "repeated a line of your resume instead of adding to it"
         rest = {k: body[k] for k in ids if k not in found}
         for k, added in _verify(rest, facts, posting, provider).items():
             found[k] = f"claimed something your resume doesn't say: {added}"

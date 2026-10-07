@@ -24,7 +24,7 @@ from tests.test_tailor import PROFILE, plan, ready  # noqa: F401  (ready is a fi
 
 JOB = northwind("").model_dump()
 OPENING = "I'd like to bring my payments work to Northwind Labs' Senior Backend Engineer role."
-HONEST = "At Paylane I built a reconciliation service in Go matching 3M transactions a day."
+HONEST = "Most of my work at Paylane has been on reconciliation, matching 3M transactions a day."
 CLOSING = "I'd welcome the chance to talk about the role."
 
 
@@ -183,6 +183,30 @@ def test_a_letter_whose_closing_was_all_cut_still_ends_properly():
         "consideration."
     )
     assert letter["removed"][0]["text"] == promise
+
+
+def test_a_sentence_that_copies_a_resume_line_is_rewritten_in_letter_voice():
+    copy = "At Paylane I built a reconciliation service in Go matching 3M transactions a day."
+    stub.answer("tailor", lambda text: Letter(paragraphs=[OPENING, copy, CLOSING]))
+    stub.answer("verify_tailoring", verdicts())
+    stub.answer("repair_tailoring", repair_with(HONEST))
+    letter = write_cover_letter(PROFILE, JOB, JD, StubProvider())
+    assert letter["text"] == "\n\n".join([OPENING, HONEST, CLOSING])
+    sent = json.loads(next(c["text"] for c in stub.calls if c["task"] == "repair_tailoring"))
+    assert sent["sentences"][0]["why"] == "repeated a line of your resume instead of adding to it"
+
+
+def test_the_persons_own_words_are_used_and_count_as_true():
+    notes = "I've wanted to work on small-business payments since my first job."
+    mine = "I've wanted to work on small-business payments since my first job, and Northwind does that."
+    stub.answer("tailor", lambda text: Letter(paragraphs=[mine, HONEST, CLOSING]))
+    stub.answer("verify_tailoring", verdicts())
+    letter = write_cover_letter(PROFILE, JOB, JD, StubProvider(), notes)
+    assert letter["text"].startswith(mine) and letter["removed"] == []
+    sent = json.loads(stub.calls[0]["text"])
+    assert sent["your_words"] == notes
+    checked = json.loads(next(c["text"] for c in stub.calls if c["task"] == "verify_tailoring"))
+    assert notes in checked["resume"]
 
 
 # --- the endpoints -------------------------------------------------------------------

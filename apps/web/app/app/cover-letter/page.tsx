@@ -43,12 +43,32 @@ function Loader() {
   return <Letter key={resume.cover_letter?.generated_at ?? "none"} resume={resume} onWritten={setResume} />;
 }
 
+/** The person in their own words: the one thing a letter needs that a resume lacks. */
+function NotesField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <label className="flex w-full flex-col gap-1.5">
+      <span className="text-sm font-medium">
+        In your own words <span className="font-normal text-muted">(optional)</span>
+      </span>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={3}
+        maxLength={2000}
+        placeholder="What draws you to this role or company? What do you care about in your work, or how do you like to work? A sentence or two makes the letter yours."
+        className="rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm"
+      />
+    </label>
+  );
+}
+
 function Letter({ resume, onWritten }: { resume: ResumeFull; onWritten: (r: ResumeFull) => void }) {
   const letter = resume.cover_letter;
   const [writing, setWriting] = useState(false);
   const [confirmRewrite, setConfirmRewrite] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
+  const [notes, setNotes] = useState(letter?.notes ?? "");
 
   const { data: text, setData, save, flush } = useAutosave<string, ResumeFull>({
     initial: letter?.text ?? "",
@@ -61,7 +81,7 @@ function Letter({ resume, onWritten }: { resume: ResumeFull; onWritten: (r: Resu
     setWriting(true);
     setProblem(null);
     try {
-      onWritten(await api.writeCoverLetter(resume.id));
+      onWritten(await api.writeCoverLetter(resume.id, notes));
     } catch (err) {
       setProblem(errorMessage(err));
       setWriting(false);
@@ -99,10 +119,12 @@ function Letter({ resume, onWritten }: { resume: ResumeFull; onWritten: (r: Resu
       {!letter ? (
         <div className="flex flex-col items-start gap-4 rounded-xl border border-line bg-surface p-6">
           <p className="leading-relaxed text-muted">
-            A short letter for this job, written only from what&apos;s in this resume. Every sentence
-            is checked: anything it can&apos;t back up is rewritten or left out, and you&apos;ll see
-            what and why.
+            A letter that says what your resume can&apos;t: why this role and company, the thread
+            through your work, and how you&apos;d approach the job — pointing to your experience, not
+            repeating it. Every sentence is checked against your resume and your own words below;
+            anything it can&apos;t back up is rewritten or left out, and you&apos;ll see what and why.
           </p>
+          <NotesField value={notes} onChange={setNotes} />
           <button
             type="button"
             onClick={write}
@@ -136,7 +158,9 @@ function Letter({ resume, onWritten }: { resume: ResumeFull; onWritten: (r: Resu
             </div>
           </div>
           {confirmRewrite && (
-            <div role="alertdialog" aria-label="Rewrite the letter?" className="flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+            <div role="alertdialog" aria-label="Rewrite the letter?" className="flex flex-col gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
+              <NotesField value={notes} onChange={setNotes} />
+              <div className="flex flex-wrap items-center gap-3">
               <span className="flex-1">Rewriting replaces this letter, including your edits.</span>
               <button type="button" onClick={write} className="h-10 rounded-lg bg-accent px-3 font-medium text-white">
                 Rewrite
@@ -144,6 +168,7 @@ function Letter({ resume, onWritten }: { resume: ResumeFull; onWritten: (r: Resu
               <button type="button" onClick={() => setConfirmRewrite(false)} className="h-10 rounded-lg px-3 text-muted hover:bg-sunken">
                 Cancel
               </button>
+              </div>
             </div>
           )}
           <label className="flex flex-col gap-2">
@@ -161,7 +186,7 @@ function Letter({ resume, onWritten }: { resume: ResumeFull; onWritten: (r: Resu
           {letter.removed.length > 0 && (
             <section aria-label="Left out" className="flex flex-col gap-2 rounded-xl bg-warn-soft p-4 text-warn-ink">
               <h2 className="text-sm font-semibold">
-                Left out ({letter.removed.length}) — it claimed something your resume doesn&apos;t say
+                Left out ({letter.removed.length})
               </h2>
               <ul className="flex flex-col gap-2 text-[13px] leading-normal">
                 {letter.removed.map((r) => (

@@ -711,8 +711,16 @@ def fit(resume_id: int, body: FitIn, user: CurrentUser, session: SessionDep) -> 
 # --- cover letter ------------------------------------------------------------------
 
 
+class WriteLetterIn(BaseModel):
+    # The person in their own words: why this company, what they care about, how they
+    # work. Used in the letter; as true as the resume.
+    notes: str = Field(default="", max_length=2000)
+
+
 @router.post("/{resume_id}/cover-letter")
-def write_letter(resume_id: int, user: CurrentUser, session: SessionDep) -> ResumeOut:
+def write_letter(
+    resume_id: int, user: CurrentUser, session: SessionDep, body: WriteLetterIn | None = None
+) -> ResumeOut:
     """Write (or rewrite) the cover letter for this resume's job, from this resume.
     Waits for the model, usually 15-30 s."""
     resume = _own(session, user, resume_id)
@@ -728,13 +736,18 @@ def write_letter(resume_id: int, user: CurrentUser, session: SessionDep) -> Resu
         "You've written a lot of cover letters today. Please try again tomorrow.",
     )
     try:
+        notes = body.notes if body else ""
         letter = write_cover_letter(
-            ResumeData.model_validate(resume.content), job.parsed, job.raw_text, get_ai_provider()
+            ResumeData.model_validate(resume.content),
+            job.parsed,
+            job.raw_text,
+            get_ai_provider(),
+            notes,
         )
     except AIProviderError as exc:
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from None
     rate_limit.record(session, "cover_letter", str(user.id))
-    resume.cover_letter = {**letter, "generated_at": utcnow().isoformat()}
+    resume.cover_letter = {**letter, "notes": notes, "generated_at": utcnow().isoformat()}
     resume.updated_at = utcnow()
     session.add(resume)
     session.commit()

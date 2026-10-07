@@ -724,6 +724,17 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       The verifier now accepts interest and courtesy but not promised results; if a
       closing is still cut entirely, a plain true one is added.
 
+- [x] **Cover letters say what the resume can't** (decided 2026-10-07, the user): why
+      this role and company (from the posting), the thread through the person's work
+      (one or two examples in fresh words, at most two numbers), how they'd approach the
+      job (intent), and a full closing; ~250-350 words, no repeated phrases. A sentence
+      that mostly repeats a resume line (≥70% of its words) is sent back to be said in
+      letter voice (`copied_line`). An optional "In your own words" box (why this
+      company, how they work) is used in the letter and counts as true alongside the
+      resume; it's kept with the letter. The verifier accepts motivation and intent,
+      and now rejects work placed at the wrong employer or time (found live: "Earlier,
+      I migrated…" for the current job's work).
+
 ### Phase 12 — Free ATS checker (to bring people in)
 - [x] Public page `/ats-checker`, no account: upload a PDF or Word file, optionally paste
       a job. `POST /ats-check` (5 per IP per day), `GET /ats-check/{token}` (the result

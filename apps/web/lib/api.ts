@@ -159,8 +159,10 @@ export type ResumeSummary = {
 
 export type CoverLetter = {
   text: string;
-  /** Sentences left out because they claimed something the resume doesn't say. */
+  /** Sentences left out: they claimed something the resume doesn't say, or copied it. */
   removed: { text: string; reason: string }[];
+  /** What the person wrote about themselves for this letter. */
+  notes?: string;
   generated_at: string;
 };
 
@@ -453,7 +455,8 @@ export const api = {
   /** Tailor again from the profile as it is now; replaces this resume's edits. */
   retailorResume: (id: number) => request<ResumeFull>(`/resumes/${id}/retailor`, { method: "POST" }),
   /** Write (or rewrite) the cover letter from this resume: waits for the model, ~15–30 s. */
-  writeCoverLetter: (id: number) => request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "POST" }),
+  writeCoverLetter: (id: number, notes = "") =>
+    request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "POST", body: JSON.stringify({ notes }) }),
   saveCoverLetter: (id: number, text: string) =>
     request<ResumeFull>(`/resumes/${id}/cover-letter`, { method: "PUT", body: JSON.stringify({ text }) }),
   coverLetterPdf: (id: number, template: string) =>
