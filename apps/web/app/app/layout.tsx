@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { APP_NAME } from "@/lib/config";
+import { LogoMark } from "@/components/logo-mark";
 import { Loading } from "@/components/loading";
 
 const NAV = [
@@ -48,7 +49,8 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
         // stay at its foot however far the page scrolls.
         className="flex shrink-0 flex-wrap items-center md:flex-nowrap justify-between gap-1 border-b border-line bg-sunken px-4 py-3 md:sticky md:top-0 md:h-dvh md:w-58 md:flex-col md:items-stretch md:justify-start md:self-start md:overflow-y-auto md:border-r md:border-b-0 md:px-3.5 md:py-6"
       >
-        <Link href="/app" className="font-display text-3xl text-ink hover:text-ink md:px-3 md:pb-6">
+        <Link href="/app" className="flex items-center gap-2.5 font-display text-3xl text-ink hover:text-ink md:px-3 md:pb-6">
+          <LogoMark size={30} />
           {APP_NAME}
         </Link>
         {/* Phones: the links get their own row (scrolling sideways if need be), so the

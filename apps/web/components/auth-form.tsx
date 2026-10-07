@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { GoogleButton } from "@/components/google-button";
 import { useAuth } from "@/lib/auth-context";
 import { APP_NAME, GOOGLE_CLIENT_ID } from "@/lib/config";
+import { LogoMark } from "@/components/logo-mark";
 
 type Mode = "login" | "register";
 
@@ -88,7 +89,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <main className="flex flex-1 flex-col">
       <header className="flex h-18 items-center border-b border-line px-4 sm:px-10">
-        <Link href="/" className="font-display text-3xl text-ink hover:text-ink">
+        <Link href="/" className="flex items-center gap-2.5 font-display text-3xl text-ink hover:text-ink">
+          <LogoMark size={30} />
           {APP_NAME}
         </Link>
       </header>

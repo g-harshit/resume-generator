@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { APP_NAME } from "@/lib/config";
+import { LogoMark } from "@/components/logo-mark";
 
 /** The frame of the signed-out pages: sign-in, password reset. */
 export function AuthShell({ children }: { children: React.ReactNode }) {
   return (
     <main className="flex flex-1 flex-col">
       <header className="flex h-18 items-center border-b border-line px-4 sm:px-10">
-        <Link href="/" className="font-display text-3xl text-ink hover:text-ink">
+        <Link href="/" className="flex items-center gap-2.5 font-display text-3xl text-ink hover:text-ink">
+          <LogoMark size={30} />
           {APP_NAME}
         </Link>
       </header>

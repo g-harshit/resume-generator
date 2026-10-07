@@ -50,6 +50,28 @@ Every page must be useful alone — thin generated pages get penalised.
 - [ ] LinkedIn: before/after tailoring posts.
 - [ ] Discord / Slack groups: bootcamp grads, new-grad hiring, international students.
 
+## Instagram profile
+
+- **Username:** @quickfitcv. **Name** (searchable, so it carries keywords):
+  `QuickFit CV | AI Resume Builder`. **Category:** Software.
+- **Profile picture:** `brand/instagram-profile.png` (logo on green; Instagram crops it to a circle).
+- **Link:** `https://quickfitcv.com/?utm_source=instagram&utm_medium=bio`
+- **Bio** (≤150 characters; pick one, or match the language of the Reels):
+
+  ```
+  Tailor your resume to every job in 30 sec ⚡
+  ATS-friendly · your words · no fake skills
+  Free resume tips every week 👇
+  ```
+
+  ```
+  Har job ke liye sahi resume, 30 sec mein ⚡
+  ATS-friendly · aapke words · koi fake skill nahi
+  Free resume tips 👇
+  ```
+
+- **Highlights:** How it works · Before/After · ATS tips · FAQ.
+
 ## 5. Short video (Instagram Reels, YouTube Shorts, TikTok)
 
 Screen recordings of the website are enough — no extension needed.

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { getToken } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { APP_NAME, EXTENSION_IDS } from "@/lib/config";
+import { LogoMark } from "@/components/logo-mark";
 
 // The bit of the Chrome API a web page gets when an extension lists the page's origin
 // in externally_connectable.
@@ -70,7 +71,10 @@ export default function ConnectExtension() {
 
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-5 px-4 py-16">
-      <span className="font-display text-3xl">{APP_NAME}</span>
+      <span className="flex items-center gap-2.5 font-display text-3xl">
+        <LogoMark size={30} />
+        {APP_NAME}
+      </span>
       {state === "connected" ? (
         <>
           <h1 className="font-display text-4xl leading-tight">The extension is signed in.</h1>

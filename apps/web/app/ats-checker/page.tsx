@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { AtsChecker } from "@/components/ats-checker";
 import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
+import { LogoMark } from "@/components/logo-mark";
 
 export const metadata: Metadata = {
   title: { absolute: `Free ATS resume checker — see what an ATS reads | ${APP_NAME}` },
@@ -40,7 +41,8 @@ export default function AtsCheckerPage() {
     <div className="flex flex-1 flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-ground/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="font-display text-3xl text-ink hover:text-ink">
+          <Link href="/" className="flex items-center gap-2.5 font-display text-3xl text-ink hover:text-ink">
+            <LogoMark size={30} />
             {APP_NAME}
           </Link>
           <HomeActions compact />

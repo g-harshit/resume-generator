@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
+import { LogoMark } from "@/components/logo-mark";
 
 export const metadata: Metadata = {
   title: { absolute: `${APP_NAME} — a resume for every job, in your own words` },
@@ -190,7 +191,10 @@ export default function Home() {
     <div className="flex flex-1 flex-col">
       <header className="sticky top-0 z-10 border-b border-line bg-ground/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
-          <span className="font-display text-3xl">{APP_NAME}</span>
+          <span className="flex items-center gap-2.5 font-display text-3xl">
+            <LogoMark size={30} />
+            {APP_NAME}
+          </span>
           <div className="flex items-center gap-2">
             <Link href="/ats-checker" className="hidden h-10 items-center rounded-[10px] px-3.5 text-[15px] text-ink hover:bg-sunken hover:text-ink sm:inline-flex">
               Free ATS check
