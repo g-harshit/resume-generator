@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Sans:wght@500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#888}
+.cover{width:1080px;height:1920px;position:relative;overflow:hidden;font-family:'IBM Plex Sans',sans-serif;box-sizing:border-box}
+.safe{position:absolute;left:0;right:0;top:285px;height:1350px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px;padding:0 70px;box-sizing:border-box}
+.big{font-family:Anton,Impact,sans-serif;text-transform:uppercase;line-height:1.04;text-align:center;margin:0}
+.paper{background:#fff;border-radius:22px;box-shadow:0 30px 70px rgba(0,0,0,.35);padding:44px 48px;width:640px;box-sizing:border-box;position:relative}
+.ln{height:14px;border-radius:7px;background:#d9d6cd;margin:14px 0}
+.h{height:26px;width:55%;background:#17181c;border-radius:8px;margin-bottom:22px}
+.chip{display:inline-block;border-radius:999px;padding:12px 22px;font-size:30px;font-weight:600;margin:7px}
+.ok{background:#e3ede8;color:#1f463c}
+.miss{background:#fbebdd;color:#7a3e0e;border:3px dashed #c66a1e}
+.stamp{position:absolute;top:90px;left:50%;transform:translateX(-50%) rotate(-14deg);border:10px solid #d62828;color:#d62828;font-family:Anton,sans-serif;font-size:120px;padding:4px 30px;border-radius:18px;letter-spacing:4px;background:rgba(255,255,255,.75)}
+.brand{position:absolute;bottom:330px;left:0;right:0;display:flex;justify-content:center;align-items:center;gap:16px;font-family:'Instrument Serif',serif;font-size:52px}
+.cta{font-size:44px;font-weight:700;border-radius:999px;padding:22px 44px}
+</style></head><body>
+
+<!-- 1: rejected -->
+<div class="cover" id="c1" style="background:#17181c">
+  <div class="safe">
+    <p class="big" style="color:#fff;font-size:150px">Why your<br>resume gets<br><span style="color:#ff5a4f">rejected</span> 👀</p>
+    <div class="paper" style="padding-bottom:60px">
+      <div class="h"></div><div class="ln" style="width:92%"></div><div class="ln" style="width:80%"></div><div class="ln" style="width:88%"></div><div class="ln" style="width:60%"></div><div class="ln" style="width:85%"></div><div class="ln" style="width:70%"></div>
+      <div class="stamp">REJECTED</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:18px;color:#fff;font-size:44px;font-weight:700">Job keywords matched: <span style="color:#ff5a4f;font-family:Anton;font-size:80px">5/11</span></div>
+  </div>
+  <div class="brand" style="color:#f7f6f2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="56" height="56">
+  <path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#2f5d50"/>
+  <path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/>
+  <path d="M21 24H37M21 31H43" stroke="#f7f6f2" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <path d="M22 43L28.5 49.5L42 36" stroke="#f7f6f2" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+QuickFit CV</div>
+</div>
+
+<!-- 2: missing keywords -->
+<div class="cover" id="c2" style="background:#f7f6f2">
+  <div class="safe">
+    <p class="big" style="color:#17181c;font-size:132px">Your resume is<br>missing <span style="background:#ffd65a;padding:0 14px;display:inline-block;line-height:1.1">6 of 11</span><br>keywords</p>
+    <div class="paper" style="width:900px;padding:40px 36px;text-align:center">
+      <span class="chip ok">✓ SQL</span><span class="chip ok">✓ Python</span><span class="chip ok">✓ Tableau</span><span class="chip miss">Looker</span><span class="chip ok">✓ A/B testing</span><span class="chip miss">dbt</span><span class="chip miss">BigQuery</span><span class="chip miss">cohort analysis</span><span class="chip ok">✓ statistics</span><span class="chip miss">retention</span><span class="chip miss">CLV</span>
+    </div>
+    <div class="cta" style="background:#2f5d50;color:#fff">Fix it in 30 seconds →</div>
+  </div>
+  <div class="brand" style="color:#17181c"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="56" height="56">
+  <path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#2f5d50"/>
+  <path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/>
+  <path d="M21 24H37M21 31H43" stroke="#f7f6f2" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <path d="M22 43L28.5 49.5L42 36" stroke="#f7f6f2" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+QuickFit CV</div>
+</div>
+
+<!-- 3: Hinglish -->
+<div class="cover" id="c3" style="background:#2f5d50">
+  <div class="safe">
+    <p class="big" style="color:#fff;font-size:150px">Resume<br><span style="color:#ffd65a">reject</span><br>kyun hota hai?</p>
+    <div style="display:flex;gap:30px;align-items:center">
+      <div class="paper" style="width:330px;padding:30px;opacity:.95"><div class="h"></div><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln"></div><div class="ln" style="width:55%"></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:150px;color:#d62828;font-family:Anton">✕</div></div>
+      <div style="font-family:Anton;font-size:90px;color:#fff">→</div>
+      <div class="paper" style="width:330px;padding:30px"><div class="h" style="background:#2f5d50"></div><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln"></div><div class="ln" style="width:55%"></div><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:150px;color:#2f9e6f;font-family:Anton">✓</div></div>
+    </div>
+    <div class="cta" style="background:#ffd65a;color:#17181c">30 sec mein fix karo 👇</div>
+  </div>
+  <div class="brand" style="color:#f7f6f2"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="56" height="56">
+  <path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#f7f6f2"/>
+  <path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/>
+  <path d="M21 24H37M21 31H43" stroke="#2f5d50" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+  <path d="M22 43L28.5 49.5L42 36" stroke="#2f5d50" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
+QuickFit CV</div>
+</div>
+</body></html>
