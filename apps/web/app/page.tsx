@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { Feedback } from "@/components/feedback";
 import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/logo-mark";
@@ -403,6 +404,7 @@ export default function Home() {
           <span>Your resume, in your own words.</span>
           <nav aria-label="Legal" className="flex gap-4">
             <Link href="/ats-checker">Free ATS checker</Link>
+            <Feedback label="Feedback" className="text-accent hover:underline" />
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </nav>

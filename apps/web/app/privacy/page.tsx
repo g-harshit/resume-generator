@@ -6,7 +6,7 @@ export const metadata: Metadata = { title: "Privacy policy" };
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy policy" updated="6 October 2026">
+    <LegalPage title="Privacy policy" updated="11 October 2026">
       <p>
         {APP_NAME} turns the resume you already have into a profile, and tailors it to job
         descriptions you choose. This page says what we keep, why, who helps us run the
@@ -35,6 +35,11 @@ export default function PrivacyPage() {
           the job description you paste, and the report, for 24 hours — so the file can become
           your profile if you sign up — then deleted. The number of checks from your IP address
           is counted for a day to stop abuse.
+        </li>
+        <li>
+          <strong>Feedback you send us:</strong> your message, the page you sent it from, your
+          browser&apos;s name, and — if you&apos;re not signed in and choose to give it — your
+          email, so we can reply.
         </li>
         <li>
           <strong>Security records:</strong> failed sign-in attempts and similar events,

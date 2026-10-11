@@ -4,12 +4,22 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { ACTION_LABEL, AdminError, ago, card, Pill, when } from "@/components/admin/shared";
 import { Loading } from "@/components/loading";
-import { type AdminAction, type AdminUserRow, api, type FailedUpload, saveFile } from "@/lib/api";
+import { APP_NAME } from "@/lib/config";
+import {
+  type AdminAction,
+  type AdminUserRow,
+  api,
+  type FailedUpload,
+  type FeedbackItem,
+  type FeedbackStatus,
+  saveFile,
+} from "@/lib/api";
 
-type Tab = "overview" | "users" | "uploads" | "log";
+type Tab = "overview" | "users" | "feedback" | "uploads" | "log";
 const TABS: [Tab, string][] = [
   ["overview", "Overview"],
   ["users", "Users"],
+  ["feedback", "Feedback"],
   ["uploads", "Failed uploads"],
   ["log", "Admin log"],
 ];
@@ -40,6 +50,7 @@ export default function AdminPage() {
       </div>
       {tab === "overview" && <Overview />}
       {tab === "users" && <Users />}
+      {tab === "feedback" && <FeedbackList />}
       {tab === "uploads" && <Failed />}
       {tab === "log" && <Log />}
     </div>
@@ -91,6 +102,9 @@ function Overview() {
         <Stat label="Resumes" value={s.resumes} sub={`${s.resumes_7d} this week · ${s.cover_letters} with a cover letter`} />
         <Stat label="Jobs read" value={s.jobs} sub={`${s.jobs_from_extension} from the extension`} />
         <Stat label="Uploads" value={s.uploads} sub={`${s.uploads_failed} failed`} />
+      </section>
+      <section aria-label="Feedback" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Stat label="New feedback" value={s.feedback_new} sub="see the Feedback tab" />
       </section>
       <section aria-label="Sign-ups, last 30 days" className={`${card} flex flex-col gap-3 p-5`}>
         <h2 className="text-[15px] font-semibold">Sign-ups, last 30 days</h2>
@@ -267,6 +281,113 @@ function Failed() {
         </li>
       ))}
     </ul>
+  );
+}
+
+// --- feedback ---------------------------------------------------------------------------
+
+const KIND_LABEL = { problem: "Problem", idea: "Idea", other: "Other" } as const;
+
+function FeedbackList() {
+  const [status, setStatus] = useState<"" | FeedbackStatus>("new");
+  const [kind, setKind] = useState("");
+  const load = useCallback(() => api.admin.feedback(status, kind), [status, kind]);
+  const { data, error } = useLoad(load);
+  const [items, setItems] = useState<FeedbackItem[] | null>(null);
+  const [loadedFor, setLoadedFor] = useState(data);
+  if (data !== loadedFor) {
+    // A new list from the server: replace what's shown (marking edits it in place).
+    setLoadedFor(data);
+    setItems(data);
+  }
+
+  async function mark(id: number, next: FeedbackStatus) {
+    const updated = await api.admin.markFeedback(id, next);
+    setItems((list) =>
+      (list ?? [])
+        .map((f) => (f.id === id ? updated : f))
+        .filter((f) => !status || f.status === status),
+    );
+  }
+
+  const select = "h-9 rounded-md border border-line-strong bg-surface px-2 text-sm";
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <select value={status} onChange={(e) => setStatus(e.target.value as "" | FeedbackStatus)} className={select} aria-label="Status">
+          <option value="new">New</option>
+          <option value="seen">Seen</option>
+          <option value="done">Done</option>
+          <option value="">All</option>
+        </select>
+        <select value={kind} onChange={(e) => setKind(e.target.value)} className={select} aria-label="Kind">
+          <option value="">Every kind</option>
+          <option value="problem">Problems</option>
+          <option value="idea">Ideas</option>
+          <option value="other">Other</option>
+        </select>
+        <button
+          type="button"
+          onClick={async () => saveFile(await api.admin.exportFeedback())}
+          className="ml-auto h-9 rounded-md border border-line-strong bg-surface px-3 text-sm hover:bg-sunken"
+        >
+          Export CSV
+        </button>
+      </div>
+      {error ? (
+        <AdminError error={error} />
+      ) : !items ? (
+        <Loading />
+      ) : !items.length ? (
+        <p className="text-muted">Nothing here.</p>
+      ) : (
+        <ul className={`${card} divide-y divide-sunken`}>
+          {items.map((f) => (
+            <li key={f.id} className="flex flex-col gap-2 px-4 py-3.5 text-sm">
+              <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <Pill tone={f.kind === "problem" ? "warn" : f.kind === "idea" ? "good" : "muted"}>{KIND_LABEL[f.kind]}</Pill>
+                {f.user_id ? (
+                  <Link href={`/app/admin/user?id=${f.user_id}`} className="text-xs">
+                    {f.email}
+                  </Link>
+                ) : f.email ? (
+                  <a href={`mailto:${f.email}`} className="text-xs">
+                    {f.email} (visitor)
+                  </a>
+                ) : (
+                  <span className="text-xs text-muted">anonymous visitor</span>
+                )}
+                {f.page && <span className="text-xs text-muted">on {f.page}</span>}
+                <span className="ml-auto text-xs text-muted">{when(f.created_at)}</span>
+              </span>
+              <p className="leading-relaxed whitespace-pre-wrap">{f.message}</p>
+              <span className="flex flex-wrap gap-3 text-xs">
+                {f.status !== "seen" && (
+                  <button type="button" onClick={() => mark(f.id, "seen")} className="text-accent hover:underline">
+                    Mark seen
+                  </button>
+                )}
+                {f.status !== "done" && (
+                  <button type="button" onClick={() => mark(f.id, "done")} className="text-accent hover:underline">
+                    Mark done
+                  </button>
+                )}
+                {f.status !== "new" && (
+                  <button type="button" onClick={() => mark(f.id, "new")} className="text-muted hover:underline">
+                    Back to new
+                  </button>
+                )}
+                {f.email && (
+                  <a href={`mailto:${f.email}?subject=${encodeURIComponent(`Your feedback on ${APP_NAME}`)}`} className="text-accent hover:underline">
+                    Reply by email
+                  </a>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

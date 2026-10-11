@@ -52,6 +52,23 @@ LAST_SEEN_EVERY = timedelta(hours=1)
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+def get_optional_user(
+    session: SessionDep,
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+) -> User | None:
+    """The signed-in user, or None for a visitor (or a token that no longer works):
+    for endpoints anyone may use, that know who it is when they can."""
+    if credentials is None:
+        return None
+    try:
+        return get_current_user(session, credentials)
+    except HTTPException:
+        return None
+
+
+OptionalUser = Annotated[User | None, Depends(get_optional_user)]
+
+
 def is_admin(user: User) -> bool:
     """On the admin list, and the address is proven to be theirs."""
     return user.email in get_settings().admin_email_list and user.email_verified_at is not None

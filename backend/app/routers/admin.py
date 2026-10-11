@@ -9,6 +9,7 @@ import csv
 import io
 import logging
 from datetime import datetime, timedelta
+from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel
@@ -19,6 +20,8 @@ from app.auth import AdminUser
 from app.database import SessionDep
 from app.models import (
     AdminAction,
+    Feedback,
+    FeedbackStatus,
     JobDescription,
     ParseStatus,
     Profile,
@@ -77,6 +80,7 @@ class StatsOut(BaseModel):
     uploads: int
     uploads_failed: int
     signups_by_day: list[DayCount]
+    feedback_new: int
 
 
 @router.get("/stats")
@@ -120,6 +124,10 @@ def stats(admin: AdminUser, session: SessionDep) -> StatsOut:
             session, uploads.where(SourceDocument.parse_status == ParseStatus.FAILED)
         ),
         signups_by_day=[DayCount(day=d, count=counts.get(d, 0)) for d in days],
+        feedback_new=_count(
+            session,
+            select(func.count()).select_from(Feedback).where(Feedback.status == FeedbackStatus.NEW),
+        ),
     )
 
 
@@ -510,3 +518,75 @@ def action_log(admin: AdminUser, session: SessionDep, limit: int = 100) -> list[
         select(AdminAction).order_by(AdminAction.created_at.desc()).limit(max(1, min(limit, 500)))
     ).all()
     return [ActionItem(**a.model_dump(include=set(ActionItem.model_fields))) for a in actions]
+
+
+# --- feedback ------------------------------------------------------------------------
+
+
+class FeedbackItem(BaseModel):
+    id: int
+    kind: str
+    message: str
+    page: str
+    status: str
+    created_at: datetime
+    user_id: int | None
+    # The account's email, or the one a visitor left ("" if neither).
+    email: str
+    user_agent: str
+
+
+def _feedback(session: Session, status_: str = "", kind: str = "", limit: int = 500):
+    query = select(Feedback, User.email).join(User, User.id == Feedback.user_id, isouter=True)
+    if status_:
+        query = query.where(Feedback.status == status_)
+    if kind:
+        query = query.where(Feedback.kind == kind)
+    rows = session.exec(query.order_by(Feedback.created_at.desc()).limit(limit)).all()
+    return [
+        FeedbackItem(
+            **f.model_dump(include=set(FeedbackItem.model_fields) - {"email"}),
+            email=user_email or f.email,
+        )
+        for f, user_email in rows
+    ]
+
+
+@router.get("/feedback")
+def list_feedback(
+    admin: AdminUser, session: SessionDep, status: str = "", kind: str = "", limit: int = 200
+) -> list[FeedbackItem]:
+    return _feedback(session, status, kind, max(1, min(limit, 500)))
+
+
+class FeedbackStatusIn(BaseModel):
+    status: Literal["new", "seen", "done"]
+
+
+@router.patch("/feedback/{feedback_id}")
+def mark_feedback(
+    feedback_id: int, body: FeedbackStatusIn, admin: AdminUser, session: SessionDep
+) -> FeedbackItem:
+    item = session.get(Feedback, feedback_id)
+    if item is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such feedback")
+    item.status = body.status
+    session.add(item)
+    session.commit()
+    return next(f for f in _feedback(session) if f.id == feedback_id)
+
+
+@router.get("/feedback.csv")
+def export_feedback(admin: AdminUser, session: SessionDep) -> Response:
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(["id", "date", "kind", "status", "email", "page", "message"])
+    for f in _feedback(session, limit=10_000):
+        writer.writerow(
+            [f.id, f.created_at.isoformat(), f.kind, f.status, f.email, f.page, f.message]
+        )
+    return Response(
+        out.getvalue(),
+        media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="feedback.csv"'},
+    )

@@ -295,3 +295,42 @@ class AtsCheck(SQLModel, table=True):
         default_factory=utcnow,
         sa_column=Column(DateTime(timezone=True), nullable=False, index=True),
     )
+
+
+class FeedbackKind:
+    PROBLEM = "problem"
+    IDEA = "idea"
+    OTHER = "other"
+
+
+class FeedbackStatus:
+    NEW = "new"
+    SEEN = "seen"
+    DONE = "done"
+
+
+class Feedback(SQLModel, table=True):
+    """What someone told us from the feedback button: a problem, an idea, anything.
+    From a signed-in user (deleted with them) or a visitor (who may leave an email)."""
+
+    __tablename__ = "feedback"
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int | None = Field(
+        default=None,
+        sa_column=Column(
+            Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True
+        ),
+    )
+    kind: str = Field(default=FeedbackKind.OTHER, max_length=20)
+    message: str = Field(sa_column=Column(Text, nullable=False))
+    # Where they were ("/app/resume?id=12"), so a problem can be found again.
+    page: str = Field(default="", max_length=500)
+    # A visitor's, so we can reply; a signed-in user's is on their account.
+    email: str = Field(default="", max_length=320)
+    status: str = Field(default=FeedbackStatus.NEW, max_length=20, index=True)
+    user_agent: str = Field(default="", max_length=500)
+    created_at: datetime = Field(
+        default_factory=utcnow,
+        sa_column=Column(DateTime(timezone=True), nullable=False, index=True),
+    )

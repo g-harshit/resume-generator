@@ -30,6 +30,21 @@ export type AdminStats = {
   uploads: number;
   uploads_failed: number;
   signups_by_day: { day: string; count: number }[];
+  feedback_new: number;
+};
+
+export type FeedbackKind = "problem" | "idea" | "other";
+export type FeedbackStatus = "new" | "seen" | "done";
+export type FeedbackItem = {
+  id: number;
+  kind: FeedbackKind;
+  message: string;
+  page: string;
+  status: FeedbackStatus;
+  created_at: string;
+  user_id: number | null;
+  email: string;
+  user_agent: string;
 };
 
 export type AdminUserRow = {
@@ -348,8 +363,19 @@ export const api = {
       await send(`/admin/users/${id}`, { method: "DELETE", body: JSON.stringify({ confirm_email: confirmEmail }) });
     },
     failedUploads: () => request<FailedUpload[]>("/admin/uploads/failed"),
+    feedback: (status = "", kind = "") =>
+      request<FeedbackItem[]>(`/admin/feedback?status=${status}&kind=${kind}`),
+    markFeedback: (id: number, status: FeedbackStatus) =>
+      request<FeedbackItem>(`/admin/feedback/${id}`, { method: "PATCH", body: JSON.stringify({ status }) }),
+    exportFeedback: async () => ({
+      blob: await (await send("/admin/feedback.csv")).blob(),
+      filename: "feedback.csv",
+    }),
     log: () => request<AdminAction[]>("/admin/log"),
   },
+  /** Anyone, signed in or not. `page` is where they were. */
+  sendFeedback: (body: { kind: FeedbackKind; message: string; page: string; email?: string }) =>
+    request<{ id: number }>("/feedback", { method: "POST", body: JSON.stringify(body) }),
   /** Start the API waking up, without waiting for it (nothing comes back). */
   wake: () => {
     fetch(`${API_URL}/health`, { cache: "no-store" }).catch(() => {});

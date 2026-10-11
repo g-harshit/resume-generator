@@ -90,6 +90,8 @@ class Settings(BaseSettings):
     uploads_per_day: int = 20
     # The free ATS checker, per IP address per day (no account needed).
     ats_checks_per_day: int = 5
+    # Feedback messages per person (or IP address, signed out) per day.
+    feedback_per_day: int = 10
     jobs_per_day: int = 50
     resumes_per_day: int = 30
     cover_letters_per_day: int = 20

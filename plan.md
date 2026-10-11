@@ -742,6 +742,14 @@ Not needed: resumes download as PDF only. Word files are still accepted as *uplo
       (all editable, saved with the letter) → Save. Preview and PDF render from the same
       parts (`_letter_html`). The "In your own words" box was removed (the user).
 
+- [x] **Feedback**: "Send feedback" in the app's sidebar, "Feedback" in the landing page
+      and ATS checker footers. A small form (Something's wrong / Idea for a feature /
+      Other + message; visitors may leave an email) → `POST /feedback` (signed in or
+      not; 10 a day per person or IP), stored with the page it came from. Admin panel:
+      Feedback tab (filter by status and kind, mark seen/done, reply by email, CSV
+      export) and a "New feedback" count on Overview. In-app rather than a Google Form
+      (decided): it knows who and where, and needs no second site.
+
 ### Phase 12 — Free ATS checker (to bring people in)
 - [x] Public page `/ats-checker`, no account: upload a PDF or Word file, optionally paste
       a job. `POST /ats-check` (5 per IP per day), `GET /ats-check/{token}` (the result

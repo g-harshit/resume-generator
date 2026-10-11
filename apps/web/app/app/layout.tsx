@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { APP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/logo-mark";
 import { Loading } from "@/components/loading";
+import { Feedback } from "@/components/feedback";
 
 const NAV = [
   { href: "/app", label: "Home" },
@@ -75,6 +76,7 @@ export default function SignedInLayout({ children }: { children: React.ReactNode
           })}
         </div>
         <div className="flex items-center gap-3 md:mt-auto md:flex-col md:items-stretch">
+          <Feedback className="h-11 rounded-lg px-3 text-left text-sm text-accent hover:bg-surface" />
           <div className="flex items-center gap-2.5 md:px-2">
             <span
               aria-hidden="true"

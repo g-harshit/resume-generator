@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AtsChecker } from "@/components/ats-checker";
+import { Feedback } from "@/components/feedback";
 import { HomeActions } from "@/components/home-actions";
 import { APP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/logo-mark";
@@ -94,6 +95,7 @@ export default function AtsCheckerPage() {
         <div className="mx-auto flex w-full max-w-6xl flex-wrap justify-between gap-3 px-4 py-6 text-sm text-muted sm:px-6">
           <Link href="/">{APP_NAME}</Link>
           <nav aria-label="Legal" className="flex gap-4">
+            <Feedback label="Feedback" className="text-accent hover:underline" />
             <Link href="/privacy">Privacy</Link>
             <Link href="/terms">Terms</Link>
           </nav>
