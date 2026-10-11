@@ -1,6 +1,6 @@
 {
   "voice": "nova",
-  "speed": 1.05,
+  "speed": 1.0,
   "instructions": {
     "en": "You are a charismatic, energetic social-media creator narrating a punchy product video to a friend. Be very expressive and human: disbelief, indignation, an exasperated sigh, relief and a satisfied smile where the words call for them. Vary pitch and pace a lot, lean on key words, take short dramatic pauses at the dots. Sound like a real person talking, never like an announcer or audiobook. Indian English accent.",
     "hi": "You are a charismatic, energetic Indian social-media creator narrating a punchy product video in natural Hinglish to a friend. Very expressive and human: disbelief, indignation, a sigh, relief and a smile where the words call for them. Vary pitch and pace, short dramatic pauses. Never sound like an announcer."
@@ -57,10 +57,10 @@
       "hi": "[confident] QuickFit CV. हर जॉब के लिए एक रिज़्यूमे, आपके अपने शब्दों में।"
     }
   ],
-  "provider": "openai",
+  "provider": "elevenlabs",
   "elevenlabs": {
-    "voice_id": "JBFqnCBsd6RMkjVDRZzb",
-    "model": "eleven_v3",
-    "_note": "Pick a voice in ElevenLabs' Voice Library and paste its ID here."
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
   }
 }

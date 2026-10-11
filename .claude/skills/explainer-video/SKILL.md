@@ -41,11 +41,14 @@ skills). Start every new video by copying it.
    delivery matters as much as the visuals. Put ElevenLabs cues before the words they
    colour: `[excited]`, `[sighs]`, `[incredulous]`, `[frustrated]`, `[warmly]`. Keep `hi`
    natural Hinglish in Devanagari, as people actually speak it.
-   - `"provider": "elevenlabs"` whenever `ELEVENLABS_API_KEY` is in `backend/.env` (it is
-     the most human voice, and acts on the cues); otherwise `"openai"`, whose expressive
+   - `"provider": "elevenlabs"`, model `eleven_v3`: the key is in `backend/.env`. The
+     default voice is Liam (`TX3LPaxmHKxFdv7VOQHJ`, "Energetic, Social Media Creator");
+     list the account's voices with `GET https://api.elevenlabs.io/v1/voices` (header
+     `xi-api-key`) when the user wants another. `"openai"` is the fallback, whose
      `instructions` do what they can and whose input has the cues stripped.
-   - `"speed"`: 1.05 for an expressive read (voice.mjs also trims each clip's silence);
-     clips are cached by request, so changing speed or one line costs only that line.
+   - `"speed"`: 1.0 for ElevenLabs, ~1.05 for OpenAI (voice.mjs also trims each clip's
+     silence). Clips are cached by request, so changing speed or one line costs only that
+     line. ElevenLabs bills by character: don't regenerate unchanged lines.
 3. **`scenes.html`.** One `<section class="scene" id="…">` per script entry, same ids, same
    order (the `ids` list in the script block). Per scene:
    - `<div class="copy" data-say="Line one|line two">` — the on-screen headline: two short
