@@ -55,7 +55,7 @@
 
   <!-- 1. applied -->
   <section class="scene" id="applied">
-    <div class="copy" data-say="You've applied|to 50 jobs."></div>
+    <div class="copy" data-say="50 applications.|Zero callbacks?"></div>
     <div class="vis">
       <div class="docs"></div>
       <div class="card abs counter" style="left: 250px; top: 600px; width: 360px; padding: 26px 34px; box-sizing: border-box; text-align: center">
@@ -73,13 +73,14 @@
 
   <!-- 3. match -->
   <section class="scene" id="match">
-    <div class="copy" data-say="Every job asks for|different skills."></div>
+    <div class="copy" data-say="5 of 11 skills matched.|Rejected unread."></div>
     <div class="vis">
       <div class="card abs job" style="left: 0; top: 40px; width: 860px; padding: 40px 42px; box-sizing: border-box">
         <div class="label">job posting</div>
         <div style="font: 600 44px/1.15 var(--sans); margin-top: 14px">Senior Data Analyst</div>
         <div style="font: 400 28px var(--sans); color: var(--muted); margin-top: 6px">Northwind Commerce · Bengaluru</div>
         <div class="chips" style="margin: 26px -7px 0"></div>
+        <div class="stamp abs" style="right: 36px; top: 40px; color: var(--red); border-color: var(--red); font-size: 46px; opacity: 0">REJECTED</div>
         <div class="scan abs" style="left: 0; top: 0; bottom: 0; width: 8px; background: linear-gradient(var(--accent), #7fb8a4); border-radius: 4px; opacity: 0; box-shadow: 0 0 40px 10px rgba(47,93,80,.35)"></div>
       </div>
       <div class="card abs score" style="left: 250px; top: 610px; width: 360px; padding: 26px 0; text-align: center">
@@ -116,7 +117,7 @@
 
   <!-- 6. seconds -->
   <section class="scene" id="seconds">
-    <div class="copy" data-say="With QuickFit CV|it takes 30 seconds."></div>
+    <div class="copy" data-say="QuickFit CV fixes it|in 30 seconds."></div>
     <div class="vis" style="display: flex; flex-direction: column; justify-content: center; padding-left: 40px; box-sizing: border-box">
       <div style="position: relative; display: inline-block; align-self: flex-start">
         <div style="font: 600 110px/1 var(--mono); letter-spacing: -3px; color: var(--muted)">45 min</div>
@@ -150,7 +151,7 @@
 
   <!-- 8. rewrite -->
   <section class="scene" id="rewrite">
-    <div class="copy" data-say="Pick lines to rewrite.|In the job's words."></div>
+    <div class="copy" data-say="Rewrite what you pick.|In the job's words."></div>
     <div class="vis">
       <div class="card abs" style="left: 0; top: 40px; width: 860px; padding: 38px 42px; box-sizing: border-box">
         <div class="label">Brightcart Retail · line 2</div>
@@ -173,7 +174,7 @@
 
   <!-- 9. honest -->
   <section class="scene" id="honest">
-    <div class="copy" data-say="It never adds a skill|you don't have."></div>
+    <div class="copy" data-say="Never a fake skill.|Not one."></div>
     <div class="vis">
       <div class="card abs" style="left: 0; top: 40px; width: 860px; padding: 36px 40px; box-sizing: border-box; background: #fdf3ea">
         <div style="font: 600 30px var(--sans); color: var(--warn-ink)">Not in this resume yet</div>
@@ -226,129 +227,141 @@ $("#honest .rows").innerHTML = [["Looker", "must have"], ["dbt", "nice to have"]
   `<div class="row" style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-top:2px solid #f3dcc6"><span style="font:600 36px var(--sans);color:var(--warn-ink)">${k} <span style="font-weight:400;font-size:28px">· ${why}</span></span><span style="border:3px dashed var(--warn);color:var(--warn-ink);border-radius:999px;padding:10px 20px;font:600 24px var(--sans)">missing</span></div>`).join("");
 
 // ---------------------------------------------------------------------------------------
-// The timeline. Each scene lasts its voice clip plus a little air; the copy's words are
-// spread over the clip so they appear about as they're said.
-const TIMING = window.__TIMING || [3, 2.8, 6, 4.7, 3.9, 3.8, 4.2, 4.4, 3.1, 5.3].map((voice, i) => ({ voice }));
-const LEAD = 0.3, AIR = 0.35, HOLD = 1.6;
-const ids = ["applied", "same", "match", "rejected", "byhand", "seconds", "paste", "rewrite", "honest", "end"];
+// The timeline. Scenes play in the script's order (window.__TIMING, from timing.json), so a
+// shorter cut is only a script change; a scene the script leaves out stays hidden. Each
+// lasts its voice clip plus a little air, and its words appear over the clip.
+const DEFAULT = ["applied", "match", "seconds", "paste", "rewrite", "honest", "end"].map((id) => ({ id, voice: 2.6 }));
+const TIMING = window.__TIMING || DEFAULT;
+const AIR = 0.3, HOLD = 1.4;
+const ids = TIMING.map((x) => x.id);
 const tl = gsap.timeline({ paused: true });
-let t = LEAD;
 const starts = {};
-ids.forEach((id, i) => { starts[id] = t; t += TIMING[i].voice + AIR + (id === "end" ? HOLD : 0); });
+let t = 0;
+TIMING.forEach((x) => { starts[x.id] = t; t += x.voice + AIR + (x.id === "end" ? HOLD : 0); });
 const END = t;
-const dur = (id) => TIMING[ids.indexOf(id)].voice + AIR;
+const voice = (id) => TIMING.find((x) => x.id === id).voice;
+const dur = (id) => voice(id) + AIR;
 const counter = (el, from, to, at, d, fmt = (v) => Math.round(v)) => {
   const o = { v: from };
   tl.to(o, { v: to, duration: d, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v)) }, at);
 };
+const stampIn = (el, at) => {
+  tl.fromTo(el, { opacity: 0, scale: 2.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.25, ease: "power4.in" }, at);
+};
 
-ids.forEach((id) => {
+ids.forEach((id, i) => {
   const s = $("#" + id), at = starts[id], d = dur(id);
-  // In and out.
-  tl.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: "power1.out" }, at - 0.15);
-  if (id !== "end") tl.to(s, { opacity: 0, duration: 0.3, ease: "power1.in" }, at + d - 0.15);
+  // The first scene is on screen from frame 0: that frame is the thumbnail, and the
+  // first second decides whether anyone stays.
+  if (i === 0) tl.set(s, { opacity: 1 }, 0);
+  else tl.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, at - 0.1);
+  if (id !== "end") tl.to(s, { opacity: 0, duration: 0.2, ease: "power1.in" }, at + d - 0.1);
   const words = $$(".w", s);
   if (words.length) {
-    const span = Math.max(0.5, TIMING[ids.indexOf(id)].voice * 0.7);
-    tl.fromTo(words, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.45, ease: "power3.out", stagger: span / words.length }, at + 0.1);
+    if (i === 0) tl.set($$(".l1 .w", s), { opacity: 1 }, 0);
+    const later = i === 0 ? $$(".l2 .w", s) : words;
+    const span = Math.max(0.3, voice(id) * 0.55);
+    tl.fromTo(later, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", stagger: span / later.length }, at + (i === 0 ? 0.9 : 0.05));
   }
   const vis = $(".vis", s);
-  if (vis) tl.fromTo(vis, { y: 40 }, { y: 0, duration: 0.9, ease: "power3.out" }, at - 0.15);
+  if (vis && i) tl.fromTo(vis, { y: 30 }, { y: 0, duration: 0.6, ease: "power3.out" }, at - 0.1);
 });
+const has = (id) => id in starts;
 
-// 1. applied: resumes drop onto a pile, the counter runs to 50.
-{
+// applied: resumes slam onto a pile, the counter runs to 50.
+if (has("applied")) {
   const at = starts.applied, docs = $$("#applied .doc");
   docs.forEach((el, i) => gsap.set(el, { left: 315 + (i % 2 ? 8 : -8) * i * 0.6, top: 150 - i * 6, rotation: (i % 2 ? 1 : -1) * (2 + i * 1.3) }));
-  tl.fromTo(docs, { y: -500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power3.in", stagger: 0.28 }, at + 0.1);
-  tl.fromTo("#applied .counter", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(2)" }, at + 0.3);
-  counter($("#applied .counter .n"), 0, 50, at + 0.4, dur("applied") - 0.6);
+  tl.set(docs[0], { opacity: 1 }, 0);
+  tl.fromTo(docs.slice(1), { y: -500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.in", stagger: 0.15 }, at);
+  tl.set("#applied .counter", { opacity: 1 }, 0);
+  counter($("#applied .counter .n"), 0, 50, at, dur("applied") - 0.4);
 }
-// 2. same: the pile deals out into identical copies.
-{
+// same: the pile deals out into identical copies.
+if (has("same")) {
   const at = starts.same, docs = $$("#same .doc");
   docs.forEach((el, i) => gsap.set(el, { left: 25 + (i % 3) * 280, top: 60 + Math.floor(i / 3) * 360 }));
   tl.fromTo(docs, { x: (i) => 290 - (i % 3) * 280, y: (i) => 150 - Math.floor(i / 3) * 360, rotation: (i) => (i % 2 ? 4 : -4), opacity: 0 },
-    { x: 0, y: 0, rotation: 0, opacity: 1, duration: 0.7, ease: "power3.out", stagger: 0.08 }, at);
-  tl.to($$("#same .doc .tag"), { color: "#c66a1e", duration: 0.2, stagger: 0.07 }, at + 1.3);
+    { x: 0, y: 0, rotation: 0, opacity: 1, duration: 0.6, ease: "power3.out", stagger: 0.06 }, at);
+  tl.to($$("#same .doc .tag"), { color: "#c66a1e", duration: 0.2, stagger: 0.05 }, at + 1.0);
 }
-// 3. match: a scan passes over the job's skills; five turn green, six stay dashed; 5/11.
-{
-  const at = starts.match, cs = $$("#match .chip");
-  tl.fromTo(".job", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5 }, at);
-  tl.fromTo(cs, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, stagger: 0.07, ease: "back.out(2)" }, at + 0.4);
-  tl.fromTo("#match .scan", { left: 0, opacity: 0 }, { left: 852, opacity: 1, duration: 1.6, ease: "power1.inOut" }, at + 1.6);
-  tl.to("#match .scan", { opacity: 0, duration: 0.2 }, at + 3.2);
+// match: a scan passes over the job's skills; five turn green, six stay dashed; 5/11;
+// then the job card is stamped.
+if (has("match")) {
+  const at = starts.match, d = dur("match"), cs = $$("#match .chip");
+  tl.fromTo(cs, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.2, stagger: 0.03, ease: "back.out(2)" }, at);
+  tl.fromTo("#match .scan", { left: 0, opacity: 0 }, { left: 852, opacity: 1, duration: 0.9, ease: "power1.inOut" }, at + 0.35);
+  tl.to("#match .scan", { opacity: 0, duration: 0.15 }, at + 1.25);
   cs.forEach((c, i) => {
-    const hit = SKILLS[i][1], when = at + 1.8 + (i / cs.length) * 1.4;
-    if (hit) {
-      tl.to(c, { backgroundColor: "#e3ede8", borderColor: "#e3ede8", color: "#1f463c", duration: 0.2 }, when);
-      tl.to($(".tick", c), { width: "1.05em", opacity: 1, duration: 0.2 }, when);
+    const when = at + 0.45 + (i / cs.length) * 0.8;
+    if (SKILLS[i][1]) {
+      tl.to(c, { backgroundColor: "#e3ede8", borderColor: "#e3ede8", color: "#1f463c", duration: 0.15 }, when);
+      tl.to($(".tick", c), { width: "1.05em", opacity: 1, duration: 0.15 }, when);
     } else {
       tl.set(c, { borderStyle: "dashed" }, when);
-      tl.to(c, { backgroundColor: "#fbebdd", borderColor: "#c66a1e", color: "#7a3e0e", duration: 0.2 }, when);
+      tl.to(c, { backgroundColor: "#fbebdd", borderColor: "#c66a1e", color: "#7a3e0e", duration: 0.15 }, when);
     }
   });
-  tl.fromTo("#match .score", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.45, ease: "back.out(2)" }, at + 3.3);
-  counter($("#match .score .n"), 0, 5, at + 3.4, 0.8);
+  tl.fromTo("#match .score", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, at + 1.2);
+  counter($("#match .score .n"), 0, 5, at + 1.25, 0.6);
+  stampIn("#match .stamp", at + Math.max(2.0, d * 0.62));
 }
-// 4. rejected: a thousand applicants scroll by; hers is stamped, never read.
-{
+// rejected: a thousand applicants scroll by; hers is stamped, never read.
+if (has("rejected")) {
   const at = starts.rejected;
-  tl.fromTo("#rejected .rows", { y: 0 }, { y: -(30 * 82 - 640), duration: 2.4, ease: "power2.inOut" }, at);
-  tl.fromTo("#rejected .me", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at + 1.9);
-  tl.fromTo("#rejected .stamp", { opacity: 0, scale: 2.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.28, ease: "power4.in" }, at + 2.6);
-  tl.fromTo("#rejected .me", { x: 0 }, { x: 8, duration: 0.05, repeat: 3, yoyo: true }, at + 2.88);
-  tl.to("#never", { opacity: 1, duration: 0.5 }, at + 3.1);
+  tl.fromTo("#rejected .rows", { y: 0 }, { y: -(30 * 82 - 640), duration: 1.6, ease: "power2.inOut" }, at);
+  tl.fromTo("#rejected .me", { opacity: 0, y: 60 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, at + 1.2);
+  stampIn("#rejected .stamp", at + 1.7);
+  tl.to("#never", { opacity: 1, duration: 0.4 }, at + 2.0);
 }
-// 5. by hand: 0 → 45 min.
-counter($("#byhand .n"), 0, 45, starts.byhand + 0.5, 2.2);
-// 6. seconds: 45 min struck out, ~30 sec with QuickFit CV.
-{
+// byhand: 0 → 45 min.
+if (has("byhand")) counter($("#byhand .n"), 0, 45, starts.byhand + 0.3, 1.4);
+// seconds: 45 min struck out, ~30 sec with QuickFit CV.
+if (has("seconds")) {
   const at = starts.seconds;
-  tl.to("#seconds .strike", { scaleX: 1, duration: 0.45, ease: "power2.inOut" }, at + 0.5);
-  tl.fromTo("#seconds .fast", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at + 1.0);
-  tl.fromTo("#seconds .with", { opacity: 0 }, { opacity: 1, duration: 0.5 }, at + 1.5);
+  tl.to("#seconds .strike", { scaleX: 1, duration: 0.3, ease: "power2.inOut" }, at + 0.15);
+  tl.fromTo("#seconds .fast", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, at + 0.4);
+  tl.fromTo("#seconds .with", { opacity: 0 }, { opacity: 1, duration: 0.4 }, at + 0.7);
 }
-// 7. paste: the job fills in, Read the job, the found skills pop in.
-{
+// paste: the job fills in, Read the job, the found skills pop in.
+if (has("paste")) {
   const at = starts.paste, cs = $$("#paste .chip"), tap = $("#paste .tap");
-  tl.fromTo($$("#paste .ta .bar"), { scaleX: 0, transformOrigin: "left" }, { scaleX: 1, duration: 0.25, stagger: 0.12 }, at + 0.2);
+  tl.fromTo($$("#paste .ta .bar"), { scaleX: 0, transformOrigin: "left" }, { scaleX: 1, duration: 0.15, stagger: 0.06 }, at);
   tl.set(tap, { left: 140, top: 302 }, at);
-  tl.fromTo(tap, { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.6, duration: 0.5 }, at + 1.0);
-  tl.to("#paste .read", { scale: 0.95, duration: 0.08, yoyo: true, repeat: 1 }, at + 1.0);
-  tl.fromTo("#paste .found", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.45 }, at + 1.3);
+  tl.fromTo(tap, { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.6, duration: 0.4 }, at + 0.45);
+  tl.to("#paste .read", { scale: 0.95, duration: 0.06, yoyo: true, repeat: 1 }, at + 0.45);
+  tl.fromTo("#paste .found", { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3 }, at + 0.6);
   cs.forEach((c, i) => {
-    const when = at + 1.5 + i * 0.13;
-    tl.fromTo(c, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, when);
+    const when = at + 0.7 + i * 0.06;
+    tl.fromTo(c, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, when);
     if (SKILLS[i][1]) {
       tl.set(c, { backgroundColor: "#e3ede8", borderColor: "#e3ede8", color: "#1f463c" }, when);
       tl.set($(".tick", c), { width: "1.05em", opacity: 1 }, when);
     } else tl.set(c, { borderStyle: "dashed", backgroundColor: "#fbebdd", borderColor: "#c66a1e", color: "#7a3e0e" }, when);
   });
 }
-// 8. rewrite: the line takes the job's words, the score climbs.
-{
+// rewrite: the line takes the job's words, the score climbs.
+if (has("rewrite")) {
   const at = starts.rewrite, C = 414.69;
-  tl.to("#rewrite .before", { opacity: 0, duration: 0.4 }, at + 1.0);
-  tl.fromTo("#rewrite .after", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5 }, at + 1.2);
-  tl.fromTo("#rewrite mark", { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.5 }, at + 1.6);
-  tl.fromTo("#rewrite .done", { opacity: 0 }, { opacity: 1, duration: 0.4 }, at + 1.9);
-  tl.fromTo("#rewrite .ring", { strokeDashoffset: C * (1 - 5 / 11) }, { strokeDashoffset: C * (1 - 7 / 11), duration: 1.0, ease: "power2.out" }, at + 2.2);
-  counter($("#rewrite .n"), 5, 7, at + 2.2, 1.0);
+  tl.to("#rewrite .before", { opacity: 0, duration: 0.25 }, at + 0.3);
+  tl.fromTo("#rewrite .after", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 }, at + 0.4);
+  tl.fromTo("#rewrite mark", { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.35 }, at + 0.6);
+  tl.fromTo("#rewrite .done", { opacity: 0 }, { opacity: 1, duration: 0.3 }, at + 0.8);
+  tl.fromTo("#rewrite .ring", { strokeDashoffset: C * (1 - 5 / 11) }, { strokeDashoffset: C * (1 - 7 / 11), duration: 0.7, ease: "power2.out" }, at + 0.9);
+  counter($("#rewrite .n"), 5, 7, at + 0.9, 0.7);
 }
-// 9. honest: what she doesn't have stays missing; stamped never invented.
-{
+// honest: what she doesn't have stays missing; stamped never invented.
+if (has("honest")) {
   const at = starts.honest;
-  tl.fromTo($$("#honest .row"), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.4, stagger: 0.18 }, at + 0.2);
-  tl.fromTo("#honest .ok", { opacity: 0, scale: 2.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.28, ease: "power4.in" }, at + 1.5);
+  tl.fromTo($$("#honest .row"), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.1 }, at);
+  stampIn("#honest .ok", at + 0.6);
 }
-// 10. end: logo, line, address.
-{
+// end: logo, line, address.
+if (has("end")) {
   const at = starts.end;
-  tl.fromTo("#end .brand", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, at);
-  tl.fromTo($$("#end .tag span"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.9 }, at + 1.3);
-  tl.fromTo("#end .url", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(2)" }, at + 3.2);
+  tl.fromTo("#end .brand", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at);
+  tl.fromTo($$("#end .tag span"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.35 }, at + 0.5);
+  tl.fromTo("#end .url", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, at + 1.2);
 }
 if (V) {
   $("#end .brand span").style.fontSize = "120px";

@@ -31,10 +31,13 @@ skills). Start every new video by copying it.
 
 ## Making one
 
-1. **The story.** 6–10 scenes, 30–45 s of voice. The shape that works: the viewer's pain
-   (with a number) → why it happens → the cost of fixing it by hand → the product doing it
-   → what makes it trustworthy → end card. If the user gave only a topic, write the story
-   yourself and state it in a line; ask only when the angle is genuinely unclear.
+1. **The story. 20–25 s in total, never more** — the user rejected a 46 s cut: "people
+   will leave". About 7 scenes, 1.5–5 s of voice each. The shape that works: a hook that
+   is on screen in the very first frame (the pain, with a number: "50 applications. Zero
+   callbacks?") → why it happens → the product fixing it → what makes it trustworthy →
+   end card ("Link in bio!"). Cut every scene that only restates another. If the user
+   gave only a topic, write the story yourself and state it in a line; ask only when the
+   angle is genuinely unclear.
 2. **`script.json`.** Write lines the way a creator talks, not an announcer: short,
    punchy, with exclamations and asides ("Fifty!", "Ugh.", "That's it!"), numbers in
    words. The user judged a flat, read-out voice "not even close" to the reference — the
@@ -49,8 +52,11 @@ skills). Start every new video by copying it.
    - `"speed"`: 1.0 for ElevenLabs, ~1.05 for OpenAI (voice.mjs also trims each clip's
      silence). Clips are cached by request, so changing speed or one line costs only that
      line. ElevenLabs bills by character: don't regenerate unchanged lines.
-3. **`scenes.html`.** One `<section class="scene" id="…">` per script entry, same ids, same
-   order (the `ids` list in the script block). Per scene:
+3. **`scenes.html`.** One `<section class="scene" id="…">` per script entry. The script
+   decides which scenes play and in what order (sections it leaves out stay hidden, so
+   `ats-rejected/scenes.html` doubles as a library of scenes: applied, same, match,
+   rejected, byhand, seconds, paste, rewrite, honest, end). Guard each scene's animation
+   block with `if (has("<id>"))`. The first scene is fully on screen at frame 0. Per scene:
    - `<div class="copy" data-say="Line one|line two">` — the on-screen headline: two short
      lines, ≤ 6 words each, ink then grey. A shorthand of the voice, not a transcript.
    - `<div class="vis">` — an 860×860 box (scaled up in 9:16) with the visual: cards,

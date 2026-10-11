@@ -8,53 +8,38 @@
   "scenes": [
     {
       "id": "applied",
-      "en": "[curious] You've applied to fifty jobs. [incredulous] Fifty!",
-      "hi": "[curious] आपने पचास जॉब्स पे अप्लाई किया। [incredulous] पचास!"
-    },
-    {
-      "id": "same",
-      "en": "Same resume... [sighs] every single time.",
-      "hi": "और हर बार... [sighs] वही एक रिज़्यूमे।"
+      "en": "[incredulous] Fifty applications. Zero callbacks?",
+      "hi": "[incredulous] पचास अप्लिकेशन्स। एक भी कॉल नहीं?"
     },
     {
       "id": "match",
-      "en": "But every job wants different skills. And yours? [disappointed] Five out of eleven.",
-      "hi": "पर हर जॉब अलग स्किल्स माँगती है। और आपका? [disappointed] ग्यारह में से सिर्फ़ पाँच।"
-    },
-    {
-      "id": "rejected",
-      "en": "[frustrated] So the ATS throws it out, before a human even reads it!",
-      "hi": "[frustrated] तो ATS उसे बाहर फेंक देता है, किसी के पढ़ने से पहले ही!"
-    },
-    {
-      "id": "byhand",
-      "en": "Tailor it by hand? Forty-five minutes. Per job. [sighs] Ugh.",
-      "hi": "हाथ से टेलर करो? हर जॉब पे पैंतालीस मिनट। [sighs] उफ़।"
+      "en": "Your resume matched five of eleven skills. [frustrated] Rejected, before anyone read it.",
+      "hi": "आपका रिज़्यूमे ग्यारह में से सिर्फ़ पाँच स्किल्स मैच करता है। [frustrated] किसी के पढ़ने से पहले ही रिजेक्ट!"
     },
     {
       "id": "seconds",
-      "en": "[excited] With QuickFit CV? Thirty seconds. That's it!",
-      "hi": "[excited] QuickFit CV के साथ? बस तीस सेकंड। हो गया!"
+      "en": "[excited] QuickFit CV fixes that in thirty seconds.",
+      "hi": "[excited] QuickFit CV ये तीस सेकंड में ठीक करता है।"
     },
     {
       "id": "paste",
-      "en": "Paste the job, and boom: you see exactly which keywords you're missing.",
-      "hi": "जॉब पेस्ट करो, और बूम: दिख जाता है कौन से कीवर्ड्स मिसिंग हैं।"
+      "en": "Paste the job, see what's missing,",
+      "hi": "जॉब पेस्ट करो, देखो क्या मिसिंग है,"
     },
     {
       "id": "rewrite",
-      "en": "Rewrite only the lines you pick, in the job's own words.",
-      "hi": "सिर्फ़ वही लाइन्स रीराइट करो जो आप चुनो, जॉब के अपने शब्दों में।"
+      "en": "rewrite the lines you pick.",
+      "hi": "और जो लाइन्स चुनो, वो रीराइट करो।"
     },
     {
       "id": "honest",
-      "en": "[warmly] And the best part? It never adds a skill you don't have.",
-      "hi": "[warmly] और सबसे अच्छी बात? ये कभी ऐसी स्किल नहीं जोड़ता जो आपके पास नहीं है।"
+      "en": "[firmly] Never a fake skill.",
+      "hi": "[firmly] कोई फ़ेक स्किल नहीं।"
     },
     {
       "id": "end",
-      "en": "[confident] QuickFit CV. One resume per job, in your own words.",
-      "hi": "[confident] QuickFit CV. हर जॉब के लिए एक रिज़्यूमे, आपके अपने शब्दों में।"
+      "en": "[confident] QuickFit CV. Link in bio!",
+      "hi": "[confident] QuickFit CV. लिंक बायो में!"
     }
   ],
   "provider": "elevenlabs",
