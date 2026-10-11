@@ -1,5 +1,6 @@
 {
   "voice": "nova",
+  "speed": 1.15,
   "instructions": {
     "en": "Warm, confident narrator for a short product film. Calm and clear, natural pace, slight smile in the voice. Indian English accent.",
     "hi": "Warm, confident narrator for a short product film, in natural conversational Hinglish with an Indian accent. Calm and clear, natural pace."

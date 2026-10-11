@@ -229,7 +229,7 @@ $("#honest .rows").innerHTML = [["Looker", "must have"], ["dbt", "nice to have"]
 // The timeline. Each scene lasts its voice clip plus a little air; the copy's words are
 // spread over the clip so they appear about as they're said.
 const TIMING = window.__TIMING || [3, 2.8, 6, 4.7, 3.9, 3.8, 4.2, 4.4, 3.1, 5.3].map((voice, i) => ({ voice }));
-const LEAD = 0.3, AIR = 0.45, HOLD = 1.6;
+const LEAD = 0.3, AIR = 0.35, HOLD = 1.6;
 const ids = ["applied", "same", "match", "rejected", "byhand", "seconds", "paste", "rewrite", "honest", "end"];
 const tl = gsap.timeline({ paused: true });
 let t = LEAD;

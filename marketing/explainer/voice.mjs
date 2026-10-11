@@ -23,16 +23,19 @@ const seconds = (file) => {
 };
 
 const timing = await Promise.all(script.scenes.map(async (s) => {
-  const file = `${out}${s.id}.mp3`;
-  if (!fs.existsSync(file)) {
+  // The model's own pace is a little slow for social video: keep its clip as .raw.mp3 and
+  // speed it up (pitch kept) by script.json's "speed".
+  const raw = `${out}${s.id}.raw.mp3`, file = `${out}${s.id}.mp3`;
+  if (!fs.existsSync(raw)) {
     const res = await fetch("https://api.openai.com/v1/audio/speech", {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: "gpt-4o-mini-tts", voice: script.voice, input: s[lang], instructions: script.instructions[lang], response_format: "mp3" }),
     });
     if (!res.ok) throw new Error(`${s.id}: ${res.status} ${await res.text()}`);
-    fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+    fs.writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
   }
+  execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-i", raw, "-filter:a", `atempo=${script.speed || 1}`, file]);
   return { id: s.id, text: s[lang], voice: +seconds(file).toFixed(2) };
 }));
 fs.writeFileSync(out + "timing.json", JSON.stringify(timing, null, 2));

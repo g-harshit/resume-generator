@@ -21,7 +21,7 @@ node marketing/explainer/render.mjs <slug> en v       # → videos/<slug>/output
 node marketing/explainer/render.mjs <slug> en h       # → …-en-16x9.mp4
 ```
 
-The voice sets the pace: each scene lasts its clip plus 0.45 s, the headline's words appear
+The voice sets the pace: each scene lasts its clip plus 0.35 s, the headline's words appear
 over the clip, and the clips are mixed in at each scene's start. A Hinglish version is
 `voice.mjs <slug> hi` then the same renders — no scene changes. A full render takes a few
 minutes per shape; run it in the background.
@@ -36,7 +36,10 @@ skills). Start every new video by copying it.
    → what makes it trustworthy → end card. If the user gave only a topic, write the story
    yourself and state it in a line; ask only when the angle is genuinely unclear.
 2. **`script.json`.** Voice lines are full spoken sentences (numbers in words: "fifty
-   jobs"). Keep `hi` natural Hinglish in Devanagari, as people actually speak it.
+   jobs"). Keep `hi` natural Hinglish in Devanagari, as people actually speak it. Keep
+   `"speed": 1.15`: the user found the TTS's own pace too slow. `voice.mjs` keeps the
+   model's clip as `<id>.raw.mp3` and speeds it up (pitch kept), so changing `speed` and
+   re-running costs nothing.
 3. **`scenes.html`.** One `<section class="scene" id="…">` per script entry, same ids, same
    order (the `ids` list in the script block). Per scene:
    - `<div class="copy" data-say="Line one|line two">` — the on-screen headline: two short
