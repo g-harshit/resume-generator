@@ -94,6 +94,11 @@ services:
         value: pjddbiflcebndfljpckcgkigckfpmndm
       - key: NEXT_PUBLIC_GOOGLE_CLIENT_ID
         value: 557351084350-5rnkmi2l3fi9dk5usaei3g8d78461172.apps.googleusercontent.com
+      # Google Analytics 4, property "quickfitcv.com". Baked into the bundle at
+      # build time like everything else here, so changing it needs a rebuild.
+      # Public by nature - it ships in the page source of every page.
+      - key: NEXT_PUBLIC_GA_ID
+        value: G-ZRGH9G0GJD
     # Pages are folders (/app/resume/index.html). Links written without the trailing
     # slash (emails, the extension, people typing) still land on the page. A new page
     # needs a line here.
