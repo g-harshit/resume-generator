@@ -21,3 +21,6 @@ backend/var/
 
 # Reel recorder output
 marketing/video/output/
+
+# Explainer renders
+marketing/explainer/videos/*/output/

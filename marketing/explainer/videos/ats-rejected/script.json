@@ -1,0 +1,29 @@
+{
+  "voice": "nova",
+  "instructions": {
+    "en": "Warm, confident narrator for a short product film. Calm and clear, natural pace, slight smile in the voice. Indian English accent.",
+    "hi": "Warm, confident narrator for a short product film, in natural conversational Hinglish with an Indian accent. Calm and clear, natural pace."
+  },
+  "scenes": [
+    { "id": "applied",  "en": "You've applied to fifty jobs.",
+                        "hi": "आपने पचास जॉब्स के लिए अप्लाई किया।" },
+    { "id": "same",     "en": "Same resume. Every single time.",
+                        "hi": "हर बार, वही एक रिज़्यूमे।" },
+    { "id": "match",    "en": "But every job asks for different skills. Yours matches five of eleven.",
+                        "hi": "पर हर जॉब अलग स्किल्स माँगती है। आपका रिज़्यूमे ग्यारह में से सिर्फ़ पाँच मैच करता है।" },
+    { "id": "rejected", "en": "So the ATS filters it out, before a human ever reads it.",
+                        "hi": "तो ATS उसे बाहर कर देता है, किसी इंसान के पढ़ने से पहले ही।" },
+    { "id": "byhand",   "en": "Tailoring it by hand? Forty-five minutes. Per job.",
+                        "hi": "हाथ से टेलर करो? हर जॉब पर पैंतालीस मिनट।" },
+    { "id": "seconds",  "en": "With QuickFit CV, it takes thirty seconds.",
+                        "hi": "QuickFit CV के साथ, सिर्फ़ तीस सेकंड।" },
+    { "id": "paste",    "en": "Paste the job, and see exactly which keywords you're missing.",
+                        "hi": "जॉब पेस्ट करो, और देखो कौन से कीवर्ड्स मिसिंग हैं।" },
+    { "id": "rewrite",  "en": "Then rewrite only the lines you choose, in the job's words.",
+                        "hi": "फिर सिर्फ़ वही लाइन्स रीराइट करो जो आप चुनो, जॉब के शब्दों में।" },
+    { "id": "honest",   "en": "And it never adds a skill you don't have.",
+                        "hi": "और ये कभी कोई ऐसी स्किल नहीं जोड़ता जो आपके पास नहीं है।" },
+    { "id": "end",      "en": "QuickFit CV. One resume per job, in your own words.",
+                        "hi": "QuickFit CV. हर जॉब के लिए एक रिज़्यूमे, आपके अपने शब्दों में।" }
+  ]
+}

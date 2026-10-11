@@ -1,0 +1,77 @@
+---
+name: explainer-video
+description: Make a short animated explainer video for QuickFit CV — motion graphics (word-by-word headlines, rebuilt UI cards, counters, stamps, before/after numbers), an AI voiceover in English or Hinglish, rendered as MP4 in 9:16 (Instagram Reels, Shorts) and 16:9 (X, LinkedIn, the site). Use whenever the user asks for a promo, explainer, ad, marketing or "Opus-style" video, a new Reel that isn't a screen recording, or another language version of one.
+---
+
+# Explainer videos
+
+Each video is a folder under `marketing/explainer/videos/<slug>/`:
+
+- `script.json` — the voiceover, one entry per scene (`id`, `en`, `hi`), plus the voice.
+- `scenes.html` — the scenes: HTML/CSS, animated with a GSAP timeline the renderer seeks
+  frame by frame (so every frame is exact, at any speed of machine).
+- `output/` — git-ignored: voice clips, `timing.json`, stills, frames, the MP4s.
+
+The shared tools are in `marketing/explainer/`:
+
+```bash
+node marketing/explainer/voice.mjs <slug> en          # voice clips + timing.json (OpenAI TTS, key from backend/.env)
+node marketing/explainer/render.mjs <slug> en v --still # one PNG per scene, 9:16 — look before rendering
+node marketing/explainer/render.mjs <slug> en v       # → videos/<slug>/output/<slug>-en-9x16.mp4
+node marketing/explainer/render.mjs <slug> en h       # → …-en-16x9.mp4
+```
+
+The voice sets the pace: each scene lasts its clip plus 0.45 s, the headline's words appear
+over the clip, and the clips are mixed in at each scene's start. A Hinglish version is
+`voice.mjs <slug> hi` then the same renders — no scene changes. A full render takes a few
+minutes per shape; run it in the background.
+
+`videos/ats-rejected/` is the first one (the ATS problem → QuickFit CV → never invents
+skills). Start every new video by copying it.
+
+## Making one
+
+1. **The story.** 6–10 scenes, 30–45 s of voice. The shape that works: the viewer's pain
+   (with a number) → why it happens → the cost of fixing it by hand → the product doing it
+   → what makes it trustworthy → end card. If the user gave only a topic, write the story
+   yourself and state it in a line; ask only when the angle is genuinely unclear.
+2. **`script.json`.** Voice lines are full spoken sentences (numbers in words: "fifty
+   jobs"). Keep `hi` natural Hinglish in Devanagari, as people actually speak it.
+3. **`scenes.html`.** One `<section class="scene" id="…">` per script entry, same ids, same
+   order (the `ids` list in the script block). Per scene:
+   - `<div class="copy" data-say="Line one|line two">` — the on-screen headline: two short
+     lines, ≤ 6 words each, ink then grey. A shorthand of the voice, not a transcript.
+   - `<div class="vis">` — an 860×860 box (scaled up in 9:16) with the visual: cards,
+     chips, counters, stamps. Rebuild UI as HTML in the brand; never screenshots.
+   - Its animations in the timeline section, at `starts.<id> + offset`, inside `dur(id)`.
+     Use `tl.fromTo`/`tl.to`/`tl.set` (all reversible) and `counter(...)` for numbers —
+     never `tl.call` or class toggles, which a seek can't undo.
+   - The `end` scene: logo, line, `quickfitcv.com`.
+4. **Voice**, then **stills** for both shapes. Read every still: text clipped or orphaned
+   words, overlaps, anything inside Instagram's covered areas (in 9:16, the top ~220 px
+   and the bottom ~340 px; keep the right edge clear too). Fix and re-run stills.
+5. **Render** both shapes, make a contact sheet of each MP4 (ffmpeg `fps=1/2.5,tile`)
+   and check it, then send the MP4s with SendUserFile.
+6. Commit `script.json` and `scenes.html` (never `output/`).
+
+## Rules
+
+- **Honest numbers only.** The product's promise is that it never invents facts; its ads
+  can't either. Demo figures come from the real demo (the Priya Sharma profile and the
+  Northwind job in `marketing/video/`: 5 of 11 skills, 5 → 7 after tailoring). Claims like
+  "45 minutes by hand" must be stated as typical, never as measured stats.
+- **Brand**: ground `#f7f6f2`, ink `#17181c`, accent `#2f5d50`, missing/warning
+  `#c66a1e` on `#fbebdd`; IBM Plex Sans (text), IBM Plex Mono (numbers, labels),
+  Instrument Serif (the name only); the logo from `brand/logo-mark.svg`.
+- No music in the file — the user adds a trending track in Instagram (copyright mutes).
+- Name the product only through what's on screen and in the voice; `APP_NAME` rules for
+  the app don't apply to marketing assets.
+
+## Gotchas
+
+- `window.seek` must return nothing: returning the GSAP timeline makes Playwright try to
+  serialise it, and the render hangs.
+- Fonts come from Google Fonts and GSAP from cdnjs, so rendering needs the network.
+- ffmpeg comes from `uvx --with imageio-ffmpeg` (no system ffmpeg needed).
+- Screen-recorded Reels of the real app are a different tool: `marketing/video/`
+  (`reel-1.mjs`, `reel-2.mjs`).
