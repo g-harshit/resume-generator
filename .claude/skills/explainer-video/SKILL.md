@@ -70,7 +70,15 @@ skills). Start every new video by copying it.
    and the bottom ~340 px; keep the right edge clear too). Fix and re-run stills.
 5. **Render** both shapes, make a contact sheet of each MP4 (ffmpeg `fps=1/2.5,tile`)
    and check it, then send the MP4s with SendUserFile.
-6. Commit `script.json` and `scenes.html` (never `output/`).
+6. **Posters and captions**, every time, without being asked:
+   - `poster.html` (copy `ats-rejected`'s): the hook headline plus the video's key visual,
+     and the logo. `node marketing/explainer/poster.mjs <slug>` renders the Reel cover
+     (9:16, content kept inside the middle 4:5 the profile grid shows), a 4:5 feed post
+     and a 16:9 thumbnail. Read all three for overlaps before sending.
+   - `captions.md`: Instagram in English and Hinglish (hook line first, the steps, "link
+     in bio", a comment prompt, 8 hashtags), X (≤ 280 counting the link as 23; check it),
+     LinkedIn (founder voice, the honesty rule stated plainly), and a first comment to pin.
+7. Commit `script.json`, `scenes.html`, `poster.html` and `captions.md` (never `output/`).
 
 ## Rules
 
