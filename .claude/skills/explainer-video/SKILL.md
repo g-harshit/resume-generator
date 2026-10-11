@@ -35,11 +35,17 @@ skills). Start every new video by copying it.
    (with a number) → why it happens → the cost of fixing it by hand → the product doing it
    → what makes it trustworthy → end card. If the user gave only a topic, write the story
    yourself and state it in a line; ask only when the angle is genuinely unclear.
-2. **`script.json`.** Voice lines are full spoken sentences (numbers in words: "fifty
-   jobs"). Keep `hi` natural Hinglish in Devanagari, as people actually speak it. Keep
-   `"speed": 1.15`: the user found the TTS's own pace too slow. `voice.mjs` keeps the
-   model's clip as `<id>.raw.mp3` and speeds it up (pitch kept), so changing `speed` and
-   re-running costs nothing.
+2. **`script.json`.** Write lines the way a creator talks, not an announcer: short,
+   punchy, with exclamations and asides ("Fifty!", "Ugh.", "That's it!"), numbers in
+   words. The user judged a flat, read-out voice "not even close" to the reference — the
+   delivery matters as much as the visuals. Put ElevenLabs cues before the words they
+   colour: `[excited]`, `[sighs]`, `[incredulous]`, `[frustrated]`, `[warmly]`. Keep `hi`
+   natural Hinglish in Devanagari, as people actually speak it.
+   - `"provider": "elevenlabs"` whenever `ELEVENLABS_API_KEY` is in `backend/.env` (it is
+     the most human voice, and acts on the cues); otherwise `"openai"`, whose expressive
+     `instructions` do what they can and whose input has the cues stripped.
+   - `"speed"`: 1.05 for an expressive read (voice.mjs also trims each clip's silence);
+     clips are cached by request, so changing speed or one line costs only that line.
 3. **`scenes.html`.** One `<section class="scene" id="…">` per script entry, same ids, same
    order (the `ids` list in the script block). Per scene:
    - `<div class="copy" data-say="Line one|line two">` — the on-screen headline: two short

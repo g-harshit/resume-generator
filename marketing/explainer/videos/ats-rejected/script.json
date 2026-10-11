@@ -1,30 +1,66 @@
 {
   "voice": "nova",
-  "speed": 1.15,
+  "speed": 1.05,
   "instructions": {
-    "en": "Warm, confident narrator for a short product film. Calm and clear, natural pace, slight smile in the voice. Indian English accent.",
-    "hi": "Warm, confident narrator for a short product film, in natural conversational Hinglish with an Indian accent. Calm and clear, natural pace."
+    "en": "You are a charismatic, energetic social-media creator narrating a punchy product video to a friend. Be very expressive and human: disbelief, indignation, an exasperated sigh, relief and a satisfied smile where the words call for them. Vary pitch and pace a lot, lean on key words, take short dramatic pauses at the dots. Sound like a real person talking, never like an announcer or audiobook. Indian English accent.",
+    "hi": "You are a charismatic, energetic Indian social-media creator narrating a punchy product video in natural Hinglish to a friend. Very expressive and human: disbelief, indignation, a sigh, relief and a smile where the words call for them. Vary pitch and pace, short dramatic pauses. Never sound like an announcer."
   },
   "scenes": [
-    { "id": "applied",  "en": "You've applied to fifty jobs.",
-                        "hi": "आपने पचास जॉब्स के लिए अप्लाई किया।" },
-    { "id": "same",     "en": "Same resume. Every single time.",
-                        "hi": "हर बार, वही एक रिज़्यूमे।" },
-    { "id": "match",    "en": "But every job asks for different skills. Yours matches five of eleven.",
-                        "hi": "पर हर जॉब अलग स्किल्स माँगती है। आपका रिज़्यूमे ग्यारह में से सिर्फ़ पाँच मैच करता है।" },
-    { "id": "rejected", "en": "So the ATS filters it out, before a human ever reads it.",
-                        "hi": "तो ATS उसे बाहर कर देता है, किसी इंसान के पढ़ने से पहले ही।" },
-    { "id": "byhand",   "en": "Tailoring it by hand? Forty-five minutes. Per job.",
-                        "hi": "हाथ से टेलर करो? हर जॉब पर पैंतालीस मिनट।" },
-    { "id": "seconds",  "en": "With QuickFit CV, it takes thirty seconds.",
-                        "hi": "QuickFit CV के साथ, सिर्फ़ तीस सेकंड।" },
-    { "id": "paste",    "en": "Paste the job, and see exactly which keywords you're missing.",
-                        "hi": "जॉब पेस्ट करो, और देखो कौन से कीवर्ड्स मिसिंग हैं।" },
-    { "id": "rewrite",  "en": "Then rewrite only the lines you choose, in the job's words.",
-                        "hi": "फिर सिर्फ़ वही लाइन्स रीराइट करो जो आप चुनो, जॉब के शब्दों में।" },
-    { "id": "honest",   "en": "And it never adds a skill you don't have.",
-                        "hi": "और ये कभी कोई ऐसी स्किल नहीं जोड़ता जो आपके पास नहीं है।" },
-    { "id": "end",      "en": "QuickFit CV. One resume per job, in your own words.",
-                        "hi": "QuickFit CV. हर जॉब के लिए एक रिज़्यूमे, आपके अपने शब्दों में।" }
-  ]
+    {
+      "id": "applied",
+      "en": "[curious] You've applied to fifty jobs. [incredulous] Fifty!",
+      "hi": "[curious] आपने पचास जॉब्स पे अप्लाई किया। [incredulous] पचास!"
+    },
+    {
+      "id": "same",
+      "en": "Same resume... [sighs] every single time.",
+      "hi": "और हर बार... [sighs] वही एक रिज़्यूमे।"
+    },
+    {
+      "id": "match",
+      "en": "But every job wants different skills. And yours? [disappointed] Five out of eleven.",
+      "hi": "पर हर जॉब अलग स्किल्स माँगती है। और आपका? [disappointed] ग्यारह में से सिर्फ़ पाँच।"
+    },
+    {
+      "id": "rejected",
+      "en": "[frustrated] So the ATS throws it out, before a human even reads it!",
+      "hi": "[frustrated] तो ATS उसे बाहर फेंक देता है, किसी के पढ़ने से पहले ही!"
+    },
+    {
+      "id": "byhand",
+      "en": "Tailor it by hand? Forty-five minutes. Per job. [sighs] Ugh.",
+      "hi": "हाथ से टेलर करो? हर जॉब पे पैंतालीस मिनट। [sighs] उफ़।"
+    },
+    {
+      "id": "seconds",
+      "en": "[excited] With QuickFit CV? Thirty seconds. That's it!",
+      "hi": "[excited] QuickFit CV के साथ? बस तीस सेकंड। हो गया!"
+    },
+    {
+      "id": "paste",
+      "en": "Paste the job, and boom: you see exactly which keywords you're missing.",
+      "hi": "जॉब पेस्ट करो, और बूम: दिख जाता है कौन से कीवर्ड्स मिसिंग हैं।"
+    },
+    {
+      "id": "rewrite",
+      "en": "Rewrite only the lines you pick, in the job's own words.",
+      "hi": "सिर्फ़ वही लाइन्स रीराइट करो जो आप चुनो, जॉब के अपने शब्दों में।"
+    },
+    {
+      "id": "honest",
+      "en": "[warmly] And the best part? It never adds a skill you don't have.",
+      "hi": "[warmly] और सबसे अच्छी बात? ये कभी ऐसी स्किल नहीं जोड़ता जो आपके पास नहीं है।"
+    },
+    {
+      "id": "end",
+      "en": "[confident] QuickFit CV. One resume per job, in your own words.",
+      "hi": "[confident] QuickFit CV. हर जॉब के लिए एक रिज़्यूमे, आपके अपने शब्दों में।"
+    }
+  ],
+  "provider": "openai",
+  "elevenlabs": {
+    "voice_id": "JBFqnCBsd6RMkjVDRZzb",
+    "model": "eleven_v3",
+    "_note": "Pick a voice in ElevenLabs' Voice Library and paste its ID here."
+  }
 }
