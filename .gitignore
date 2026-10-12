@@ -24,3 +24,5 @@ marketing/video/output/
 
 # Explainer renders
 marketing/explainer/videos/*/output/
+marketing/explainer/export/
+marketing/explainer/*.zip

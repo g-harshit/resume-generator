@@ -101,6 +101,37 @@ What matters on Instagram:
 - CTA that drives DMs: *"Comment 'RESUME' and I'll check your keywords"* (ManyChat can
   automate the replies).
 
+
+## Content calendar — 20 explainer videos
+
+All in `marketing/explainer/videos/<slug>/`: `captions.md` (Instagram EN + Hinglish, LinkedIn,
+X, pinned comment), and in `output/` the 9:16 MP4 (Reels), 16:9 MP4 (LinkedIn, X) and three
+posters. Five a week: Instagram every day listed, LinkedIn on Tue and Thu (16:9 + its
+LinkedIn text). Mix keeps each week to one hook, one demo, one tip, one trust video.
+
+| # | When | Video | Hook | Why this slot |
+|---|---|---|---|---|
+| 1 | W1 Mon | `ats-rejected` | 50 applications. Zero callbacks? | Hook: the ATS problem |
+| 2 | W1 Tue | `tailor-30s` | Tailor a resume in 30 seconds. | Demo: the whole flow |
+| 3 | W1 Thu | `ats-basics` | 3 things an ATS needs from your resume | Tip (save-worthy) |
+| 4 | W1 Fri | `fake-skills` | Can you explain every line? If AI wrote it, maybe not. | Trust: never invents |
+| 5 | W1 Sun | `two-columns` | Two-column resume? The ATS reads it straight across. | Tip: templates |
+| 6 | W2 Mon | `job-words` | Same work. Different words. That's why the ATS missed you. | Problem: different words |
+| 7 | W2 Tue | `five-to-seven` | 5 of 11 → 7 of 11 without a single lie. | Demo: honest 5→7 |
+| 8 | W2 Thu | `ats-checker` | What does the ATS actually read? Check free. No sign-up. | Free tool |
+| 9 | W2 Fri | `interview-questions` | Every line on your resume is an interview question. | Trust: interviews |
+| 10 | W2 Sun | `one-page` | Two pages? Make it one. One click. | Feature: fit to one page |
+| 11 | W3 Mon | `same-resume` | 50 jobs. One resume. That's the problem. | Problem: one file, 50 jobs |
+| 12 | W3 Tue | `lines-prove` | Your line says Django. The job wants Python. Same thing. | Feature: skills your lines prove |
+| 13 | W3 Thu | `image-pdf` | Your resume is an image? The ATS sees nothing. | Tip: image PDFs |
+| 14 | W3 Fri | `your-words` | AI rewrote your whole resume? Pick the lines instead. | Trust: your words |
+| 15 | W3 Sun | `buzzwords` | Results-driven team player? Show the numbers. | Tip: numbers over buzzwords |
+| 16 | W4 Mon | `profile-once` | Upload once. Tailor every time. | Feature: upload once |
+| 17 | W4 Tue | `cover-letter` | Your cover letter sounds like everyone else's. | Feature: cover letters |
+| 18 | W4 Thu | `summary` | Same summary for every job? | Feature: summary per job |
+| 19 | W4 Fri | `templates` | Four templates. All ATS-safe. | Feature: 4 templates |
+| 20 | W4 Sun | `deadline` | Closes at midnight. It's 11:30 PM. Still time. | Story: 11:30 PM |
+
 ## 6. Launches (one-time spikes + backlinks)
 
 - [ ] Product Hunt, Show HN, Indie Hackers, BetaList.
