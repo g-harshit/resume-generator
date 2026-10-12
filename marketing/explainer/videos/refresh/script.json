@@ -1,0 +1,54 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "upd",
+      "type": "text",
+      "en": "[curious] Updated your profile? Refresh any resume from it.",
+      "text": "Updated your **profile**?",
+      "sub": "Refresh any resume from it."
+    },
+    {
+      "id": "steps",
+      "type": "steps",
+      "en": "Resumes you already sent stay exactly as they were.",
+      "items": [
+        "Edit your profile once",
+        "**Refresh** a resume from it",
+        "Sent ones stay as they were"
+      ],
+      "say": "Sent resumes|stay as sent."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Updated your profile?",
+      "Refresh any resume."
+    ],
+    "scene": "steps"
+  },
+  "captions": {
+    "ig_en": "New project, new skill, new job? Update your profile once 🔄\n\n→ refresh any resume from it in one click\n→ resumes you've already sent never change\n→ so you always know what a recruiter has\n\nTry it free → link in bio ✅\n💬 How many versions of your resume do you have right now? 👇",
+    "ig_hi": "Profile update kiya? Kisi bhi resume ko ek click mein refresh karo. Bheje hue resume waise hi rehte hain.\n\nFree try karo → link in bio",
+    "linkedin": "Keeping five tailored resumes in sync by hand is how mistakes happen.\n\n• refresh any resume from it in one click\n• resumes you've already sent never change\n• so you always know what a recruiter has\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Updated your profile? Refresh any resume from it in one click.\n\nResumes you already sent stay exactly as they were.\n\nhttps://quickfitcv.com",
+    "comment": "How many versions of your resume do you have right now? 👇"
+  }
+}

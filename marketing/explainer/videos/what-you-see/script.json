@@ -1,0 +1,49 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "same",
+      "type": "text",
+      "en": "[confident] What you see is exactly what downloads.",
+      "text": "What you see is **what downloads**.",
+      "sub": "One template, two outputs."
+    },
+    {
+      "id": "tpl",
+      "type": "templates",
+      "en": "The preview and the PDF are built from the same template.",
+      "say": "Preview = PDF.|Always."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "What you see is",
+      "what downloads."
+    ],
+    "scene": "tpl"
+  },
+  "captions": {
+    "ig_en": "Ever downloaded a resume and the PDF looked different from the editor? 😤\n\n→ in QuickFit CV the preview and the PDF come from the same template\n→ what you see is exactly what downloads\n→ every template is ATS-safe\n\nTry it free → link in bio ✅\n💬 Ever had a PDF surprise? 👇",
+    "ig_hi": "Jo dikhta hai wahi download hota hai. Preview aur PDF ek hi template se.\n\nFree try karo → link in bio",
+    "linkedin": "Resume builders often render the preview and the PDF differently, so what you checked isn't what you sent.\n\n• in QuickFit CV the preview and the PDF come from the same template\n• what you see is exactly what downloads\n• every template is ATS-safe\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "What you see is exactly what downloads.\n\nQuickFit CV builds the preview and the PDF from the same template.\n\nhttps://quickfitcv.com",
+    "comment": "Ever had a PDF surprise? 👇"
+  }
+}

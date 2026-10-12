@@ -86,7 +86,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
 const LOGO = '<path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#2f5d50"/><path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/><path d="M21 24H37M21 31H43" stroke="#f7f6f2" stroke-width="3.2" stroke-linecap="round" fill="none"/><path d="M22 43L28.5 49.5L42 36" stroke="#f7f6f2" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
 const logo = (px) => `<svg width="${px}" height="${px}" viewBox="0 0 64 64">${LOGO}</svg>`;
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
 // **word** in a parameter becomes a highlight.
 const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<mark>$1</mark>");
 const doc = (tag = "") => `<div class="card doc abs"><div class="bar dark"></div><div class="bar" style="width:90%"></div><div class="bar" style="width:75%"></div><div class="bar" style="width:85%"></div><div class="bar" style="width:60%"></div><div class="bar" style="width:80%"></div><div class="tag">${esc(tag)}</div></div>`;

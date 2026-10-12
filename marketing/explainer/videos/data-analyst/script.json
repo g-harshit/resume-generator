@@ -1,0 +1,100 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "job",
+      "type": "job",
+      "en": "[curious] Applying for data analyst roles? Here's what one asked for.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "say": "Data analyst?|Here's one job:"
+    },
+    {
+      "id": "top",
+      "type": "steps",
+      "en": "SQL, Python, a dashboard tool, statistics, experiments.",
+      "items": [
+        "**SQL** and **Python**",
+        "A dashboard tool: **Tableau** or Looker",
+        "**Statistics** and A/B testing"
+      ],
+      "say": "Most asked:"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Data analyst?",
+      "Here's what one",
+      "job asked for."
+    ],
+    "scene": "job"
+  },
+  "captions": {
+    "ig_en": "Applying for Data Analyst roles? Here's what one real-style job asked for 📊\n\n→ must have: SQL, Python, Tableau, Looker, statistics, A/B testing\n→ nice to have: dbt, BigQuery, cohort and retention analysis\n→ QuickFit CV shows which ones your resume already covers\n\nTry it free → link in bio ✅\n💬 Data folks: which of these do you use daily? 👇",
+    "ig_hi": "Data analyst job mein kya maanga: SQL, Python, Tableau/Looker, statistics, A/B testing.\n\nFree try karo → link in bio",
+    "linkedin": "Breaking down a Senior Data Analyst job description into what it actually asks for:\n\n• must have: SQL, Python, Tableau, Looker, statistics, A/B testing\n• nice to have: dbt, BigQuery, cohort and retention analysis\n• QuickFit CV shows which ones your resume already covers\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Data analyst job, decoded:\nMust: SQL, Python, Tableau/Looker, statistics, A/B testing\nNice: dbt, BigQuery, cohort analysis\n\nSee what you cover:\n\nhttps://quickfitcv.com",
+    "comment": "Data folks: which of these do you use daily? 👇"
+  }
+}

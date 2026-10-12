@@ -1,0 +1,55 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "long",
+      "type": "rewrite",
+      "en": "[sighs] A bullet four lines long? Condense it, in your own words.",
+      "label": "Brightcart Retail · line 3",
+      "tall": true,
+      "before": "Automated the monthly revenue report using Python and pandas scripts that pulled data from three systems, cutting prep from about two days to three hours.",
+      "after": "Automated the monthly revenue report with **Python** and **pandas**: 2 days → 3 hours.",
+      "done": "✓ Shorter · same facts",
+      "say": "4-line bullet?|Condense it."
+    },
+    {
+      "id": "rule",
+      "type": "text",
+      "en": "Same facts. Half the words.",
+      "text": "Same facts. **Half the words.**",
+      "sub": "Every number kept."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "4-line bullet?",
+      "Same facts,",
+      "half the words."
+    ],
+    "scene": "long"
+  },
+  "captions": {
+    "ig_en": "A bullet point 4 lines long? ✂️\n\n→ keep the action, the tool and the result\n→ cut the rest\n→ QuickFit CV condenses lines from your own words, every number kept\n\nTry it free → link in bio ✅\n💬 Longest bullet on your resume: how many lines? 👇",
+    "ig_hi": "4 line ka bullet? Action, tool aur result rakho, baaki kaato. Har number wahi rehta hai.\n\nFree try karo → link in bio",
+    "linkedin": "Long bullets get skimmed. The fix is usually to keep three things: what you did, with what, and the result.\n\n• keep the action, the tool and the result\n• cut the rest\n• QuickFit CV condenses lines from your own words, every number kept\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "4-line bullet points get skimmed.\n\nKeep the action, the tool, the result. QuickFit CV condenses lines from your own words, every number kept.\n\nhttps://quickfitcv.com",
+    "comment": "Longest bullet on your resume: how many lines? 👇"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "q",
+      "type": "text",
+      "en": "[curious] Can the AI change your job title, or your dates? No.",
+      "text": "Can the AI change your **dates**?",
+      "sub": "No."
+    },
+    {
+      "id": "list",
+      "type": "checklist",
+      "en": "Names, titles, employers, dates and education come straight from your profile.",
+      "title": "Never rewritten",
+      "items": [
+        [
+          "Names and job titles",
+          "pass"
+        ],
+        [
+          "Employers",
+          "pass"
+        ],
+        [
+          "Dates",
+          "pass"
+        ],
+        [
+          "Education",
+          "pass"
+        ]
+      ],
+      "say": "Straight from|your profile."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Can the AI change",
+      "your dates?",
+      "No."
+    ],
+    "scene": "list"
+  },
+  "captions": {
+    "ig_en": "Can the AI change your job title or dates? No 🔒\n\n→ names, job titles, employers, dates and education come straight from your profile\n→ AI only rewords the lines you pick\n→ to change a fact, you edit your profile yourself\n\nTry it free → link in bio ✅\n💬 What would you never let AI touch on your resume? 👇",
+    "ig_hi": "Kya AI aapka job title ya dates badal sakta hai? Nahi. Yeh sab seedha aapki profile se aata hai.\n\nFree try karo → link in bio",
+    "linkedin": "One question I get about AI resume tools: what stops it changing the facts?\n\n• names, job titles, employers, dates and education come straight from your profile\n• AI only rewords the lines you pick\n• to change a fact, you edit your profile yourself\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Can QuickFit CV's AI change your job title or dates? No.\n\nNames, titles, employers, dates and education come straight from your profile.\n\nhttps://quickfitcv.com",
+    "comment": "What would you never let AI touch on your resume? 👇"
+  }
+}

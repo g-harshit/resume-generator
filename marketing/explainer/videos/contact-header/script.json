@@ -1,0 +1,71 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "gone",
+      "type": "atstext",
+      "en": "[incredulous] Your email is in the header? Here's what an ATS might read.",
+      "lines": [
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "Jun 2022 – Present",
+        "SKILLS: SQL, Python, Tableau"
+      ],
+      "say": "Email in a header?|ATS might read:"
+    },
+    {
+      "id": "why",
+      "type": "text",
+      "en": "Many ATSs skip headers. Your email goes with them.",
+      "text": "Many ATSs **skip headers**.",
+      "sub": "Your email and phone go with them."
+    },
+    {
+      "id": "fix",
+      "type": "checklist",
+      "en": "Every QuickFit CV template puts contact details in the body.",
+      "items": [
+        [
+          "Email and phone in the body",
+          "pass"
+        ],
+        [
+          "Not in a header or text box",
+          "pass"
+        ]
+      ],
+      "say": "Contact details|in the body."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Email in the header?",
+      "Many ATSs skip it."
+    ],
+    "scene": "gone"
+  },
+  "captions": {
+    "ig_en": "Is your email and phone in the resume header? 👀\n\n→ many ATSs skip headers, footers and text boxes\n→ your contact details can vanish with them\n→ every QuickFit CV template puts them in the body\n\nTry it free → link in bio ✅\n💬 Check yours now: header or body? 👇",
+    "ig_hi": "Email aur phone resume ke header mein? Kai ATS header skip karte hain. QuickFit CV templates mein contact details body mein.\n\nFree try karo → link in bio",
+    "linkedin": "A small formatting choice with a big consequence: contact details in a document header. Many applicant tracking systems skip headers entirely.\n\n• many ATSs skip headers, footers and text boxes\n• your contact details can vanish with them\n• every QuickFit CV template puts them in the body\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Email and phone in your resume header?\n\nMany ATSs skip headers, and your contact details with them. QuickFit CV templates keep them in the body.\n\nhttps://quickfitcv.com",
+    "comment": "Check yours now: header or body? 👇"
+  }
+}

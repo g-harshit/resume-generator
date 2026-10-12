@@ -52,10 +52,20 @@ function request(text) {
 async function clip(s) {
   const req = request(s[lang]);
   const hash = crypto.createHash("sha1").update(req.url + JSON.stringify(req.body)).digest("hex").slice(0, 10);
-  const raw = `${out}${s.id}.${hash}.raw.mp3`, file = `${out}${s.id}.mp3`;
+  // One cache for every video, keyed by the request: a line that repeats across videos
+  // (the end card's) is paid for once.
+  const cached = `${here}cache/${hash}.raw.mp3`, legacy = `${out}${s.id}.${hash}.raw.mp3`, file = `${out}${s.id}.mp3`;
+  fs.mkdirSync(`${here}cache`, { recursive: true });
+  if (!fs.existsSync(cached) && fs.existsSync(legacy)) fs.copyFileSync(legacy, cached);
+  const raw = cached;
   if (!fs.existsSync(raw)) {
     const res = await fetch(req.url, { method: "POST", headers: req.headers, body: JSON.stringify(req.body) });
-    if (!res.ok) throw new Error(`${s.id}: ${res.status} ${await res.text()}`);
+    if (!res.ok) {
+      const body = await res.text();
+      // Out of characters: say so plainly, so a batch can stop at the last video that fit.
+      if (/quota_exceeded/.test(body)) { console.error(`QUOTA ${slug}: ${body}`); process.exit(3); }
+      throw new Error(`${s.id}: ${res.status} ${body}`);
+    }
     fs.writeFileSync(raw, Buffer.from(await res.arrayBuffer()));
   }
   // Optional speed-up (pitch kept), and the silence the model leaves at either end trimmed,

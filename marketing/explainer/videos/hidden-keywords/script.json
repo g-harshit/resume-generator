@@ -1,0 +1,56 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "white",
+      "type": "text",
+      "en": "[incredulous] Hidden white keywords on your resume?",
+      "text": "Hidden **white** keywords?",
+      "sub": "The ATS reads them. So does the recruiter."
+    },
+    {
+      "id": "reads",
+      "type": "atstext",
+      "en": "The ATS reads them, and so does the recruiter who searches.",
+      "lines": [
+        "PRIYA SHARMA",
+        "Data Analyst",
+        "python python sql sql leadership",
+        "kubernetes aws looker dbt"
+      ],
+      "say": "This is what|it reads."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Hidden white",
+      "keywords?",
+      "The ATS reads them."
+    ],
+    "scene": "reads"
+  },
+  "captions": {
+    "ig_en": "Pasting the job's keywords in white text on your resume? 🙈\n\n→ the ATS reads white text like any other text\n→ and the recruiter sees it when they open what it read\n→ QuickFit CV puts real keywords where your work proves them\n\nTry it free → link in bio ✅\n💬 Have you ever tried the white text trick? No judgement 👇",
+    "ig_hi": "Resume pe white text keywords? ATS unhe padhta hai, aur recruiter bhi dekh leta hai.\n\nFree try karo → link in bio",
+    "linkedin": "An old trick that still circulates: paste the job's keywords in white text. The ATS reads them, and a recruiter looking at the parsed text sees them too.\n\n• the ATS reads white text like any other text\n• and the recruiter sees it when they open what it read\n• QuickFit CV puts real keywords where your work proves them\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "White-text keywords on your resume? The ATS reads them, and so does the recruiter.\n\nQuickFit CV puts keywords only where your work proves them.\n\nhttps://quickfitcv.com",
+    "comment": "Have you ever tried the white text trick? No judgement 👇"
+  }
+}

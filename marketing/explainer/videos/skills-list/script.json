@@ -1,0 +1,129 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "long",
+      "type": "resume",
+      "en": "[sighs] Forty tools in your skills section?",
+      "heading": "Skills",
+      "skills": [
+        [
+          "SQL",
+          ""
+        ],
+        [
+          "Python",
+          ""
+        ],
+        [
+          "pandas",
+          ""
+        ],
+        [
+          "Tableau",
+          ""
+        ],
+        [
+          "Excel",
+          ""
+        ],
+        [
+          "PowerPoint",
+          ""
+        ],
+        [
+          "Word",
+          ""
+        ],
+        [
+          "R",
+          ""
+        ],
+        [
+          "SAS",
+          ""
+        ],
+        [
+          "Jira",
+          ""
+        ],
+        [
+          "Slack",
+          ""
+        ],
+        [
+          "Figma",
+          ""
+        ]
+      ],
+      "say": "40 tools in your|skills section?"
+    },
+    {
+      "id": "this",
+      "type": "text",
+      "en": "List what this job needs, first.",
+      "text": "List what **this job** needs.",
+      "sub": "Leave the rest off this one."
+    },
+    {
+      "id": "short",
+      "type": "resume",
+      "en": "Remove the rest for this resume. Your profile keeps them.",
+      "heading": "Skills",
+      "skills": [
+        [
+          "SQL",
+          "ok"
+        ],
+        [
+          "Python",
+          "ok"
+        ],
+        [
+          "Tableau",
+          "ok"
+        ],
+        [
+          "statistics",
+          "ok"
+        ],
+        [
+          "A/B testing",
+          "ok"
+        ]
+      ],
+      "say": "Trim it|per job."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "40 tools in your",
+      "skills section?"
+    ],
+    "scene": "short"
+  },
+  "captions": {
+    "ig_en": "40 tools in your skills section? 😵\n\n→ list what this job needs, first\n→ leave the rest off this one resume\n→ QuickFit CV lets you trim skills per resume; your profile keeps them all\n\nTry it free → link in bio ✅\n💬 How many skills are on your resume right now? 👇",
+    "ig_hi": "Skills section mein 40 tools? Is job ke liye jo chahiye wahi dikhao. Profile mein sab safe rehta hai.\n\nFree try karo → link in bio",
+    "linkedin": "A skills section that lists everything makes the relevant skills harder to spot.\n\n• list what this job needs, first\n• leave the rest off this one resume\n• QuickFit CV lets you trim skills per resume; your profile keeps them all\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "40 tools in your skills section?\n\nList what this job needs. QuickFit CV trims skills per resume; your profile keeps them all.\n\nhttps://quickfitcv.com",
+    "comment": "How many skills are on your resume right now? 👇"
+  }
+}

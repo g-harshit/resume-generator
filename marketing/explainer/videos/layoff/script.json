@@ -1,0 +1,55 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "hit",
+      "type": "text",
+      "en": "[warmly] Laid off, and applying everywhere?",
+      "text": "Laid off?",
+      "sub": "Applying everywhere at once?"
+    },
+    {
+      "id": "plan",
+      "type": "steps",
+      "en": "Upload once. Tailor the ones you want most, in minutes.",
+      "items": [
+        "Upload your resume **once**",
+        "Pick the roles you want most",
+        "Tailor each in **minutes**"
+      ],
+      "say": "Tailor the ones|you want most."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Laid off?",
+      "Tailor the ones",
+      "you want most."
+    ],
+    "scene": "plan"
+  },
+  "captions": {
+    "ig_en": "Laid off and applying everywhere at once? You've got this 💪\n\n→ upload your resume once\n→ pick the roles you want most\n→ tailor each in minutes, honestly\n\nTry it free → link in bio ✅\n💬 If you've been laid off this year, drop your role; let's help each other 👇",
+    "ig_hi": "Layoff hua? Resume ek baar upload karo, jo roles sabse zyada chahiye unhe minutes mein tailor karo.\n\nFree try karo → link in bio",
+    "linkedin": "After a layoff, the instinct is to apply to everything immediately. Tailoring the applications you care most about tends to work better, and it no longer has to take an evening each.\n\n• upload your resume once\n• pick the roles you want most\n• tailor each in minutes, honestly\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Laid off? Upload your resume once, then tailor the roles you want most in minutes. Nothing invented.\n\nhttps://quickfitcv.com",
+    "comment": "If you've been laid off this year, drop your role; let's help each other 👇"
+  }
+}

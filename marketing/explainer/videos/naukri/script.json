@@ -1,0 +1,78 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "naukri",
+      "type": "text",
+      "en": "[curious] Applying on Naukri? Its recruiter system reads your file into text too.",
+      "text": "Applying on **Naukri**?",
+      "sub": "Its RMS reads your file into text, like any ATS."
+    },
+    {
+      "id": "reads",
+      "type": "atstext",
+      "en": "So what it reads is what recruiters search.",
+      "lines": [
+        "PRIYA SHARMA",
+        "Data Analyst · Bengaluru",
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "SKILLS: SQL, Python, Tableau"
+      ],
+      "say": "What it reads is|what they search."
+    },
+    {
+      "id": "check",
+      "type": "checklist",
+      "en": "Check yours free, no sign-up.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "One column, real text, standard headings",
+          "pass"
+        ],
+        [
+          "Email and phone in the body",
+          "pass"
+        ],
+        [
+          "Every role has dates",
+          "pass"
+        ]
+      ],
+      "say": "Check yours|free."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Applying on Naukri?",
+      "Its RMS reads your",
+      "file into text."
+    ],
+    "scene": "reads"
+  },
+  "captions": {
+    "ig_en": "Applying on Naukri? Its RMS reads your resume into text, just like Workday or Greenhouse 🇮🇳\n\n→ what it reads is what recruiters search\n→ columns, tables and headers can scramble it\n→ check yours with our free ATS checker, no sign-up\n\nTry it free → link in bio ✅\n💬 Naukri, LinkedIn or company sites: where do you apply most? 👇",
+    "ig_hi": "Naukri pe apply kar rahe ho? Uska RMS bhi aapki file ko text mein padhta hai. Free checker se dekho kya padha.\n\nFree try karo → link in bio",
+    "linkedin": "Recruiters on Naukri search candidates through its RMS, which reads your uploaded file into text, the same way global ATSs do.\n\n• what it reads is what recruiters search\n• columns, tables and headers can scramble it\n• check yours with our free ATS checker, no sign-up\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Applying on Naukri? Its RMS reads your file into text, and recruiters search that.\n\nCheck what it reads with our free ATS checker. No sign-up.\n\nhttps://quickfitcv.com",
+    "comment": "Naukri, LinkedIn or company sites: where do you apply most? 👇"
+  }
+}

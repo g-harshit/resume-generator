@@ -1,0 +1,79 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "none",
+      "type": "text",
+      "en": "[curious] Fresher with no experience?",
+      "text": "Fresher with **no experience**?",
+      "sub": "Your projects are experience."
+    },
+    {
+      "id": "proj",
+      "type": "resume",
+      "en": "Your projects are experience.",
+      "who": "Fresher · example",
+      "heading": "Projects",
+      "lines": [
+        "Built a library app in **Django** with a team of 4."
+      ],
+      "skills": [
+        [
+          "Django",
+          ""
+        ],
+        [
+          "Git",
+          ""
+        ],
+        [
+          "SQL",
+          ""
+        ]
+      ],
+      "say": "Your projects|are experience."
+    },
+    {
+      "id": "prove",
+      "type": "rewrite",
+      "en": "And they prove skills. Django is Python, so say it.",
+      "label": "Projects · line 1",
+      "before": "Built a library app in Django with a team of 4.",
+      "after": "Built a library app in **Python** (Django) with a team of 4.",
+      "done": "✓ Named a skill this line proves",
+      "say": "They prove|skills too."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Fresher?",
+      "No experience?",
+      "Your projects count."
+    ],
+    "scene": "prove"
+  },
+  "captions": {
+    "ig_en": "Fresher with \"no experience\"? Your projects are experience 🎓\n\n→ list projects like jobs: what you built, with what, for whom\n→ name the skills they prove (Django → Python)\n→ QuickFit CV tailors them to each job, without inventing anything\n\nTry it free → link in bio ✅\n💬 Freshers: what's the best project on your resume? 👇",
+    "ig_hi": "Fresher ho, experience nahi? Projects hi experience hain, aur woh skills prove karte hain: Django matlab Python.\n\nFree try karo → link in bio",
+    "linkedin": "Freshers often leave their strongest material off: the projects. A project you built is experience, and it proves skills a recruiter is searching for.\n\n• list projects like jobs: what you built, with what, for whom\n• name the skills they prove (Django → Python)\n• QuickFit CV tailors them to each job, without inventing anything\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Fresher with no experience? Your projects are experience, and they prove skills: a Django project is Python.\n\nQuickFit CV tailors them to each job, nothing invented.\n\nhttps://quickfitcv.com",
+    "comment": "Freshers: what's the best project on your resume? 👇"
+  }
+}

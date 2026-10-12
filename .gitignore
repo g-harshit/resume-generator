@@ -26,3 +26,4 @@ marketing/video/output/
 marketing/explainer/videos/*/output/
 marketing/explainer/export/
 marketing/explainer/*.zip
+marketing/explainer/cache/

@@ -1,0 +1,64 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "up",
+      "type": "text",
+      "en": "[confident] PDF or Word? Upload either.",
+      "text": "**PDF** or **Word**?",
+      "sub": "Upload either. We read it."
+    },
+    {
+      "id": "you",
+      "type": "checklist",
+      "en": "We read it into your profile, and you check it once.",
+      "title": "Your profile",
+      "items": [
+        [
+          "Roles, dates, lines, skills read",
+          "pass"
+        ],
+        [
+          "You review them once",
+          "pass"
+        ],
+        [
+          "Fix anything we misread",
+          "pass"
+        ]
+      ],
+      "say": "You check|it once."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "PDF or Word?",
+      "Upload either."
+    ],
+    "scene": "you"
+  },
+  "captions": {
+    "ig_en": "PDF or Word? Upload either 📤\n\n→ QuickFit CV reads it into your profile\n→ you review it once and fix anything we misread\n→ every tailored resume is built from that\n\nTry it free → link in bio ✅\n💬 PDF or Word: which do you send recruiters? 👇",
+    "ig_hi": "PDF ho ya Word, dono chalega. Hum profile mein padh lete hain, aap ek baar check karo.\n\nFree try karo → link in bio",
+    "linkedin": "Starting is the hardest part, so the first step is just uploading the resume you already have.\n\n• QuickFit CV reads it into your profile\n• you review it once and fix anything we misread\n• every tailored resume is built from that\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "PDF or Word: upload either to QuickFit CV. We read it into your profile; you check it once.\n\nhttps://quickfitcv.com",
+    "comment": "PDF or Word: which do you send recruiters? 👇"
+  }
+}

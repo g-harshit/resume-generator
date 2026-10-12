@@ -1,0 +1,53 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "sum",
+      "type": "rewrite",
+      "en": "[confident] Tailor your summary in one click, from what's in your resume.",
+      "label": "Summary",
+      "tall": true,
+      "before": "Data analyst with 4 years of experience turning sales and customer data into reports.",
+      "after": "Data analyst with 4 years in retail and e-commerce, focused on **customer retention** and **A/B testing**.",
+      "say": "Summary,|for this job."
+    },
+    {
+      "id": "len",
+      "type": "text",
+      "en": "Shorter, same, or longer. Your pick.",
+      "text": "Shorter. Same. **Longer.**",
+      "sub": "Only from what's in your resume."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Your summary,",
+      "for this job."
+    ],
+    "scene": "sum"
+  },
+  "captions": {
+    "ig_en": "Your summary is the first thing they read. Tailor it 🖊️\n\n→ rewritten for each job from what's already in your resume\n→ shorter, same length or longer\n→ nothing added that isn't yours\n\nTry it free → link in bio ✅\n💬 Summary: 2 lines or 4? 👇",
+    "ig_hi": "Summary har job ke liye, sirf aapke resume se. Chhota, same ya lamba.\n\nFree try karo → link in bio",
+    "linkedin": "The summary is the most-read part of a resume, and the easiest to tailor badly.\n\n• rewritten for each job from what's already in your resume\n• shorter, same length or longer\n• nothing added that isn't yours\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Tailor your resume summary for each job in one click, only from what's in your resume. Shorter, same or longer.\n\nhttps://quickfitcv.com",
+    "comment": "Summary: 2 lines or 4? 👇"
+  }
+}

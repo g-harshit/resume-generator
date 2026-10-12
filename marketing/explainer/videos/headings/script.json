@@ -1,0 +1,77 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "bad",
+      "type": "checklist",
+      "en": "Where I've made an impact? An ATS doesn't know that heading.",
+      "items": [
+        [
+          "\"Where I've made an impact\"",
+          "fail"
+        ],
+        [
+          "\"My journey\"",
+          "fail"
+        ],
+        [
+          "\"Toolbox\"",
+          "fail"
+        ]
+      ],
+      "say": "Creative headings?|ATS is confused."
+    },
+    {
+      "id": "good",
+      "type": "checklist",
+      "en": "Use the ones it knows: Experience, Education, Skills.",
+      "items": [
+        [
+          "Experience",
+          "pass"
+        ],
+        [
+          "Education",
+          "pass"
+        ],
+        [
+          "Skills",
+          "pass"
+        ]
+      ],
+      "say": "Use the ones|it knows."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "\"Where I've made",
+      "an impact\"?",
+      "The ATS doesn't know it."
+    ],
+    "scene": "bad"
+  },
+  "captions": {
+    "ig_en": "\"Where I've made an impact\" is a lovely heading. An ATS has no idea what it is 😅\n\n→ ATSs sort your resume by standard headings\n→ Experience, Education, Skills, Projects\n→ every QuickFit CV template uses them\n\nTry it free → link in bio ✅\n💬 Most creative resume heading you've seen? 👇",
+    "ig_hi": "\"Where I've made an impact\" jaisi heading ATS nahi samajhta. Experience, Education, Skills likho.\n\nFree try karo → link in bio",
+    "linkedin": "Creative section headings are a common way to stand out, and a common way to confuse applicant tracking systems, which sort your resume by recognising standard headings.\n\n• ATSs sort your resume by standard headings\n• Experience, Education, Skills, Projects\n• every QuickFit CV template uses them\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "\"Where I've made an impact\" isn't a heading an ATS knows.\n\nUse Experience, Education, Skills. Every QuickFit CV template does.\n\nhttps://quickfitcv.com",
+    "comment": "Most creative resume heading you've seen? 👇"
+  }
+}

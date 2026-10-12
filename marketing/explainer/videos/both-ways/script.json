@@ -1,0 +1,53 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "two",
+      "type": "text",
+      "en": "[curious] A slash B testing, or experimentation? Write it both ways.",
+      "text": "A/B testing **or** experimentation?",
+      "sub": "Write it both ways."
+    },
+    {
+      "id": "line",
+      "type": "rewrite",
+      "en": "Recruiters search one or the other.",
+      "label": "Brightcart Retail · line 4",
+      "before": "Ran A/B tests on checkout page changes with the product team.",
+      "after": "Ran **A/B tests (experimentation)** on checkout page changes with the product team.",
+      "say": "Recruiters search|one or the other."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "A/B testing or",
+      "experimentation?",
+      "Write both."
+    ],
+    "scene": "line"
+  },
+  "captions": {
+    "ig_en": "A/B testing or experimentation? CV or résumé? SQL or Structured Query Language? Write it both ways 💡\n\n→ recruiters search the ATS with one term or the other\n→ use the job's term, plus the common alternative\n→ QuickFit CV shows which of the job's words you're missing\n\nTry it free → link in bio ✅\n💬 Which skill of yours has 3 different names? 👇",
+    "ig_hi": "A/B testing ya experimentation? Dono likho. Recruiter kisi ek se search karta hai.\n\nFree try karo → link in bio",
+    "linkedin": "Recruiters search applicant tracking systems with specific terms, and the same skill often goes by two names.\n\n• recruiters search the ATS with one term or the other\n• use the job's term, plus the common alternative\n• QuickFit CV shows which of the job's words you're missing\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "A/B testing or experimentation? Write it both ways: recruiters search with one or the other.\n\nQuickFit CV shows which of the job's words you're missing.\n\nhttps://quickfitcv.com",
+    "comment": "Which skill of yours has 3 different names? 👇"
+  }
+}

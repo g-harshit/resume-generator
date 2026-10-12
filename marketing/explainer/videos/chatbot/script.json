@@ -1,0 +1,78 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "vs",
+      "type": "compare",
+      "en": "[curious] Why not just paste your resume into a chatbot?",
+      "bad": [
+        "A chatbot",
+        "Doesn't know what's true about you"
+      ],
+      "good": [
+        "QuickFit CV",
+        "Checks every fact against your profile"
+      ],
+      "say": "Why not just|a chatbot?"
+    },
+    {
+      "id": "code",
+      "type": "text",
+      "en": "Because QuickFit CV checks every skill, date and number against your profile, after the AI writes.",
+      "text": "Every fact **checked in code**,",
+      "sub": "against your profile, after the AI writes."
+    },
+    {
+      "id": "miss",
+      "type": "missing",
+      "en": "Not in your profile? Not on your resume.",
+      "rows": [
+        [
+          "Looker",
+          "must have"
+        ],
+        [
+          "dbt",
+          "nice to have"
+        ],
+        [
+          "BigQuery",
+          "nice to have"
+        ]
+      ],
+      "say": "Not in profile?|Not on resume."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Why not just",
+      "use a chatbot?",
+      "It doesn't know what's true."
+    ],
+    "scene": "vs"
+  },
+  "captions": {
+    "ig_en": "Why not just paste your resume into a chatbot? 🤖\n\n→ a chatbot doesn't know which facts are actually yours\n→ QuickFit CV checks every skill, date and number against your profile after the AI writes\n→ not in your profile? Not on your resume\n\nTry it free → link in bio ✅\n💬 Ever had AI add something to your resume you never did? 👇",
+    "ig_hi": "Chatbot se resume tailor karwaoge? Use pata hi nahi kya sach hai. QuickFit CV har skill, date aur number aapki profile se check karta hai.\n\nFree try karo → link in bio",
+    "linkedin": "\"Can't I just paste my resume into a chatbot?\" You can, and it'll write something fluent. What it can't do is tell which facts are true about you, so skills and numbers drift in.\n\nQuickFit CV treats your profile as the source of truth:\n\n• a chatbot doesn't know which facts are actually yours\n• QuickFit CV checks every skill, date and number against your profile after the AI writes\n• not in your profile? Not on your resume\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Why not just ask a chatbot to tailor your resume?\n\nIt doesn't know what's true about you. QuickFit CV checks every skill, date and number against your profile after the AI writes.\n\nhttps://quickfitcv.com",
+    "comment": "Ever had AI add something to your resume you never did? 👇"
+  }
+}

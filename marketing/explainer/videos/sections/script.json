@@ -1,0 +1,55 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "order",
+      "type": "steps",
+      "en": "[curious] Skills first for this job? Reorder sections per resume.",
+      "items": [
+        "Summary",
+        "**Skills** ↑",
+        "Experience",
+        "Education"
+      ],
+      "say": "Skills first|for this job?"
+    },
+    {
+      "id": "why",
+      "type": "text",
+      "en": "Lead with what this job cares about.",
+      "text": "Lead with what **this job** wants.",
+      "sub": "Your profile's order stays the same."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Skills first",
+      "for this job?"
+    ],
+    "scene": "order"
+  },
+  "captions": {
+    "ig_en": "Skills first or experience first? It depends on the job 🔀\n\n→ reorder sections per resume\n→ lead with what this job cares about\n→ your profile's order stays as it is\n\nTry it free → link in bio ✅\n💬 Skills or experience first? 👇",
+    "ig_hi": "Skills pehle ya experience? Job pe depend karta hai. Har resume mein sections ka order alag rakh sakte ho.\n\nFree try karo → link in bio",
+    "linkedin": "Section order is a quiet way to tailor: a technical role may want skills near the top, another may want experience first.\n\n• reorder sections per resume\n• lead with what this job cares about\n• your profile's order stays as it is\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Skills first or experience first? Depends on the job.\n\nQuickFit CV lets you reorder sections per resume; your profile stays as it is.\n\nhttps://quickfitcv.com",
+    "comment": "Skills or experience first? 👇"
+  }
+}

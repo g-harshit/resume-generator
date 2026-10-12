@@ -1,0 +1,51 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "prep",
+      "type": "text",
+      "en": "[confident] Prep for the interview from your own resume.",
+      "text": "Prep from your **own lines**.",
+      "sub": "Each one is a story."
+    },
+    {
+      "id": "q",
+      "type": "chat",
+      "en": "Every line is a question. Have the story ready.",
+      "q": "Tell me about the 12% lift in repeat orders.",
+      "a": "We found why repeat purchases dropped, then changed the loyalty program.",
+      "say": "Every line,|a story ready."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Prep for the interview",
+      "from your own lines."
+    ],
+    "scene": "q"
+  },
+  "captions": {
+    "ig_en": "Interview tomorrow? Prep from your own resume 🎤\n\n→ every line is a question they might ask\n→ have a 60-second story for each: problem, action, result\n→ true lines make easy stories\n\nTry it free → link in bio ✅\n💬 Which line on your resume gets asked about most? 👇",
+    "ig_hi": "Interview prep: resume ki har line ek sawaal hai. Har line ki 60 second ki kahani ready rakho.\n\nFree try karo → link in bio",
+    "linkedin": "The best interview prep material is already in front of you: your resume.\n\n• every line is a question they might ask\n• have a 60-second story for each: problem, action, result\n• true lines make easy stories\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Interview prep: every line on your resume is a question. Have a 60-second story for each: problem, action, result.\n\nhttps://quickfitcv.com",
+    "comment": "Which line on your resume gets asked about most? 👇"
+  }
+}

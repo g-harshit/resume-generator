@@ -1,0 +1,67 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "three",
+      "type": "steps",
+      "en": "[confident] Three places to tailor your resume.",
+      "items": [
+        "**Summary**: lead with what the job wants",
+        "**Skills**: only what this job needs",
+        "**Top lines**: in the job's words"
+      ],
+      "say": "3 places to|tailor a resume."
+    },
+    {
+      "id": "all",
+      "type": "checklist",
+      "en": "QuickFit CV does all three, from your facts.",
+      "items": [
+        [
+          "Summary rewritten for the job",
+          "pass"
+        ],
+        [
+          "Skills trimmed per resume",
+          "pass"
+        ],
+        [
+          "Lines you pick, in its words",
+          "pass"
+        ]
+      ],
+      "say": "All three,|from your facts."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "3 places to",
+      "tailor a resume"
+    ],
+    "scene": "three"
+  },
+  "captions": {
+    "ig_en": "3 places to tailor your resume (save this) 📌\n\n→ summary: lead with what the job wants\n→ skills: only what this job needs\n→ top lines: in the job's own words\n\nTry it free → link in bio ✅\n💬 Which of the three do you skip? 👇",
+    "ig_hi": "Resume tailor karne ki 3 jagah: summary, skills, aur top lines job ke shabdon mein.\n\nFree try karo → link in bio",
+    "linkedin": "Tailoring doesn't mean rewriting everything. Three places do most of the work:\n\n• summary: lead with what the job wants\n• skills: only what this job needs\n• top lines: in the job's own words\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "3 places to tailor a resume:\n1. Summary\n2. Skills\n3. Your top lines, in the job's words\n\nQuickFit CV does all three from your facts.\n\nhttps://quickfitcv.com",
+    "comment": "Which of the three do you skip? 👇"
+  }
+}

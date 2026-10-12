@@ -1,0 +1,63 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "claim",
+      "type": "resume",
+      "en": "[playful] Excellent communication skills? Show it instead.",
+      "heading": "Skills",
+      "skills": [
+        [
+          "Excellent communication",
+          "hl"
+        ],
+        [
+          "Team player",
+          "hl"
+        ]
+      ],
+      "say": "\"Excellent|communication\"?"
+    },
+    {
+      "id": "show",
+      "type": "rewrite",
+      "en": "Presented A/B test results to leadership. That's communication.",
+      "label": "Brightcart Retail · line 4",
+      "before": "Excellent communication skills.",
+      "after": "**Presented** A/B test results on checkout changes **to leadership**.",
+      "say": "Show it|with a line."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "\"Excellent",
+      "communication\"?",
+      "Show it."
+    ],
+    "scene": "show"
+  },
+  "captions": {
+    "ig_en": "\"Excellent communication skills\" 🙄 Show it instead.\n\n→ \"presented A/B test results to leadership\" IS communication\n→ a real line beats an adjective\n→ QuickFit CV writes from your real lines\n\nTry it free → link in bio ✅\n💬 Which soft skill do you find hardest to prove? 👇",
+    "ig_hi": "\"Excellent communication\" likhne se kya hoga? Dikhao: \"leadership ko results present kiye\".\n\nFree try karo → link in bio",
+    "linkedin": "Soft skills are the hardest to claim and the easiest to show.\n\n• \"presented A/B test results to leadership\" IS communication\n• a real line beats an adjective\n• QuickFit CV writes from your real lines\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "\"Excellent communication skills\"? Show it: \"presented A/B test results to leadership\".\n\nQuickFit CV writes from your real lines.\n\nhttps://quickfitcv.com",
+    "comment": "Which soft skill do you find hardest to prove? 👇"
+  }
+}

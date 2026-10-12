@@ -1,0 +1,62 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "miss",
+      "type": "missing",
+      "en": "[curious] Forgot to list a skill you really have?",
+      "rows": [
+        [
+          "cohort analysis",
+          "nice to have"
+        ],
+        [
+          "Looker",
+          "must have"
+        ]
+      ],
+      "say": "Forgot a skill|you really have?"
+    },
+    {
+      "id": "add",
+      "type": "ihave",
+      "en": "Tap I have this, and say where you used it, in your own words.",
+      "skill": "cohort analysis",
+      "where": "Data Analyst at Brightcart Retail",
+      "words": "Built monthly cohort reports on repeat buyers for the loyalty team.",
+      "hold": 0.4,
+      "say": "Say where,|in your words."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Forgot a skill",
+      "you really have?"
+    ],
+    "scene": "add"
+  },
+  "captions": {
+    "ig_en": "Forgot to list a skill you really have? ✍️\n\n→ tap \"I have this\" next to it\n→ say where you used it, in your own words\n→ it's saved to your profile for every future resume\n\nTry it free → link in bio ✅\n💬 What skill do you have that's NOT on your resume? 👇",
+    "ig_hi": "Asli skill resume pe likhna bhool gaye? \"I have this\" dabao, apne shabdon mein batao kahan use kiya.\n\nFree try karo → link in bio",
+    "linkedin": "Most resumes undersell: real skills that never made it onto the page.\n\n• tap \"I have this\" next to it\n• say where you used it, in your own words\n• it's saved to your profile for every future resume\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Forgot to list a skill you really have?\n\nIn QuickFit CV, tap \"I have this\" and say where you used it, in your own words. Saved for every future resume.\n\nhttps://quickfitcv.com",
+    "comment": "What skill do you have that's NOT on your resume? 👇"
+  }
+}
