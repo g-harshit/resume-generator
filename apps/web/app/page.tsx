@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: { absolute: `${APP_NAME} — a resume for every job, in your own words` },
   description:
     "Create a job description based resume effortlessly with QuickFit CV. Tailor your resume for every job, ensuring ATS compatibility while using your own words.",
+  alternates: { canonical: "https://quickfitcv.com/" },
 };
 
 // Every claim on this page is something the product does today. The examples in
