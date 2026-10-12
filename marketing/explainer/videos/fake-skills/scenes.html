@@ -57,7 +57,7 @@
 
   <!-- hook: the AI-written resume claims a skill she doesn't have -->
   <section class="scene" id="hook">
-    <div class="copy" data-say="Your AI resume says|you know Looker."></div>
+    <div class="copy" data-say="Quick test: can you|explain every line?"></div>
     <div class="vis">
       <div class="card abs" style="left: 0; top: 70px; width: 860px; padding: 40px 44px; box-sizing: border-box">
         <div class="label">Priya Sharma · Data Analyst</div>
@@ -72,10 +72,10 @@
 
   <!-- interview: the question that exposes it -->
   <section class="scene" id="interview">
-    <div class="copy" data-say="Then the interviewer|asks about it."></div>
+    <div class="copy" data-say="Because interviewers|ask about it."></div>
     <div class="vis">
       <div class="card bubble q abs" style="left: 0; top: 60px; width: 740px; border-bottom-left-radius: 8px">
-        <div class="who">Interviewer</div>Walk me through a Looker model you built.
+        <div class="who">Interviewer</div>Walk me through that Looker model?
       </div>
       <div class="bubble a abs" style="left: 300px; top: 360px; width: 560px; background: var(--accent-soft); color: var(--accent-ink); border-bottom-right-radius: 8px">
         <div class="who" style="color: var(--accent)">You</div><span class="dots" style="font: 700 60px/1 var(--sans); letter-spacing: 6px">…</span><span class="uh" style="opacity: 0"> Uh…</span>
@@ -86,7 +86,7 @@
 
   <!-- other: QuickFit CV works the other way round -->
   <section class="scene" id="other">
-    <div class="copy" data-say="QuickFit CV works|the other way round."></div>
+    <div class="copy" data-say="QuickFit CV tailors|without inventing."></div>
     <div class="vis">
       <div class="card row1 abs" style="left: 0; top: 120px; width: 860px; padding: 34px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between">
         <div><div class="who">Other AI resume tools</div><div style="font: 600 40px var(--sans)">Add skills you don't have</div></div>
@@ -113,7 +113,7 @@
 
   <!-- ihave: a skill she really has, in her own words -->
   <section class="scene" id="ihave">
-    <div class="copy" data-say="Really have one?|Add it in your words."></div>
+    <div class="copy" data-say="Real ones?|In your own words."></div>
     <div class="vis">
       <div class="card abs" style="left: 0; top: 40px; width: 860px; padding: 36px 40px; box-sizing: border-box">
         <div style="display: flex; align-items: center; justify-content: space-between">
@@ -214,9 +214,12 @@ const has = (id) => id in starts;
 // hook: the AI badge, the invented skill glowing.
 if (has("hook")) {
   const at = starts.hook;
-  tl.set("#hook .ai", { opacity: 1 }, 0);
-  tl.fromTo("#hook .fake", { scale: 1 }, { scale: 1.15, duration: 0.25, yoyo: true, repeat: 3, ease: "power1.inOut" }, at + 0.9);
-  tl.fromTo("#hook .fk", { backgroundColor: "rgba(255,224,138,0.35)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.3, yoyo: true, repeat: 3 }, at + 0.9);
+  // A normal-looking resume until "If AI wrote it…": then the badge, and the skill it made up.
+  const reveal = at + Math.max(1.8, dur("hook") * 0.58);
+  tl.fromTo("#hook .ai", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, reveal);
+  tl.fromTo("#hook .fake", { backgroundColor: "#efede6", borderColor: "#efede6" }, { backgroundColor: "#fff4c2", borderColor: "#e0b400", duration: 0.25 }, reveal);
+  tl.fromTo("#hook .fk", { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.25 }, reveal);
+  tl.fromTo("#hook .fake", { scale: 1 }, { scale: 1.15, duration: 0.2, yoyo: true, repeat: 3, ease: "power1.inOut" }, reveal + 0.3);
 }
 // interview: the question, a long pause, rejected.
 if (has("interview")) {

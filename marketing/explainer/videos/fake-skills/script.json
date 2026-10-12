@@ -1,6 +1,6 @@
 {
   "voice": "nova",
-  "speed": 1.0,
+  "speed": 1.08,
   "instructions": {
     "en": "You are a charismatic, energetic social-media creator narrating a punchy product video to a friend. Be very expressive and human: disbelief, indignation, an exasperated sigh, relief and a satisfied smile where the words call for them. Vary pitch and pace a lot, lean on key words, take short dramatic pauses at the dots. Sound like a real person talking, never like an announcer or audiobook. Indian English accent.",
     "hi": "You are a charismatic, energetic Indian social-media creator narrating a punchy product video in natural Hinglish to a friend. Very expressive and human: disbelief, indignation, a sigh, relief and a smile where the words call for them. Vary pitch and pace, short dramatic pauses. Never sound like an announcer."
@@ -8,30 +8,30 @@
   "scenes": [
     {
       "id": "hook",
-      "en": "[incredulous] Your AI resume says you know Looker... Do you?",
-      "hi": "[incredulous] आपका AI रिज़्यूमे कहता है आपको Looker आता है... सच में?"
+      "en": "[curious] Quick test: could you explain every line on your resume? If AI wrote it, maybe not.",
+      "hi": "[curious] छोटा सा टेस्ट: क्या आप अपने रिज़्यूमे की हर लाइन समझा सकते हो? अगर AI ने लिखा है, तो शायद नहीं।"
     },
     {
       "id": "interview",
-      "en": "[nervous] Then the interviewer asks about it... [sighs] Awkward.",
-      "hi": "[nervous] फिर इंटरव्यूअर उसी के बारे में पूछता है... [sighs] गए काम से।"
+      "en": "[nervous] Because interviewers ask. Uh-oh.",
+      "hi": "[nervous] क्योंकि इंटरव्यूअर पूछते हैं। अरे बाप रे।"
     },
     {
       "id": "other",
-      "en": "[confident] QuickFit CV works the other way round.",
-      "hi": "[confident] QuickFit CV बिल्कुल उल्टा काम करता है।",
-      "hold": 0.4
+      "en": "[confident] QuickFit CV tailors your resume without inventing anything.",
+      "hi": "[confident] QuickFit CV आपका रिज़्यूमे टेलर करता है, बिना कुछ भी बनाए।",
+      "hold": 0
     },
     {
       "id": "gaps",
-      "en": "Skills you don't have? They stay missing. Never added.",
-      "hi": "जो स्किल आपके पास नहीं, वो मिसिंग ही रहती है। कभी ऐड नहीं होती।"
+      "en": "Missing skills? They stay missing.",
+      "hi": "जो स्किल्स मिसिंग हैं? वो मिसिंग ही रहती हैं।"
     },
     {
       "id": "ihave",
-      "en": "[warmly] Really have one? Add it, in your own words.",
-      "hi": "[warmly] सच में आती है? तो अपने शब्दों में ऐड करो।",
-      "hold": 1.3
+      "en": "[warmly] Real ones? Add them in your own words.",
+      "hi": "[warmly] जो सच में आती हैं? अपने शब्दों में ऐड करो।",
+      "hold": 0.7
     },
     {
       "id": "end",

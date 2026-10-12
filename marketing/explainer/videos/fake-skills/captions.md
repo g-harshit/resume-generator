@@ -6,7 +6,7 @@ Posters: `node marketing/explainer/poster.mjs fake-skills` → `output/poster-co
 ## Instagram Reel — English
 
 ```
-Your AI resume says you know Looker. Do you? 😬
+Quick test: could you explain every line on your resume? 😬
 
 A lot of AI resume tools "help" by adding skills you don't have. It looks great, right up until the interviewer asks about it.
 
@@ -24,7 +24,7 @@ Your resume, your facts ✅ Try it free → link in bio
 ## Instagram Reel — Hinglish
 
 ```
-Aapka AI resume kehta hai aapko Looker aata hai. Sach mein? 😬
+Chhota sa test: kya aap apne resume ki har line samjha sakte ho? 😬
 
 Kai AI resume tools "help" ke naam pe woh skills add kar dete hain jo aapke paas hai hi nahi. Sab badhiya lagta hai, jab tak interviewer usi ke baare mein na pooch le.
 
@@ -42,9 +42,9 @@ Aapka resume, aapke facts ✅ Free try karo → link in bio
 ## LinkedIn (16:9 video + this text)
 
 ```
-Your AI resume says you know Looker. Do you?
+Quick test: could you explain every line on your resume?
 
-A lot of AI resume tools will happily add skills, tools and numbers you don't have, because a fuller resume scores better against the job description. It works right up until the interviewer says: "Walk me through a Looker model you built."
+If AI wrote it, maybe not. A lot of AI resume tools will happily add skills, tools and numbers you don't have, because a fuller resume scores better against the job description. It works right up until the interviewer says: "Walk me through a Looker model you built."
 
 I built QuickFit CV to do the opposite:
 • It compares your resume with the job and shows exactly which skills are missing
@@ -64,11 +64,11 @@ Recruiters and hiring managers: how often do you catch padded resumes in intervi
 ## X (fits 280 with the link)
 
 ```
-Your AI resume says you know Looker. Do you?
+Quick test: could you explain every line on your resume?
 
-Most AI resume tools add skills you don't have. Then the interview happens.
+If AI wrote it, maybe not. Interviewers ask.
 
-QuickFit CV does the opposite: missing skills stay missing, and you add only what's true, in your own words.
+QuickFit CV tailors your resume without inventing anything. Missing skills stay missing.
 
 https://quickfitcv.com
 ```
