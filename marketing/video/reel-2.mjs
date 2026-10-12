@@ -12,7 +12,7 @@ const { p, wait, cap, card, tap, scrollToEl } = r;
 // Off camera: read the job, so the hook can quote its real numbers.
 await p.goto("http://localhost:3100/app/new/");
 await p.fill("#jd", fs.readFileSync(here + "jd.txt", "utf8"));
-await p.locator("button[type=submit]").dispatchEvent("click");
+await p.locator("button", { hasText: "Read the job" }).dispatchEvent("click");
 await p.waitForSelector("text=Choose a template", { timeout: 120000 });
 const [have, total] = (await p.getByText(/^\d+ of \d+$/).first().innerText()).split(" of ").map(Number);
 console.log("step: job", have, "of", total);

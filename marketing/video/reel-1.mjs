@@ -21,7 +21,7 @@ await tap(p.locator("#jd"));
 await p.locator("#jd").pressSequentially(jd.slice(0, 48), { delay: 18 });
 await p.fill("#jd", jd);
 await wait(500);
-const read = p.locator("button[type=submit]");
+const read = p.locator("button", { hasText: "Read the job" });
 await scrollToEl(read, 420, 500);
 await tap(read);
 await wait(900);

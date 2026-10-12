@@ -71,6 +71,7 @@ export async function startReel(name) {
 
   const cdp = await ctx.newCDPSession(p);
   const frames = []; // { file, t }: t in video seconds
+  const marks = []; // { t, kind, html }: when each caption or card appeared
   let recording = false, offset = 0, pausedAt = 0, lastPaused = null, n = 0;
   const now = () => performance.now() / 1000;
   const keep = (buf) => {
@@ -91,8 +92,10 @@ export async function startReel(name) {
     p,
     wait,
     scrollTo,
-    cap: (html) => p.evaluate((h) => window.__cap(h), html),
-    card: (html, dark = false) => p.evaluate(([h, d]) => window.__card(h, d), [html, dark]),
+    // Each caption and card is logged with its time in the video, so a voiceover can be
+    // laid over it afterwards (voiceover.mjs).
+    cap: (html) => { if (html) marks.push({ t: now() - offset, kind: "cap", html }); return p.evaluate((h) => window.__cap(h), html); },
+    card: (html, dark = false) => { if (html) marks.push({ t: now() - offset, kind: "card", html }); return p.evaluate(([h, d]) => window.__card(h, d), [html, dark]); },
     /** Scroll so the element's top sits `top` px below the viewport's top. */
     async scrollToEl(loc, top = 230, ms = 900) {
       const y = await loc.evaluate((el, top) => el.getBoundingClientRect().top + window.scrollY - top, top);
@@ -133,6 +136,8 @@ export async function startReel(name) {
       });
       list += `file '${FR}${frames.at(-1).file}'\n`;
       fs.writeFileSync(`${dir}${name}/frames.txt`, list);
+      const t0 = frames[0].t;
+      fs.writeFileSync(`${dir}${name}/marks.json`, JSON.stringify(marks.map((m) => ({ ...m, t: +(m.t - t0).toFixed(2) })), null, 2));
       console.log(`${name}: ${frames.length} frames, ${(end - frames[0].t).toFixed(1)} s`);
     },
   };
