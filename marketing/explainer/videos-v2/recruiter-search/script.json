@@ -1,0 +1,125 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "search",
+      "type": "atstext",
+      "en": "[curious] Here's how recruiters actually find you.",
+      "title": "Recruiter search · example",
+      "file": "ATS",
+      "lines": [
+        "search: \"retention analysis\" AND SQL",
+        "",
+        "3 candidates match",
+        "✓ Priya Sharma, Data Analyst"
+      ],
+      "say": "How recruiters|find you:"
+    },
+    {
+      "id": "words",
+      "type": "text",
+      "en": "They search the ATS by keyword. Use the job's words.",
+      "text": "They search **by keyword**.",
+      "sub": "So use the job's words, where they're true."
+    },
+    {
+      "type": "paste",
+      "en": "QuickFit CV shows which of the job's words your resume is missing.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "say": "Find the words|you're missing.",
+      "id": "x1"
+    },
+    {
+      "type": "rewrite",
+      "en": "Then use them where your work proves them.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        7,
+        11
+      ],
+      "say": "Use them where|they're true.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "How recruiters",
+      "actually find you."
+    ],
+    "scene": "search"
+  },
+  "captions": {
+    "ig_en": "How do recruiters actually find you in an ATS? 🔍\n\n→ they search it, by keyword, like a search engine\n→ if the job's words aren't in your resume, you don't come up\n→ QuickFit CV shows which ones you're missing\n\nTry it free → link in bio ✅\n💬 Recruiters: what do you search for first? 👇",
+    "ig_hi": "Recruiter ATS mein keyword se search karte hain. Job ke words resume pe nahi, toh aap dikhoge hi nahi.\n\nFree try karo → link in bio",
+    "linkedin": "A lot of the screening happens before anyone opens your resume: recruiters search the ATS for keywords from the job.\n\n• they search it, by keyword, like a search engine\n• if the job's words aren't in your resume, you don't come up\n• QuickFit CV shows which ones you're missing\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Recruiters find you by searching the ATS for keywords.\n\nIf the job's words aren't on your resume, you don't show up. QuickFit CV shows which you're missing.\n\nhttps://quickfitcv.com",
+    "comment": "Recruiters: what do you search for first? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

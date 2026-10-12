@@ -1,0 +1,86 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "tpl",
+      "type": "templates",
+      "en": "[confident] ATS-friendly doesn't have to mean ugly.",
+      "say": "ATS-friendly|≠ ugly."
+    },
+    {
+      "id": "rules",
+      "type": "checklist",
+      "en": "One column, real text, standard headings. Still looks good.",
+      "items": [
+        [
+          "One column",
+          "pass"
+        ],
+        [
+          "Real text",
+          "pass"
+        ],
+        [
+          "Standard headings",
+          "pass"
+        ]
+      ],
+      "say": "Simple rules,|good design."
+    },
+    {
+      "type": "atstext",
+      "en": "And an ATS reads it clean, top to bottom.",
+      "lines": [
+        "PRIYA SHARMA",
+        "Data Analyst · Bengaluru",
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "Jun 2022 – Present",
+        "SKILLS: SQL, Python, pandas, Tableau"
+      ],
+      "say": "And it reads|clean.",
+      "id": "x1"
+    },
+    {
+      "type": "text",
+      "en": "Switch templates any time. Your words stay the same.",
+      "text": "Switch templates **any time**.",
+      "sub": "Your words don't change.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "ATS-friendly",
+      "doesn't mean ugly."
+    ],
+    "scene": "tpl"
+  },
+  "captions": {
+    "ig_en": "ATS-friendly doesn't have to mean ugly ✨\n\n→ one column, real text, standard headings\n→ four templates: Classic, Modern, Compact, Executive\n→ all of them tested the way an ATS reads\n\nTry it free → link in bio ✅\n💬 Which template style do you prefer? 👇",
+    "ig_hi": "ATS-friendly ka matlab boring nahi. One column, real text, standard headings, phir bhi sundar.\n\nFree try karo → link in bio",
+    "linkedin": "There's a myth that an ATS-safe resume has to look like a plain text file.\n\n• one column, real text, standard headings\n• four templates: Classic, Modern, Compact, Executive\n• all of them tested the way an ATS reads\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "ATS-friendly doesn't have to mean ugly: one column, real text, standard headings, and still well designed. Four templates in QuickFit CV.\n\nhttps://quickfitcv.com",
+    "comment": "Which template style do you prefer? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

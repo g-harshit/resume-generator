@@ -1,0 +1,91 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "score",
+      "type": "stat",
+      "en": "[incredulous] Your resume got an ATS score of sixty-two out of a hundred?",
+      "n": 62,
+      "suffix": "/100",
+      "label": "\"ATS score\"",
+      "color": "var(--warn)",
+      "say": "Your ATS score|is 62/100?"
+    },
+    {
+      "id": "real",
+      "type": "text",
+      "en": "Real ATSs don't score you. They read your file into text, and recruiters search it.",
+      "text": "Real ATSs **don't score you**.",
+      "sub": "They read your file into text. Recruiters search that."
+    },
+    {
+      "id": "reads",
+      "type": "atstext",
+      "en": "So check the text it actually reads.",
+      "lines": [
+        "PRIYA SHARMA",
+        "priya.sharma@example.com",
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "Jun 2022 – Present"
+      ],
+      "say": "Check what|it reads."
+    },
+    {
+      "type": "checklist",
+      "en": "Free, no sign-up, five checks a day.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "Text an ATS can read",
+          "pass"
+        ],
+        [
+          "One column",
+          "pass"
+        ],
+        [
+          "Email and phone found",
+          "pass"
+        ]
+      ],
+      "say": "Free.|No sign-up.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Your ATS score",
+      "is 62/100?",
+      "Real ATSs don't score you."
+    ],
+    "scene": "score"
+  },
+  "captions": {
+    "ig_en": "Your resume got an \"ATS score\" of 62/100? 🤔\n\n→ real ATSs (Workday, Greenhouse, Lever, Naukri's RMS) don't score you\n→ they read your file into text, and recruiters search that text\n→ our free checker shows that exact text, with no made-up score\n\nTry it free → link in bio ✅\n💬 Ever paid for an ATS score? 👇",
+    "ig_hi": "Resume ka \"ATS score\" 62/100? Asli ATS score nahi deta, file ko text mein padhta hai, aur recruiter woh text search karta hai.\n\nFree try karo → link in bio",
+    "linkedin": "Most \"ATS checkers\" give your resume a score out of 100. It's a useful-looking number, but it isn't how applicant tracking systems work.\n\n• real ATSs (Workday, Greenhouse, Lever, Naukri's RMS) don't score you\n• they read your file into text, and recruiters search that text\n• our free checker shows that exact text, with no made-up score\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Your resume's \"ATS score\" is 62/100?\n\nReal ATSs don't score you. They read your file into text, and recruiters search it. Our free checker shows that text.\n\nhttps://quickfitcv.com",
+    "comment": "Ever paid for an ATS score? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

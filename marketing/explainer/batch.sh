@@ -4,7 +4,13 @@
 # Usage: batch.sh [render] [slug …]
 cd "$(dirname "$0")/../.."
 MODE=prep; [ "$1" = render ] && { MODE=render; shift; }
-SLUGS=${*:-$(for d in marketing/explainer/videos/*/; do [ -f "$d/scenes.html" ] || basename "$d"; done)}
+V=${VIDEOS:-videos}
+kit_videos() {
+  for d in marketing/explainer/$V/*/; do
+    if [ -f "$d/script.json" ] && [ ! -f "$d/scenes.html" ]; then basename "$d"; fi
+  done
+}
+SLUGS=${*:-$(kit_videos)}
 one() {
   s=$1
   if [ $MODE = prep ]; then

@@ -1,0 +1,76 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "three",
+      "type": "pages",
+      "en": "[curious] One page or two? Your call. One click.",
+      "fromLabel": "3 pages",
+      "toLabel": "2 pages ✓",
+      "button": "Fit to 2 pages",
+      "say": "One page or two?|Your call."
+    },
+    {
+      "id": "how",
+      "type": "checklist",
+      "en": "Spacing first, then lines merged from your own words.",
+      "items": [
+        [
+          "Tightens spacing first",
+          "pass"
+        ],
+        [
+          "Merges lines from your words",
+          "pass"
+        ],
+        [
+          "Undo any time",
+          "pass"
+        ]
+      ],
+      "say": "Spacing first.|Your words only."
+    },
+    {
+      "type": "text",
+      "en": "The one-page rule isn't universal. With lots of experience, two is fine.",
+      "text": "One-page rule? **Not always.**",
+      "sub": "Lots of experience? Two is fine.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "One page or two?",
+      "Your call.",
+      "One click."
+    ],
+    "scene": "three"
+  },
+  "captions": {
+    "ig_en": "One page or two? Your call, one click 📏\n\n→ pick 1 or 2 pages\n→ it tightens spacing first, then merges lines from your own words\n→ nothing new is added\n\nTry it free → link in bio ✅\n💬 Senior folks: one page or two? 👇",
+    "ig_hi": "Ek page ya do? Aapki marzi, ek click. Pehle spacing, phir aapke hi shabdon se lines merge.\n\nFree try karo → link in bio",
+    "linkedin": "The one-page rule isn't universal: experienced candidates often need two.\n\n• pick 1 or 2 pages\n• it tightens spacing first, then merges lines from your own words\n• nothing new is added\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "One page or two? Your call.\n\nQuickFit CV fits your resume to 1 or 2 pages: spacing first, then merges lines from your own words.\n\nhttps://quickfitcv.com",
+    "comment": "Senior folks: one page or two? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

@@ -1,0 +1,86 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "read",
+      "type": "atstext",
+      "en": "[warmly] We read your resume. You check it once.",
+      "title": "What we read from your file",
+      "lines": [
+        "Data Analyst · Brightcart Retail",
+        "Jun 2022 – Present",
+        "4 lines · 10 skills"
+      ],
+      "say": "We read it.|You check it once."
+    },
+    {
+      "id": "trust",
+      "type": "text",
+      "en": "Nothing is built from it until you've confirmed it.",
+      "text": "Nothing built until **you confirm**.",
+      "sub": "Parsing is never perfect. You're the check."
+    },
+    {
+      "type": "checklist",
+      "en": "Check your roles, lines and skills once.",
+      "title": "Check once",
+      "items": [
+        [
+          "Roles and dates",
+          "pass"
+        ],
+        [
+          "Every line",
+          "pass"
+        ],
+        [
+          "Skills",
+          "pass"
+        ]
+      ],
+      "say": "Roles, lines,|skills.",
+      "id": "x1"
+    },
+    {
+      "type": "text",
+      "en": "Every resume after that is built only from what you confirmed.",
+      "text": "Every resume after **builds on it**.",
+      "sub": "Only from what you confirmed.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "We read it.",
+      "You check it once."
+    ],
+    "scene": "trust"
+  },
+  "captions": {
+    "ig_en": "We read your resume into a profile, and you check it once 🧐\n\n→ parsing is never perfect\n→ nothing is built from your profile until you've confirmed it\n→ fix anything we misread\n\nTry it free → link in bio ✅\n💬 Has a site ever mangled your resume on upload? 👇",
+    "ig_hi": "Hum resume padhte hain, aap ek baar check karte ho. Confirm kiye bina kuch nahi banta.\n\nFree try karo → link in bio",
+    "linkedin": "No resume parser is perfect, so QuickFit CV doesn't pretend to be.\n\n• parsing is never perfect\n• nothing is built from your profile until you've confirmed it\n• fix anything we misread\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "QuickFit CV reads your resume into a profile, and nothing is built from it until you've checked it once. Parsing is never perfect.\n\nhttps://quickfitcv.com",
+    "comment": "Has a site ever mangled your resume on upload? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

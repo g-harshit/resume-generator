@@ -1,0 +1,84 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "mixed",
+      "type": "atstext",
+      "say": "Two columns?|What the ATS reads:",
+      "file": "resume_two_column.pdf",
+      "lines": [
+        "PRIYA SHARMA          SKILLS",
+        "Data Analyst at       SQL, Python,",
+        "Brightcart Retail     Tableau, Excel",
+        "Built weekly sales    EDUCATION",
+        "dashboards in         B.Tech, VIT",
+        "Tableau used by 40    LANGUAGES"
+      ],
+      "en": "[curious] Love your two-column resume? Here's what an ATS might read from it."
+    },
+    {
+      "id": "why",
+      "type": "text",
+      "text": "Read **straight across**.",
+      "sub": "Lines from both columns, mixed together.",
+      "en": "[frustrated] Lines from both columns, read straight across. Mixed up."
+    },
+    {
+      "id": "tpl",
+      "type": "templates",
+      "say": "One column.|Always.",
+      "en": "Every QuickFit CV template is one column, real text, standard headings."
+    },
+    {
+      "id": "clean",
+      "type": "atstext",
+      "say": "Read clean,|top to bottom.",
+      "title": "What an ATS reads",
+      "file": "priya-sharma.pdf",
+      "lines": [
+        "PRIYA SHARMA",
+        "Data Analyst · Bengaluru",
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "Jun 2022 – Present",
+        "SKILLS: SQL, Python, pandas, Tableau"
+      ],
+      "en": "So it reads clean, top to bottom."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Designed for people,",
+      "line2": "readable by every ATS.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Two-column resume?",
+      "The ATS reads it",
+      "straight across."
+    ],
+    "scene": "mixed"
+  },
+  "captions": {
+    "ig_en": "That two-column resume template looks great. To an ATS, it can look like this 👀\n\nMany ATSs read the page straight across, so lines from both columns get mixed together.\n\nEvery QuickFit CV template is:\n→ one column\n→ real, selectable text\n→ standard headings\n\nDesigned for people, readable by every ATS ✅\nTry it free → link in bio\n💬 Using a two-column template right now? 👇",
+    "ig_hi": "Two-column template sundar dikhta hai. Par ATS ko aisa dikh sakta hai 👀\n\nKai ATS page ko seedha left se right padhte hain, dono columns ki lines mix ho jaati hain.\n\nQuickFit CV ke har template mein: one column, real text, standard headings. Free try karo → link in bio",
+    "linkedin": "Two-column resume templates are popular because they look great. The catch: many applicant tracking systems read a page straight across, line by line, so text from both columns gets interleaved into something like \"Data Analyst at SQL, Python\".\n\nThat's why every QuickFit CV template is one column, real selectable text and standard headings. You can check any resume with our free ATS checker, which shows the text an ATS actually gets.\n\nhttps://quickfitcv.com\n\n#resume #ats #jobsearch #recruiting",
+    "x": "Two-column resume?\n\nMany ATSs read straight across the page, so both columns get mixed: \"Data Analyst at SQL, Python\".\n\nEvery QuickFit CV template is one column, real text, standard headings.\n\nhttps://quickfitcv.com",
+    "comment": "Want me to check if your template is ATS-friendly? Comment \"CHECK\" 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

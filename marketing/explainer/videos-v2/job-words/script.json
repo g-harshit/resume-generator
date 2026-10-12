@@ -1,0 +1,127 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "same",
+      "type": "rewrite",
+      "say": "Same work.|Different words.",
+      "label": "Brightcart Retail · line 2",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        6,
+        11
+      ],
+      "en": "[curious] The job says retention analysis. Your resume says repeat purchases dropped. Same work, different words."
+    },
+    {
+      "id": "search",
+      "type": "text",
+      "text": "Recruiters search the ATS **by keyword**.",
+      "sub": "If the word isn't there, neither are you.",
+      "en": "And recruiters search the ATS by keyword."
+    },
+    {
+      "id": "paste",
+      "type": "paste",
+      "say": "See the words|you're missing.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "en": "QuickFit CV shows which of the job's words you're missing,"
+    },
+    {
+      "id": "again",
+      "type": "rewrite",
+      "say": "Then use them|where they're true.",
+      "label": "Brightcart Retail · line 1",
+      "before": "Built weekly sales dashboards in Tableau used by 40 store managers across 3 regions.",
+      "after": "Built weekly sales **reporting** dashboards in Tableau for 40 store managers across 3 regions.",
+      "ring": [
+        6,
+        7,
+        11
+      ],
+      "en": "then puts them in the lines that already prove them."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Your work,",
+      "line2": "in the job's words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Same work.",
+      "Different words.",
+      "That's why the ATS missed you."
+    ],
+    "scene": "same"
+  },
+  "captions": {
+    "ig_en": "The job says \"retention analysis\". Your resume says \"found why repeat purchases dropped\". Same work, different words 🤦\n\nRecruiters search the ATS by keyword. If the word isn't on your resume, you don't show up.\n\nQuickFit CV:\n→ shows which of the job's words you're missing\n→ puts them in the lines that already prove them\n→ never adds what you didn't do\n\nTry it free → link in bio\n💬 What's a skill you have but describe differently? 👇",
+    "ig_hi": "Job kehti hai \"retention analysis\". Aapka resume kehta hai \"repeat purchases kyun gire\". Kaam same, shabd alag 🤦\n\nRecruiters ATS mein keyword se search karte hain.\n\nQuickFit CV missing words dikhata hai, aur unhi lines mein daalta hai jo pehle se sach hain. Free try karo → link in bio",
+    "linkedin": "A lot of good candidates don't get found for a simple reason: they describe their work in their own words, and the job description uses different ones.\n\n\"Found why repeat purchases dropped\" is retention analysis. But if a recruiter searches the ATS for \"retention analysis\", that resume doesn't come up.\n\nQuickFit CV compares your resume with the job, shows which of its keywords are missing, and puts them into the lines that already prove them. It doesn't add keywords for work you haven't done.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #ats #resume #recruiting",
+    "x": "\"Found why repeat purchases dropped\" is retention analysis.\n\nBut recruiters search the ATS for the job's words, not yours.\n\nQuickFit CV puts the job's words into the lines that already prove them. Nothing invented.\n\nhttps://quickfitcv.com",
+    "comment": "Drop a line from your resume and the job title. I'll tell you which keyword it's probably missing 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

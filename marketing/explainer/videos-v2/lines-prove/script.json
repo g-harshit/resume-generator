@@ -1,0 +1,88 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "says",
+      "type": "resume",
+      "say": "Says Django.|Job wants Python.",
+      "who": "Your resume · Backend Developer",
+      "lines": [
+        "Built REST APIs in **Django** for 3 internal tools."
+      ],
+      "skills": [
+        [
+          "Django",
+          ""
+        ],
+        [
+          "PostgreSQL",
+          ""
+        ],
+        [
+          "Docker",
+          ""
+        ]
+      ],
+      "en": "[curious] Your resume says Django. The job wants Python."
+    },
+    {
+      "id": "is",
+      "type": "text",
+      "text": "Django **is** Python.",
+      "sub": "Your line already proves it.",
+      "en": "But Django is Python. Your line already proves it."
+    },
+    {
+      "id": "named",
+      "type": "rewrite",
+      "say": "Name the skills|your lines prove.",
+      "label": "Experience · line 1",
+      "before": "Built REST APIs in Django for 3 internal tools.",
+      "after": "Built REST APIs in **Python** (Django) for 3 internal tools.",
+      "done": "✓ Named a skill this line proves",
+      "en": "QuickFit CV names skills your lines prove, only where your words back it up."
+    },
+    {
+      "type": "text",
+      "en": "Same with ECS and AWS, or pandas and Python.",
+      "text": "ECS **is** AWS.",
+      "sub": "pandas is Python. Name what you proved.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Skills you have,",
+      "line2": "named the job's way.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Your line says Django.",
+      "The job wants Python.",
+      "Same thing."
+    ],
+    "scene": "named"
+  },
+  "captions": {
+    "ig_en": "Your resume says Django. The job says Python. The ATS doesn't know they're the same thing 🤷\n\nQuickFit CV's \"Name skills my lines prove\":\n→ finds skills your lines already show (Django → Python, ECS → AWS)\n→ names them in those lines\n→ only where your own words back it up\n\nTry it free → link in bio\n💬 What tool on your resume implies a skill you never listed? 👇",
+    "ig_hi": "Resume mein Django likha hai, job Python maangti hai. ATS ko nahi pata dono same hain 🤷\n\nQuickFit CV woh skills naam deta hai jo aapki lines pehle se prove karti hain, sirf jahan aapke shabd saath dein. Free try karo → link in bio",
+    "linkedin": "A small thing that costs people interviews: their resume proves a skill without ever naming it.\n\n\"Built REST APIs in Django\" is Python experience. \"Deployed services on ECS\" is AWS. A recruiter searching the ATS for \"Python\" may never see that line.\n\nQuickFit CV has a button for exactly this: it names the skills your lines already prove, in those lines, and only where your own words back it up.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #softwareengineering #ats",
+    "x": "\"Built REST APIs in Django\" is Python experience.\n\nBut a recruiter searching for \"Python\" might never see it.\n\nQuickFit CV names the skills your lines already prove, only where your words back it up.\n\nhttps://quickfitcv.com",
+    "comment": "Share a line from your resume; I'll tell you which skills it already proves 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

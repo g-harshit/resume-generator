@@ -1,0 +1,74 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "old",
+      "type": "text",
+      "en": "[sighs] Six bullets for a job from four years ago?",
+      "text": "**6 bullets** for an old job?",
+      "sub": "Give the space to what matters now."
+    },
+    {
+      "id": "fix",
+      "type": "checklist",
+      "en": "Lines per role: merge them down, from your own words.",
+      "title": "Lines per role",
+      "items": [
+        [
+          "Meridian Insights: 6 → 3",
+          "pass"
+        ],
+        [
+          "Merged from your own words",
+          "pass"
+        ],
+        [
+          "Add them back any time",
+          "pass"
+        ]
+      ],
+      "say": "Fewer lines,|your words."
+    },
+    {
+      "type": "text",
+      "en": "Your recent work gets the space. Older roles stay, just shorter.",
+      "text": "Recent work **gets the space**.",
+      "sub": "Older roles stay, just shorter.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "6 bullets for",
+      "an old job?"
+    ],
+    "scene": "fix"
+  },
+  "captions": {
+    "ig_en": "6 bullet points for a job from 4 years ago? 🗂️\n\n→ give the space to what matters for this job\n→ Lines per role merges old roles down, from your own words\n→ more brings your own lines back\n\nTry it free → link in bio ✅\n💬 How far back does your resume go? 👇",
+    "ig_hi": "4 saal purani job ke 6 bullets? Lines per role se kam karo, aapke hi shabdon se.\n\nFree try karo → link in bio",
+    "linkedin": "Older roles often keep all their bullets out of habit, while the relevant recent work gets squeezed.\n\n• give the space to what matters for this job\n• Lines per role merges old roles down, from your own words\n• more brings your own lines back\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "6 bullets for a job from 4 years ago?\n\nQuickFit CV's Lines per role merges them down from your own words, and brings them back any time.\n\nhttps://quickfitcv.com",
+    "comment": "How far back does your resume go? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

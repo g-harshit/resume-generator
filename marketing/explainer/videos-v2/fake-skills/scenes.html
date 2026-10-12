@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>QuickFit CV: fake skills</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  :root {
+    --ground: #f7f6f2; --surface: #fff; --sunken: #efede6; --line: #dedad0; --ink: #17181c; --muted: #8a8d93;
+    --accent: #2f5d50; --accent-soft: #e3ede8; --accent-ink: #1f463c; --warn: #c66a1e; --warn-soft: #fbebdd; --warn-ink: #7a3e0e;
+    --red: #d62828;
+    --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace; --serif: "Instrument Serif", Georgia, serif;
+  }
+  html, body { margin: 0; background: #222; }
+  #stage { position: relative; overflow: hidden; background: var(--ground); font-family: var(--sans); color: var(--ink); }
+  #stage.h { width: 1920px; height: 1080px; }
+  #stage.v { width: 1080px; height: 1920px; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+
+  /* Copy: line one in ink, line two in grey, word by word. */
+  .copy { position: absolute; font-weight: 500; letter-spacing: -1.5px; }
+  .h .copy { left: 120px; width: 780px; top: 50%; transform: translateY(-50%); font-size: 80px; line-height: 1.08; }
+  .v .copy { left: 84px; right: 84px; top: 250px; font-size: 86px; line-height: 1.08; }
+  .copy .l2 { color: var(--muted); display: block; }
+  .copy .w { display: inline-block; opacity: 0; }
+
+  /* Visuals live in an 860px box, scaled per layout. */
+  .vis { position: absolute; width: 860px; height: 860px; }
+  .h .vis { left: 960px; top: 250px; }
+  .v .vis { left: 110px; top: 720px; transform-origin: 50% 0; scale: 1.12; }
+  .abs { position: absolute; }
+
+  .card { background: var(--surface); border-radius: 22px; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 24px 60px rgba(23,24,28,.12); }
+  .label { font: 600 20px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .bar { height: 12px; border-radius: 6px; background: #e4e1d8; margin: 12px 0; }
+  .bar.dark { background: var(--ink); height: 18px; width: 55%; margin-bottom: 20px; }
+
+  /* resume thumbnails */
+  .doc { width: 230px; height: 300px; padding: 26px 24px; box-sizing: border-box; }
+  .doc .tag { position: absolute; left: 18px; right: 18px; bottom: 16px; font: 500 15px var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 12px 22px; font: 600 26px/1 var(--sans); margin: 7px; background: var(--sunken); color: var(--ink); border: 3px solid var(--sunken); }
+  .chip .tick { display: inline-block; width: 0; opacity: 0; overflow: hidden; }
+
+  .stamp { font: 700 64px/1 var(--mono); letter-spacing: 6px; color: var(--ink); border: 7px solid var(--ink); border-radius: 14px; padding: 14px 26px; background: rgba(255,255,255,.85); white-space: nowrap; }
+  .big { font: 600 210px/1 var(--mono); letter-spacing: -6px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; border-radius: 14px; font: 600 28px var(--sans); height: 72px; padding: 0 34px; }
+  .tap { position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; background: rgba(47,93,80,.3); border: 4px solid var(--accent); opacity: 0; }
+  .bubble { border-radius: 30px; padding: 30px 36px; box-sizing: border-box; font: 400 36px/1.35 var(--sans); }
+  .who { font: 600 20px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  mark { background: #ffe08a; color: inherit; border-radius: 6px; padding: 0 4px; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- hook: the AI-written resume claims a skill she doesn't have -->
+  <section class="scene" id="hook">
+    <div class="copy" data-say="Quick test: can you|explain every line?"></div>
+    <div class="vis">
+      <div class="card abs" style="left: 0; top: 70px; width: 860px; padding: 40px 44px; box-sizing: border-box">
+        <div class="label">Priya Sharma · Data Analyst</div>
+        <div style="font: 600 30px var(--sans); margin-top: 26px">Skills</div>
+        <div style="margin: 10px -7px 0"><span class="chip">SQL</span><span class="chip">Python</span><span class="chip">Tableau</span><span class="chip">A/B testing</span><span class="chip fake" style="background: #fff4c2; border-color: #e0b400">Looker</span></div>
+        <div style="font: 600 30px var(--sans); margin-top: 26px">Experience</div>
+        <div style="font: 400 32px/1.45 var(--sans); margin-top: 10px">Built sales dashboards in <mark class="fk">Looker</mark> and Tableau for 40 store managers.</div>
+        <div class="ai abs" style="right: 30px; top: 28px; background: var(--ink); color: #fff; border-radius: 999px; padding: 12px 20px; font: 600 24px var(--sans)">✨ Added by AI</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- interview: the question that exposes it -->
+  <section class="scene" id="interview">
+    <div class="copy" data-say="Because interviewers|ask about it."></div>
+    <div class="vis">
+      <div class="card bubble q abs" style="left: 0; top: 60px; width: 740px; border-bottom-left-radius: 8px">
+        <div class="who">Interviewer</div>Walk me through that Looker model?
+      </div>
+      <div class="bubble a abs" style="left: 300px; top: 360px; width: 560px; background: var(--accent-soft); color: var(--accent-ink); border-bottom-right-radius: 8px">
+        <div class="who" style="color: var(--accent)">You</div><span class="dots" style="font: 700 60px/1 var(--sans); letter-spacing: 6px">…</span><span class="uh" style="opacity: 0"> Uh…</span>
+      </div>
+      <div class="stamp abs" style="left: 220px; top: 610px; color: var(--red); border-color: var(--red)">REJECTED</div>
+    </div>
+  </section>
+
+  <!-- other: QuickFit CV works the other way round -->
+  <section class="scene" id="other">
+    <div class="copy" data-say="QuickFit CV tailors|without inventing."></div>
+    <div class="vis">
+      <div class="card row1 abs" style="left: 0; top: 120px; width: 860px; padding: 34px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between">
+        <div><div class="who">Other AI resume tools</div><div style="font: 600 40px var(--sans)">Add skills you don't have</div></div>
+        <div class="x" style="font: 700 70px var(--sans); color: var(--red)">✕</div>
+      </div>
+      <div class="card row2 abs" style="left: 0; top: 380px; width: 860px; padding: 34px 40px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; outline: 4px solid var(--accent)">
+        <div><div class="who" style="color: var(--accent); display: flex; align-items: center; gap: 10px"><svg class="logo" width="30" height="30" viewBox="0 0 64 64"></svg>QuickFit CV</div><div style="font: 600 40px var(--sans)">Only your facts. Always.</div></div>
+        <div class="ok" style="font: 700 70px var(--sans); color: var(--accent)">✓</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- gaps: what she doesn't have stays missing -->
+  <section class="scene" id="gaps">
+    <div class="copy" data-say="Missing skills|stay missing."></div>
+    <div class="vis">
+      <div class="card abs" style="left: 0; top: 60px; width: 860px; padding: 36px 40px; box-sizing: border-box; background: #fdf3ea">
+        <div style="font: 600 32px var(--sans); color: var(--warn-ink)">Not in this resume yet</div>
+        <div class="rows" style="margin-top: 14px"></div>
+      </div>
+      <div class="note abs" style="left: 0; right: 0; top: 560px; text-align: center; font: 600 34px var(--sans); color: var(--warn-ink)">We never add them for you.</div>
+    </div>
+  </section>
+
+  <!-- ihave: a skill she really has, in her own words -->
+  <section class="scene" id="ihave">
+    <div class="copy" data-say="Real ones?|In your own words."></div>
+    <div class="vis">
+      <div class="card abs" style="left: 0; top: 40px; width: 860px; padding: 36px 40px; box-sizing: border-box">
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <span style="font: 600 36px var(--sans)">cohort analysis</span>
+          <span class="have" style="border: 3px solid var(--warn); color: var(--warn-ink); border-radius: 12px; padding: 10px 18px; font: 600 26px var(--sans)">I have this</span>
+        </div>
+        <div class="form" style="margin-top: 26px; opacity: 0">
+          <div style="font: 400 26px var(--sans); color: var(--muted)">Where did you use it?</div>
+          <div style="margin-top: 10px; border: 2px solid var(--line); border-radius: 12px; padding: 14px 18px; font: 500 28px var(--sans)">Data Analyst at Brightcart Retail ▾</div>
+          <div style="font: 400 26px var(--sans); color: var(--muted); margin-top: 18px">In your own words, what did you do?</div>
+          <div class="said" style="margin-top: 10px; border: 2px solid var(--accent); border-radius: 12px; padding: 14px 18px; font: 400 30px/1.4 var(--sans); min-height: 90px">Built monthly cohort reports on repeat buyers for the loyalty team.</div>
+        </div>
+      </div>
+      <div class="added abs" style="left: 0; right: 0; top: 650px; display: flex; justify-content: center; opacity: 0"><span class="chip" style="background: #e3ede8; border-color: #e3ede8; color: #1f463c; font-size: 32px; padding: 16px 28px">✓ cohort analysis · added in your words</span></div>
+      <div class="tap"></div>
+    </div>
+  </section>
+
+  <!-- 10. end -->
+  <section class="scene" id="end">
+    <div class="abs endbox" style="inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 34px">
+      <div class="brand" style="display: flex; align-items: center; gap: 26px"><svg class="logo" width="130" height="130" viewBox="0 0 64 64"></svg><span style="font: 150px/1 var(--serif); letter-spacing: -2px">QuickFit CV</span></div>
+      <div class="tag" style="font: 500 56px/1.2 var(--sans); letter-spacing: -1px"><span>Every skill real.</span><br><span style="color: var(--muted)">Every line yours.</span></div>
+      <div class="url btn" style="height: 86px; font-size: 36px; padding: 0 44px; border-radius: 999px">quickfitcv.com</div>
+    </div>
+  </section>
+</div>
+</div>
+
+<script>
+const params = new URLSearchParams(location.search);
+const stage = document.getElementById("stage");
+stage.className = params.get("f") === "h" ? "h" : "v";
+const V = stage.className === "v";
+// The resume's own facts, matching the demo profile used in the Reels.
+const SKILLS = [["SQL", 1], ["Python", 1], ["Tableau", 1], ["Looker", 0], ["statistics", 1], ["A/B testing", 1], ["dbt", 0], ["BigQuery", 0], ["cohort analysis", 0], ["retention analysis", 0], ["CLV", 0]];
+const LOGO = '<path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#2f5d50"/><path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/><path d="M21 24H37M21 31H43" stroke="#f7f6f2" stroke-width="3.2" stroke-linecap="round" fill="none"/><path d="M22 43L28.5 49.5L42 36" stroke="#f7f6f2" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+document.querySelectorAll("svg.logo").forEach((s) => (s.innerHTML = LOGO));
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+
+// Copy, split into words: "line one|line two".
+$$(".copy").forEach((el) => {
+  el.innerHTML = el.dataset.say.split("|").map((line, i) =>
+    `<span class="${i ? "l2" : "l1"}">${line.split(" ").map((w) => `<span class="w">${w}</span>`).join(" ")}</span>`).join("");
+});
+
+
+// Builders.
+$("#gaps .rows").innerHTML = [["Looker", "must have"], ["dbt", "nice to have"], ["BigQuery", "nice to have"]].map(([k, why]) =>
+  `<div class="row" style="display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-top:2px solid #f3dcc6"><span style="font:600 38px var(--sans);color:var(--warn-ink)">${k} <span style="font-weight:400;font-size:28px">· ${why}</span></span><span style="border:3px dashed var(--warn);color:var(--warn-ink);border-radius:999px;padding:10px 22px;font:600 26px var(--sans)">missing</span></div>`).join("");
+// Typed text: one span per character, so typing can be seeked backwards too.
+$$(".said").forEach((el) => (el.innerHTML = [...el.textContent].map((c) => `<span class="c" style="opacity:0">${c}</span>`).join("")));
+document.querySelectorAll("svg.logo").forEach((s) => (s.innerHTML = LOGO));
+
+// ---------------------------------------------------------------------------------------
+const DEFAULT = ["hook", "interview", "other", "gaps", "ihave", "end"].map((id) => ({ id, voice: 2.6 }));
+const TIMING = window.__TIMING || DEFAULT;
+const AIR = 0.3, HOLD = 2.4;
+const ids = TIMING.map((x) => x.id);
+const tl = gsap.timeline({ paused: true });
+const starts = {};
+let t = 0;
+// "hold" (script.json): extra seconds on screen after the voice, for something to read.
+TIMING.forEach((x) => { starts[x.id] = t; t += x.voice + AIR + (x.hold || 0) + (x.id === "end" ? HOLD : 0); });
+const END = t;
+const voice = (id) => TIMING.find((x) => x.id === id).voice;
+const dur = (id) => voice(id) + AIR + (TIMING.find((x) => x.id === id).hold || 0);
+const counter = (el, from, to, at, d, fmt = (v) => Math.round(v)) => {
+  const o = { v: from };
+  tl.to(o, { v: to, duration: d, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v)) }, at);
+};
+const stampIn = (el, at) => {
+  tl.fromTo(el, { opacity: 0, scale: 2.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.25, ease: "power4.in" }, at);
+};
+
+ids.forEach((id, i) => {
+  const s = $("#" + id), at = starts[id], d = dur(id);
+  // The first scene is on screen from frame 0: that frame is the thumbnail, and the
+  // first second decides whether anyone stays.
+  if (i === 0) tl.set(s, { opacity: 1 }, 0);
+  else tl.fromTo(s, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, at - 0.1);
+  if (id !== "end") tl.to(s, { opacity: 0, duration: 0.2, ease: "power1.in" }, at + d - 0.1);
+  const words = $$(".w", s);
+  if (words.length) {
+    if (i === 0) tl.set($$(".l1 .w", s), { opacity: 1 }, 0);
+    const later = i === 0 ? $$(".l2 .w", s) : words;
+    const span = Math.max(0.3, voice(id) * 0.55);
+    tl.fromTo(later, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", stagger: span / later.length }, at + (i === 0 ? 0.9 : 0.05));
+  }
+  const vis = $(".vis", s);
+  if (vis && i) tl.fromTo(vis, { y: 30 }, { y: 0, duration: 0.6, ease: "power3.out" }, at - 0.1);
+});
+
+
+const has = (id) => id in starts;
+
+// hook: the AI badge, the invented skill glowing.
+if (has("hook")) {
+  const at = starts.hook;
+  // A normal-looking resume until "If AI wrote it…": then the badge, and the skill it made up.
+  const reveal = at + Math.max(1.8, dur("hook") * 0.58);
+  tl.fromTo("#hook .ai", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, reveal);
+  tl.fromTo("#hook .fake", { backgroundColor: "#efede6", borderColor: "#efede6" }, { backgroundColor: "#fff4c2", borderColor: "#e0b400", duration: 0.25 }, reveal);
+  tl.fromTo("#hook .fk", { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.25 }, reveal);
+  tl.fromTo("#hook .fake", { scale: 1 }, { scale: 1.15, duration: 0.2, yoyo: true, repeat: 3, ease: "power1.inOut" }, reveal + 0.3);
+}
+// interview: the question, a long pause, rejected.
+if (has("interview")) {
+  const at = starts.interview, d = dur("interview");
+  tl.fromTo("#interview .q", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, at);
+  tl.fromTo("#interview .a", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, at + 0.8);
+  tl.fromTo("#interview .dots", { opacity: 0.2 }, { opacity: 1, duration: 0.3, yoyo: true, repeat: 3 }, at + 0.9);
+  tl.to("#interview .uh", { opacity: 1, duration: 0.2 }, at + 1.9);
+  tl.fromTo("#interview .stamp", { opacity: 0, scale: 2.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.25, ease: "power4.in" }, at + Math.max(2.2, d - 1.0));
+}
+// other: other tools ✕, QuickFit CV ✓.
+if (has("other")) {
+  const at = starts.other;
+  tl.fromTo("#other .row1", { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.35 }, at);
+  tl.fromTo("#other .x", { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, at + 0.4);
+  tl.fromTo("#other .row2", { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35 }, at + 0.8);
+  tl.fromTo("#other .ok", { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, at + 1.2);
+}
+// gaps: the missing skills slide in and stay missing.
+if (has("gaps")) {
+  const at = starts.gaps;
+  tl.fromTo($$("#gaps .row"), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.15 }, at + 0.1);
+  tl.fromTo("#gaps .note", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35 }, at + 1.0);
+}
+// ihave: tap "I have this", her words typed, added.
+if (has("ihave")) {
+  const at = starts.ihave, d = dur("ihave"), tap = $("#ihave .tap"), cs = $$("#ihave .said .c");
+  tl.set(tap, { left: 760, top: 94 }, at);
+  tl.fromTo(tap, { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.6, duration: 0.4 }, at + 0.2);
+  tl.fromTo("#ihave .form", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, at + 0.35);
+  tl.to(cs, { opacity: 1, duration: 0.01, stagger: Math.min(0.025, (d - 1.4) / cs.length) }, at + 0.6);
+  tl.fromTo("#ihave .added", { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, at + d - 0.75);
+}
+
+// end: logo, line, address.
+if (has("end")) {
+  const at = starts.end;
+  tl.fromTo("#end .brand", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at);
+  tl.fromTo($$("#end .tag span"), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.35 }, at + 0.5);
+  tl.fromTo("#end .url", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, at + 1.2);
+}
+if (V) {
+  $("#end .brand span").style.fontSize = "120px";
+  $("#end .brand svg").setAttribute("width", "104"); $("#end .brand svg").setAttribute("height", "104");
+  $("#end .tag").style.fontSize = "52px";
+}
+
+window.DURATION = END;
+window.STARTS = starts;
+window.seek = (s) => { tl.seek(s, false); };
+document.fonts.ready.then(() => { tl.seek(0, false); window.READY = true; });
+// Preview in a normal browser: plays in real time.
+if (!window.__TIMING && !params.has("still")) tl.play();
+</script>
+</body>
+</html>

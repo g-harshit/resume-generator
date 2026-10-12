@@ -1,0 +1,84 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "gap",
+      "type": "text",
+      "en": "[warmly] Career gap? Don't fake the dates.",
+      "text": "Career gap?",
+      "sub": "Don't fake the dates."
+    },
+    {
+      "id": "why",
+      "type": "checklist",
+      "en": "Background checks find it anyway. And QuickFit CV won't change them.",
+      "items": [
+        [
+          "Dates come straight from your profile",
+          "pass"
+        ],
+        [
+          "AI can't move them",
+          "pass"
+        ],
+        [
+          "Explain the gap in your words",
+          "pass"
+        ]
+      ],
+      "say": "Dates stay|true."
+    },
+    {
+      "type": "text",
+      "en": "Say it in one honest line. That's usually enough.",
+      "text": "Say it **in one line**.",
+      "sub": "\"Career break, 2023: family.\"",
+      "id": "x1"
+    },
+    {
+      "type": "resume",
+      "en": "Then lead with your real work, tailored to the job.",
+      "lines": [
+        "Built weekly sales dashboards in Tableau for 40 store managers.",
+        "Automated the monthly revenue report: 2 days → 3 hours."
+      ],
+      "say": "Then lead with|your work.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Career gap?",
+      "Don't fake",
+      "the dates."
+    ],
+    "scene": "why"
+  },
+  "captions": {
+    "ig_en": "Career gap? Don't fake the dates 🙅\n\n→ background checks find it anyway\n→ QuickFit CV takes dates straight from your profile, AI can't move them\n→ a short honest line beats a stretched date\n\nTry it free → link in bio ✅\n💬 How do you explain a gap in interviews? 👇",
+    "ig_hi": "Career gap hai? Dates fake mat karo. QuickFit CV mein dates seedha profile se aati hain.\n\nFree try karo → link in bio",
+    "linkedin": "Gaps are common: layoffs, health, family, study. Stretching dates to hide one is a risk that background checks often catch.\n\n• background checks find it anyway\n• QuickFit CV takes dates straight from your profile, AI can't move them\n• a short honest line beats a stretched date\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Career gap? Don't fake the dates.\n\nQuickFit CV takes dates straight from your profile; the AI can't move them.\n\nhttps://quickfitcv.com",
+    "comment": "How do you explain a gap in interviews? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

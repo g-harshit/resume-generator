@@ -10,7 +10,10 @@ const [reel] = process.argv.slice(2);
 const here = new URL(".", import.meta.url).pathname;
 const out = `${here}output/${reel}/`;
 const marks = JSON.parse(fs.readFileSync(out + "marks.json", "utf8"));
-const spec = JSON.parse(fs.readFileSync(`${here}${reel}.voice.json`, "utf8"));
+// VOICE_FILE: another set of lines; EXTEND_END: seconds more on the final frame (the end
+// card); OUT: the output's name. The defaults reproduce the original Reel.
+const spec = JSON.parse(fs.readFileSync(process.env.VOICE_FILE || `${here}${reel}.voice.json`, "utf8"));
+const extend = +(process.env.EXTEND_END || 0);
 if (marks.length !== spec.lines.length) throw new Error(`${marks.length} captions but ${spec.lines.length} lines`);
 const env = fs.readFileSync(here + "../../backend/.env", "utf8");
 const key = env.match(/^ELEVENLABS_API_KEY=["']?([^"'\n]+)/m)[1];
@@ -48,10 +51,19 @@ const placed = clips.map((c, i) => {
 const inputs = placed.flatMap((c) => ["-i", c.clip]);
 const mix = placed.map((c, i) => { const ms = Math.round(c.start * 1000); return `[${i + 1}:a]adelay=${ms}|${ms},aformat=channel_layouts=stereo[a${i}]`; }).join(";") +
   `;${placed.map((_, i) => `[a${i}]`).join("")}amix=inputs=${placed.length}:normalize=0,loudnorm=I=-16:TP=-1.5:LRA=11,aresample=48000,apad[aout]`;
-const mp4 = `${here}output/${reel}-voiced.mp4`;
+const mp4 = `${here}output/${process.env.OUT || `${reel}-voiced`}.mp4`;
 // The video's length, from the frame durations: padded audio would otherwise run forever.
-const total = fs.readFileSync(`${out}frames.txt`, "utf8").match(/duration [\d.]+/g).reduce((a, d) => a + +d.split(" ")[1], 0);
-execFileSync(ffmpeg, ["-y", "-hide_banner", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", `${out}frames.txt`, ...inputs,
+let list = fs.readFileSync(`${out}frames.txt`, "utf8");
+if (extend) {
+  // The last "duration" belongs to the final frame shown: the end card.
+  const i = list.lastIndexOf("duration ");
+  const j = list.indexOf("\n", i);
+  list = list.slice(0, i) + `duration ${(+list.slice(i + 9, j) + extend).toFixed(4)}` + list.slice(j);
+}
+const listFile = `${out}frames-voiced.txt`;
+fs.writeFileSync(listFile, list);
+const total = list.match(/duration [\d.]+/g).reduce((a, d) => a + +d.split(" ")[1], 0);
+execFileSync(ffmpeg, ["-y", "-hide_banner", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", listFile, ...inputs,
   "-filter_complex", `[0:v]scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0xf4f2ec,fps=30,format=yuv420p[v];${mix}`,
   "-map", "[v]", "-map", "[aout]", "-t", total.toFixed(2), "-c:v", "libx264", "-preset", "slow", "-crf", "18", "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", mp4]);
 console.log(mp4);

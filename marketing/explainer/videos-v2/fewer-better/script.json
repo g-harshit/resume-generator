@@ -1,0 +1,120 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "many",
+      "type": "stat",
+      "en": "[sighs] A hundred applications, same resume?",
+      "n": 100,
+      "docs": true,
+      "tag": "resume.pdf",
+      "label": "applications",
+      "say": "100 applications.|Same resume?"
+    },
+    {
+      "id": "better",
+      "type": "text",
+      "en": "Fewer, tailored applications. That's the move.",
+      "text": "**Fewer**, tailored applications.",
+      "sub": "Each one built for the job."
+    },
+    {
+      "type": "job",
+      "en": "Because every job asks for a different mix of skills.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "score": true,
+      "say": "Each job wants|something else.",
+      "id": "x1"
+    },
+    {
+      "type": "steps",
+      "en": "And tailoring each one takes about thirty seconds.",
+      "items": [
+        "Paste the job",
+        "See what's missing",
+        "Rewrite the lines you pick"
+      ],
+      "say": "About 30 sec|per job.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "100 applications.",
+      "Same resume?"
+    ],
+    "scene": "many"
+  },
+  "captions": {
+    "ig_en": "100 applications with the same resume, or 20 tailored ones? 🤔\n\n→ tailored applications match what each job asks for\n→ QuickFit CV makes tailoring take about 30 seconds\n→ so you can do both: apply widely and tailor each\n\nTry it free → link in bio ✅\n💬 How many applications per week is your target? 👇",
+    "ig_hi": "100 applications same resume se, ya tailored? QuickFit CV ke saath tailoring 30 second ki hai.\n\nFree try karo → link in bio",
+    "linkedin": "The spray-and-pray approach is tempting because tailoring takes time. It doesn't have to.\n\n• tailored applications match what each job asks for\n• QuickFit CV makes tailoring take about 30 seconds\n• so you can do both: apply widely and tailor each\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "100 applications with the same resume, or tailored ones?\n\nWith QuickFit CV, tailoring takes about 30 seconds, so you don't have to choose.\n\nhttps://quickfitcv.com",
+    "comment": "How many applications per week is your target? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

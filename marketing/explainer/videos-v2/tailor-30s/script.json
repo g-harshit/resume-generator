@@ -1,0 +1,135 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "paste",
+      "type": "paste",
+      "say": "Tailor a resume|in 30 seconds.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "en": "[excited] Watch me tailor a resume to this job in thirty seconds."
+    },
+    {
+      "id": "rewrite",
+      "type": "rewrite",
+      "say": "Rewrite the lines|I pick.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        7,
+        11
+      ],
+      "en": "[confident] Rewrite only the lines I pick, in the job's words."
+    },
+    {
+      "id": "fit",
+      "type": "pages",
+      "say": "Fit it on|one page.",
+      "en": "Fit it on one page."
+    },
+    {
+      "id": "checks",
+      "type": "checklist",
+      "say": "ATS checks?|All green.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "One column, real text, standard headings",
+          "pass"
+        ],
+        [
+          "Email and phone in the body",
+          "pass"
+        ],
+        [
+          "Every role has dates",
+          "pass"
+        ],
+        [
+          "Fits on one page",
+          "pass"
+        ]
+      ],
+      "en": "[satisfied] ATS checks? All green."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in thirty seconds.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Tailor a resume",
+      "in 30 seconds."
+    ],
+    "scene": "rewrite"
+  },
+  "captions": {
+    "ig_en": "Tailoring a resume shouldn't take your whole evening ⏱️\n\nWatch:\n→ paste the job, see which keywords you're missing\n→ rewrite only the lines you pick, in the job's words\n→ fit it on one page\n→ ATS checks: all green\n\nYour facts stay yours. Nothing invented ✅\nTry it free → link in bio\n💬 Comment the job title you're applying for 👇",
+    "ig_hi": "Resume tailor karna poori shaam kyun le? ⏱️\n\n→ job paste karo, missing keywords dekho\n→ sirf wahi lines rewrite karo jo aap chuno\n→ ek page pe fit karo\n→ ATS checks: sab green\n\nAapke facts, aapke shabd ✅ Free try karo → link in bio",
+    "linkedin": "Tailoring a resume to a job usually means an evening of rewording bullet points.\n\nHere's the same job done in about 30 seconds with QuickFit CV:\n• Paste the job description and see which of its keywords your resume already has, and which it's missing\n• Rewrite only the lines you choose, in the job's own language\n• Fit it on one page\n• Check it the way an ATS reads it: one column, real text, standard headings, dates on every role\n\nOne rule throughout: it never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Tailoring a resume to one job, start to finish, in about 30 seconds:\n\n→ paste the job\n→ see the missing keywords\n→ rewrite the lines you pick\n→ fit to one page\n\nNothing invented.\n\nhttps://quickfitcv.com",
+    "comment": "What role are you applying for this week? I'll reply with the 3 keywords it's most likely screening for 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

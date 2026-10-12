@@ -1,0 +1,122 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "upload",
+      "type": "resume",
+      "say": "Upload your resume|once.",
+      "skills": [
+        [
+          "SQL",
+          "ok"
+        ],
+        [
+          "Python",
+          "ok"
+        ],
+        [
+          "Tableau",
+          "ok"
+        ],
+        [
+          "A/B testing",
+          "ok"
+        ],
+        [
+          "Excel",
+          "ok"
+        ]
+      ],
+      "lines": [
+        "Built weekly sales dashboards in Tableau for 40 store managers.",
+        "Automated the monthly revenue report: 2 days → 3 hours."
+      ],
+      "en": "[warmly] Upload your resume once."
+    },
+    {
+      "id": "profile",
+      "type": "checklist",
+      "say": "It becomes|your profile.",
+      "title": "Your profile",
+      "items": [
+        [
+          "Every role, line and skill, **yours**",
+          "pass"
+        ],
+        [
+          "You review it once",
+          "pass"
+        ],
+        [
+          "Edit it any time",
+          "pass"
+        ]
+      ],
+      "en": "It becomes your profile. You check it once."
+    },
+    {
+      "id": "fast",
+      "type": "stat",
+      "say": "Every job after:|about 30 seconds.",
+      "n": 30,
+      "suffix": " sec",
+      "label": "per new job",
+      "color": "var(--accent)",
+      "en": "[excited] After that, every new job takes about thirty seconds."
+    },
+    {
+      "id": "frozen",
+      "type": "text",
+      "text": "Sent resumes **never change**.",
+      "sub": "Each one is a snapshot of what you sent.",
+      "en": "And editing your profile never changes a resume you already sent."
+    },
+    {
+      "type": "rewrite",
+      "en": "Tailored to the job in seconds.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        7,
+        11
+      ],
+      "say": "Tailored|in seconds.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Upload once.",
+      "line2": "Tailor every time.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Upload once.",
+      "Tailor every time."
+    ],
+    "scene": "profile"
+  },
+  "captions": {
+    "ig_en": "Stop rebuilding your resume from scratch for every job 🙅\n\nWith QuickFit CV:\n→ upload your resume once, it becomes your profile\n→ review it once\n→ every new job after that takes about 30 seconds\n→ resumes you already sent never change\n\nTry it free → link in bio\n💬 How long does tailoring one resume take you? 👇",
+    "ig_hi": "Har job ke liye resume zero se mat banao 🙅\n\nQuickFit CV: resume ek baar upload karo, woh aapki profile ban jaati hai. Uske baad har job ~30 second. Bheje hue resumes kabhi nahi badalte. Free try karo → link in bio",
+    "linkedin": "The slowest part of tailoring resumes is starting over every time.\n\nIn QuickFit CV you upload your resume once and it becomes your profile: every role, line and skill, which you review once and can edit any time. Each new job then takes about 30 seconds.\n\nOne design choice I care about: every resume is a snapshot. Editing your profile later never changes a resume you've already sent, so you always know what a recruiter has.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers",
+    "x": "Upload your resume once. It becomes your profile.\n\nAfter that, each new job takes about 30 seconds, and resumes you've already sent never change.\n\nhttps://quickfitcv.com",
+    "comment": "What's the most annoying part of tailoring resumes for you? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

@@ -1,0 +1,92 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "bad",
+      "type": "checklist",
+      "en": "Summer twenty-two to now? Give the ATS real dates.",
+      "items": [
+        [
+          "Summer '22 – now",
+          "warn"
+        ],
+        [
+          "2 yrs at Brightcart",
+          "warn"
+        ],
+        [
+          "Jun 2022 – Present",
+          "pass"
+        ]
+      ],
+      "say": "Summer '22 – now?|Use real dates."
+    },
+    {
+      "id": "why",
+      "type": "text",
+      "en": "It sorts your experience by them.",
+      "text": "Dates **sort your experience**.",
+      "sub": "Month and year, on every role."
+    },
+    {
+      "id": "ok",
+      "type": "checklist",
+      "en": "QuickFit CV checks every role has one.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "Every role has dates",
+          "pass"
+        ]
+      ],
+      "say": "Checked on|every resume."
+    },
+    {
+      "type": "atstext",
+      "en": "Clean dates mean your experience reads in the right order.",
+      "lines": [
+        "Data Analyst, Brightcart Retail",
+        "Jun 2022 – Present",
+        "Junior Analyst, Meridian Insights",
+        "Jul 2020 – May 2022"
+      ],
+      "say": "Clean dates,|right order.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "\"Summer '22 – now\"?",
+      "Give the ATS",
+      "real dates."
+    ],
+    "scene": "bad"
+  },
+  "captions": {
+    "ig_en": "\"Summer '22 – now\" on your resume? Give the ATS real dates 📅\n\n→ month and year, on every role: Jun 2022 – Present\n→ ATSs use dates to sort your experience\n→ QuickFit CV checks every role has them\n\nTry it free → link in bio ✅\n💬 MM/YYYY or Month YYYY? 👇",
+    "ig_hi": "\"Summer '22 – now\"? Real dates likho: Jun 2022 – Present, har role pe.\n\nFree try karo → link in bio",
+    "linkedin": "Dates look like a small detail, but applicant tracking systems use them to order your experience and work out how long you did what.\n\n• month and year, on every role: Jun 2022 – Present\n• ATSs use dates to sort your experience\n• QuickFit CV checks every role has them\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "\"Summer '22 – now\"? Use real dates: Jun 2022 – Present, on every role.\n\nATSs sort your experience by them. QuickFit CV checks every role has one.\n\nhttps://quickfitcv.com",
+    "comment": "MM/YYYY or Month YYYY? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

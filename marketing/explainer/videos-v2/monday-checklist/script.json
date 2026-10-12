@@ -1,0 +1,147 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "check",
+      "type": "checklist",
+      "en": "[confident] Before you hit apply, four checks.",
+      "title": "Before you apply",
+      "items": [
+        [
+          "Summary for this job",
+          "pass"
+        ],
+        [
+          "Job's keywords, where true",
+          "pass"
+        ],
+        [
+          "One page (or two, on purpose)",
+          "pass"
+        ],
+        [
+          "ATS checks green",
+          "pass"
+        ]
+      ],
+      "say": "Before you|hit apply:"
+    },
+    {
+      "type": "paste",
+      "en": "QuickFit CV shows the job's keywords you have, and the ones you're missing.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "say": "Check 2:|its keywords.",
+      "id": "x1"
+    },
+    {
+      "type": "pages",
+      "en": "Fit it to one page, or two on purpose, in one click.",
+      "say": "Check 3:|page count.",
+      "id": "x2"
+    },
+    {
+      "type": "checklist",
+      "en": "And every ATS check, green, before you hit apply.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "One column, real text, standard headings",
+          "pass"
+        ],
+        [
+          "Email and phone in the body",
+          "pass"
+        ],
+        [
+          "Every role has dates",
+          "pass"
+        ],
+        [
+          "Fits on one page",
+          "pass"
+        ]
+      ],
+      "say": "Check 4:|all green.",
+      "id": "x3"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Before you",
+      "hit apply:"
+    ],
+    "scene": "check"
+  },
+  "captions": {
+    "ig_en": "Before you hit apply: 4 checks ✅ (save this)\n\n→ summary written for this job\n→ the job's keywords, where they're true\n→ one page, or two on purpose\n→ ATS checks all green\n\nTry it free → link in bio ✅\n💬 What's on your pre-apply checklist? 👇",
+    "ig_hi": "Apply se pehle 4 checks: summary job ke liye, keywords jahan sach ho, page count, ATS checks green.\n\nFree try karo → link in bio",
+    "linkedin": "A two-minute checklist before every application:\n\n• summary written for this job\n• the job's keywords, where they're true\n• one page, or two on purpose\n• ATS checks all green\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Before you hit apply:\n1. Summary for this job\n2. Its keywords, where true\n3. Page count on purpose\n4. ATS checks green\n\nhttps://quickfitcv.com",
+    "comment": "What's on your pre-apply checklist? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

@@ -1,0 +1,51 @@
+{
+  "voice": "nova",
+  "speed": 1.0,
+  "instructions": {
+    "en": "You are a charismatic, energetic social-media creator narrating a punchy product video to a friend. Be very expressive and human: disbelief, indignation, an exasperated sigh, relief and a satisfied smile where the words call for them. Vary pitch and pace a lot, lean on key words, take short dramatic pauses at the dots. Sound like a real person talking, never like an announcer or audiobook. Indian English accent.",
+    "hi": "You are a charismatic, energetic Indian social-media creator narrating a punchy product video in natural Hinglish to a friend. Very expressive and human: disbelief, indignation, a sigh, relief and a smile where the words call for them. Vary pitch and pace, short dramatic pauses. Never sound like an announcer."
+  },
+  "scenes": [
+    {
+      "id": "applied",
+      "en": "[incredulous] Fifty applications. Zero callbacks?",
+      "hi": "[incredulous] पचास अप्लिकेशन्स। एक भी कॉल नहीं?"
+    },
+    {
+      "id": "match",
+      "en": "Your resume matched five of eleven skills. [frustrated] Rejected, before anyone read it.",
+      "hi": "आपका रिज़्यूमे ग्यारह में से सिर्फ़ पाँच स्किल्स मैच करता है। [frustrated] किसी के पढ़ने से पहले ही रिजेक्ट!"
+    },
+    {
+      "id": "seconds",
+      "en": "[excited] QuickFit CV fixes that in thirty seconds.",
+      "hi": "[excited] QuickFit CV ये तीस सेकंड में ठीक करता है।"
+    },
+    {
+      "id": "paste",
+      "en": "Paste the job, see what's missing,",
+      "hi": "जॉब पेस्ट करो, देखो क्या मिसिंग है,"
+    },
+    {
+      "id": "rewrite",
+      "en": "rewrite the lines you pick.",
+      "hi": "और जो लाइन्स चुनो, वो रीराइट करो।"
+    },
+    {
+      "id": "honest",
+      "en": "[firmly] Never a fake skill.",
+      "hi": "[firmly] कोई फ़ेक स्किल नहीं।"
+    },
+    {
+      "id": "end",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!",
+      "hi": "[confident] QuickFit CV. लिंक बायो में!"
+    }
+  ],
+  "provider": "elevenlabs",
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  }
+}

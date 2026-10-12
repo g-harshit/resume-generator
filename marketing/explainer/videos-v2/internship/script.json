@@ -1,0 +1,92 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "intern",
+      "type": "resume",
+      "en": "[warmly] Internship? Write it like a job.",
+      "who": "Fresher · example",
+      "lines": [
+        "**Data Analyst Intern**, Meridian Insights · May – Jul 2024",
+        "Cleaned survey data for 5 client projects in Excel and Python."
+      ],
+      "say": "Internship?|Write it as a job."
+    },
+    {
+      "id": "proves",
+      "type": "text",
+      "en": "Real work, real tools, real results.",
+      "text": "Real work. Real tools.",
+      "sub": "Name them, with the result."
+    },
+    {
+      "type": "rewrite",
+      "en": "Don't write helped with. Say what you did, with which tools.",
+      "before": "Helped with data cleaning for clients.",
+      "after": "Cleaned survey data for **5 client projects** in **Excel** and **Python**.",
+      "label": "Internship · line 1",
+      "say": "\"Helped with\"?|Say what you did.",
+      "id": "x1"
+    },
+    {
+      "type": "job",
+      "en": "Those are exactly the skills entry-level jobs ask for.",
+      "chips": [
+        [
+          "Excel",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "data cleaning",
+          1
+        ],
+        [
+          "SQL",
+          0
+        ]
+      ],
+      "score": true,
+      "say": "It matches|real jobs.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Internship?",
+      "Write it",
+      "like a job."
+    ],
+    "scene": "intern"
+  },
+  "captions": {
+    "ig_en": "Your internship counts. Write it like a job 💼\n\n→ title, company, dates\n→ what you did, with what tools\n→ the result, if you have one\n\nTry it free → link in bio ✅\n💬 Best thing you did in an internship? 👇",
+    "ig_hi": "Internship bhi experience hai. Job ki tarah likho: title, company, dates, kya kiya, kis tool se.\n\nFree try karo → link in bio",
+    "linkedin": "Students often bury internships at the bottom. Written like a job, they're often the strongest thing on a first resume.\n\n• title, company, dates\n• what you did, with what tools\n• the result, if you have one\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Your internship counts. Write it like a job: title, company, dates, what you did, with which tools, and the result.\n\nhttps://quickfitcv.com",
+    "comment": "Best thing you did in an internship? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

@@ -1,0 +1,74 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "none",
+      "type": "text",
+      "en": "[curious] No numbers on your resume? Look for these three.",
+      "text": "No **numbers** on your resume?",
+      "sub": "Look for these three."
+    },
+    {
+      "id": "three",
+      "type": "steps",
+      "en": "Time saved. People served. What changed.",
+      "items": [
+        "**Time** saved: 2 days → 3 hours",
+        "**People** served: 40 store managers",
+        "**Change**: repeat orders up 12%"
+      ],
+      "say": "Time. People.|Change."
+    },
+    {
+      "id": "keep",
+      "type": "text",
+      "en": "QuickFit CV keeps your numbers, and never makes new ones.",
+      "text": "Your numbers, **never new ones**.",
+      "sub": "Checked against your profile."
+    },
+    {
+      "type": "rewrite",
+      "en": "Then put it in the line: a report cut from two days to three hours.",
+      "before": "Responsible for the monthly revenue report.",
+      "after": "Automated the monthly revenue report: **2 days → 3 hours**.",
+      "label": "Brightcart Retail · line 3",
+      "say": "Put it in|the line.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "No numbers",
+      "on your resume?",
+      "Look for these 3."
+    ],
+    "scene": "three"
+  },
+  "captions": {
+    "ig_en": "No numbers on your resume? Look for these 3 📊 (save this)\n\n→ time saved: \"2 days → 3 hours\"\n→ people served: \"40 store managers\"\n→ what changed: \"repeat orders up 12%\"\n\nTry it free → link in bio ✅\n💬 Drop one line from your resume; I'll find the number in it 👇",
+    "ig_hi": "Resume pe numbers nahi? Teen jagah dekho: time bachaya, kitne logon ke kaam aaya, kya badla.\n\nFree try karo → link in bio",
+    "linkedin": "Numbers make a resume line believable, and most people have more of them than they think. Three places to look:\n\n• time saved: \"2 days → 3 hours\"\n• people served: \"40 store managers\"\n• what changed: \"repeat orders up 12%\"\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "No numbers on your resume? Look for:\n1. Time saved\n2. People served\n3. What changed\n\nQuickFit CV keeps yours and never invents new ones.\n\nhttps://quickfitcv.com",
+    "comment": "Drop one line from your resume; I'll find the number in it 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

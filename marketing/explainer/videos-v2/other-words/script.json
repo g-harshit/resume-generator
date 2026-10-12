@@ -1,0 +1,104 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "words",
+      "type": "job",
+      "en": "[curious] Beyond the skills, the job uses other words too.",
+      "chips": [
+        [
+          "reporting",
+          0
+        ],
+        [
+          "customer retention",
+          0
+        ],
+        [
+          "dashboards",
+          1
+        ],
+        [
+          "e-commerce",
+          1
+        ],
+        [
+          "stakeholders",
+          1
+        ]
+      ],
+      "say": "The job's|other words."
+    },
+    {
+      "id": "use",
+      "type": "rewrite",
+      "en": "Reporting, customer retention. Use them where they fit.",
+      "label": "Brightcart Retail · line 1",
+      "before": "Built weekly sales dashboards in Tableau used by 40 store managers.",
+      "after": "Built weekly sales **reporting** dashboards in Tableau for 40 store managers.",
+      "say": "Use them|where they fit."
+    },
+    {
+      "type": "text",
+      "en": "Recruiters search for these words too, not only the skills list.",
+      "text": "Recruiters search **these** too.",
+      "sub": "Not only the skills list.",
+      "id": "x1"
+    },
+    {
+      "type": "checklist",
+      "en": "So use them wherever your work really shows them.",
+      "title": "Now in your resume",
+      "items": [
+        [
+          "reporting",
+          "pass"
+        ],
+        [
+          "customer retention",
+          "pass"
+        ],
+        [
+          "stakeholders",
+          "pass"
+        ]
+      ],
+      "say": "Where they're|true.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "The job's",
+      "other words."
+    ],
+    "scene": "words"
+  },
+  "captions": {
+    "ig_en": "It's not just skills: job descriptions have other words recruiters search for too 🔤\n\n→ reporting, customer retention, stakeholders, e-commerce\n→ QuickFit CV lists them separately\n→ use them in lines where they're true\n\nTry it free → link in bio ✅\n💬 Which buzzword shows up in every job post in your field? 👇",
+    "ig_hi": "Skills ke alawa job ke aur words bhi hote hain: reporting, customer retention. Jahan sach ho wahan use karo.\n\nFree try karo → link in bio",
+    "linkedin": "Beyond tools and skills, a job description uses domain words that recruiters also search for.\n\n• reporting, customer retention, stakeholders, e-commerce\n• QuickFit CV lists them separately\n• use them in lines where they're true\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Job descriptions have other words recruiters search for: reporting, customer retention, stakeholders.\n\nQuickFit CV lists them; use the true ones.\n\nhttps://quickfitcv.com",
+    "comment": "Which buzzword shows up in every job post in your field? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

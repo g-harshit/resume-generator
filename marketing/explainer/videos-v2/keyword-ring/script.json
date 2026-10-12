@@ -1,0 +1,94 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "ring",
+      "type": "rewrite",
+      "en": "[curious] What does seven of eleven mean?",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        7,
+        11
+      ],
+      "say": "What does|7/11 mean?"
+    },
+    {
+      "id": "means",
+      "type": "text",
+      "en": "Seven of the job's eleven skills appear in your resume's text.",
+      "text": "7 of the job's 11 skills,",
+      "sub": "in your resume's actual text."
+    },
+    {
+      "type": "missing",
+      "en": "The other four? Still missing, because she doesn't have them.",
+      "rows": [
+        [
+          "Looker",
+          "must have"
+        ],
+        [
+          "dbt",
+          "nice to have"
+        ],
+        [
+          "BigQuery",
+          "nice to have"
+        ]
+      ],
+      "note": "Not hers, so not on it.",
+      "say": "The other 4?|Still missing.",
+      "id": "x1"
+    },
+    {
+      "type": "compare",
+      "en": "A count you can check beats a score you can't.",
+      "bad": [
+        "A score out of 100",
+        "Can't tell you what's wrong"
+      ],
+      "good": [
+        "QuickFit CV",
+        "Shows exactly which skills"
+      ],
+      "say": "A count you|can check.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "What does",
+      "7/11 mean?"
+    ],
+    "scene": "ring"
+  },
+  "captions": {
+    "ig_en": "What does \"7/11 job keywords covered\" mean? 🎯\n\n→ 7 of the job's 11 skills appear in your resume's actual text\n→ not a made-up score, a count you can check\n→ missing ones stay missing unless you really have them\n\nTry it free → link in bio ✅\n💬 What's your match on your last application? 👇",
+    "ig_hi": "\"7/11\" ka matlab: job ki 11 skills mein se 7 aapke resume ke text mein hain. Koi fake score nahi.\n\nFree try karo → link in bio",
+    "linkedin": "Most resume tools show a score. QuickFit CV shows a count you can check:\n\n• 7 of the job's 11 skills appear in your resume's actual text\n• not a made-up score, a count you can check\n• missing ones stay missing unless you really have them\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "\"7/11\" in QuickFit CV means 7 of the job's 11 skills appear in your resume's actual text. Not a made-up score.\n\nhttps://quickfitcv.com",
+    "comment": "What's your match on your last application? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

@@ -1,0 +1,76 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "top",
+      "type": "resume",
+      "en": "[curious] The top third of your resume does most of the work.",
+      "who": "Priya Sharma · Data Analyst",
+      "heading": "Summary",
+      "lines": [
+        "Data analyst focused on **customer retention** and **A/B testing**."
+      ],
+      "skills": [
+        [
+          "SQL",
+          "ok"
+        ],
+        [
+          "Python",
+          "ok"
+        ],
+        [
+          "Tableau",
+          "ok"
+        ]
+      ],
+      "say": "The top third|does the work."
+    },
+    {
+      "id": "so",
+      "type": "steps",
+      "en": "Name, summary, the skills this job wants. Make them count.",
+      "items": [
+        "Your name and title",
+        "A summary **for this job**",
+        "The skills **it asks for**"
+      ],
+      "say": "Make it|count."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "The top third",
+      "of your resume",
+      "does the work."
+    ],
+    "scene": "top"
+  },
+  "captions": {
+    "ig_en": "The top third of your resume does most of the work 👆\n\n→ name and title\n→ a summary written for this job\n→ the skills it asks for, first\n\nTry it free → link in bio ✅\n💬 What's at the top of your resume right now? 👇",
+    "ig_hi": "Resume ka upar wala hissa sabse zyada kaam karta hai: naam, job ke liye summary, aur zaroori skills.\n\nFree try karo → link in bio",
+    "linkedin": "Recruiters skim from the top. Whatever is in the first third sets the impression.\n\n• name and title\n• a summary written for this job\n• the skills it asks for, first\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "The top third of your resume does most of the work: name, a summary for this job, the skills it asks for.\n\nhttps://quickfitcv.com",
+    "comment": "What's at the top of your resume right now? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

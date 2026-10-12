@@ -27,3 +27,5 @@ marketing/explainer/videos/*/output/
 marketing/explainer/export/
 marketing/explainer/*.zip
 marketing/explainer/cache/
+marketing/explainer/videos-v2/*/output/
+marketing/explainer/export-v2/

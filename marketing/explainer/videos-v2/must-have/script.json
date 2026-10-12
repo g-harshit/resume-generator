@@ -1,0 +1,150 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "job",
+      "type": "job",
+      "en": "Not every keyword matters equally.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "score": true,
+      "say": "Not every keyword|matters the same."
+    },
+    {
+      "id": "must",
+      "type": "checklist",
+      "en": "Must-haves first: SQL, Python, Tableau, statistics. Nice-to-haves after.",
+      "title": "Must have",
+      "items": [
+        [
+          "SQL",
+          "pass"
+        ],
+        [
+          "Python",
+          "pass"
+        ],
+        [
+          "Tableau",
+          "pass"
+        ],
+        [
+          "Looker",
+          "fail"
+        ]
+      ],
+      "say": "Must-haves|first."
+    },
+    {
+      "id": "miss",
+      "type": "missing",
+      "en": "QuickFit CV sorts them for you.",
+      "rows": [
+        [
+          "Looker",
+          "must have"
+        ],
+        [
+          "dbt",
+          "nice to have"
+        ],
+        [
+          "BigQuery",
+          "nice to have"
+        ]
+      ],
+      "say": "Sorted|for you."
+    },
+    {
+      "type": "rewrite",
+      "en": "Then add the nice-to-haves your work really shows.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        6,
+        11
+      ],
+      "say": "Then the|nice-to-haves.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Not every keyword",
+      "matters the same."
+    ],
+    "scene": "must"
+  },
+  "captions": {
+    "ig_en": "Not every keyword in a job description matters equally 🎯\n\n→ must-haves first: they decide whether you're a fit\n→ nice-to-haves after\n→ QuickFit CV reads the job and sorts its skills into must have, nice to have and other words\n\nTry it free → link in bio ✅\n💬 Do you apply if you meet 60% of the must-haves? 👇",
+    "ig_hi": "Har keyword barabar nahi hota. Pehle must-have, phir nice-to-have. QuickFit CV job padh ke sort kar deta hai.\n\nFree try karo → link in bio",
+    "linkedin": "Job descriptions mix hard requirements with a wish list. Treating every keyword the same means effort goes in the wrong place.\n\n• must-haves first: they decide whether you're a fit\n• nice-to-haves after\n• QuickFit CV reads the job and sorts its skills into must have, nice to have and other words\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Not every keyword matters equally. Must-haves first, nice-to-haves after.\n\nQuickFit CV reads the job and sorts its skills for you.\n\nhttps://quickfitcv.com",
+    "comment": "Do you apply if you meet 60% of the must-haves? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

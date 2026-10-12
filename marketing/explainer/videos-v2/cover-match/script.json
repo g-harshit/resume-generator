@@ -1,0 +1,82 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "letter",
+      "type": "letter",
+      "en": "[confident] Your cover letter, in the same template as your resume.",
+      "lines": [
+        "At Brightcart Retail I found why **repeat purchases** dropped; a loyalty change then lifted repeat orders 12%."
+      ],
+      "say": "Cover letter,|same template."
+    },
+    {
+      "id": "what",
+      "type": "text",
+      "en": "Edit it, and what you see is what downloads.",
+      "text": "Same look. **Your words.**",
+      "sub": "What you see is what downloads."
+    },
+    {
+      "type": "checklist",
+      "en": "Written for this job, only from facts in your profile.",
+      "items": [
+        [
+          "Only facts from your profile",
+          "pass"
+        ],
+        [
+          "Written for this job",
+          "pass"
+        ],
+        [
+          "Says what your resume can't",
+          "pass"
+        ]
+      ],
+      "say": "Your facts,|for this job.",
+      "id": "x1"
+    },
+    {
+      "type": "text",
+      "en": "Resume and letter, sent together, matching.",
+      "text": "One look, **resume and letter**.",
+      "sub": "Sent together, they match.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Cover letter,",
+      "same template."
+    ],
+    "scene": "letter"
+  },
+  "captions": {
+    "ig_en": "Cover letter and resume in the same template, from the same facts ✉️\n\n→ written for the job, from your profile\n→ edit anything; what you see is what downloads\n→ matches your resume's template\n\nTry it free → link in bio ✅\n💬 Same template for both, or not? 👇",
+    "ig_hi": "Cover letter aur resume ek hi template mein, ek hi facts se.\n\nFree try karo → link in bio",
+    "linkedin": "A cover letter that looks like it came from a different person undercuts the resume.\n\n• written for the job, from your profile\n• edit anything; what you see is what downloads\n• matches your resume's template\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "QuickFit CV writes your cover letter for the job, from your profile, in your resume's template. Edit it; what you see is what downloads.\n\nhttps://quickfitcv.com",
+    "comment": "Same template for both, or not? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

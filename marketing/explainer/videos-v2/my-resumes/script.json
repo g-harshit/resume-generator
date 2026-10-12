@@ -1,0 +1,79 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "list",
+      "type": "steps",
+      "en": "[confident] Every resume you tailored, in one place.",
+      "items": [
+        "Senior Data Analyst · Northwind",
+        "Data Analyst · Fieldnote",
+        "Product Analyst · Tern Labs"
+      ],
+      "say": "Every resume,|one place."
+    },
+    {
+      "id": "snap",
+      "type": "text",
+      "en": "Each one is a snapshot of exactly what you sent.",
+      "text": "Each one, **exactly as sent**.",
+      "sub": "Duplicate, edit, or download again."
+    },
+    {
+      "type": "text",
+      "en": "Open any one again, download it, or duplicate it for a similar job.",
+      "text": "Open any one **again**.",
+      "sub": "Download it, or duplicate it for a similar job.",
+      "id": "x1"
+    },
+    {
+      "type": "compare",
+      "en": "No more guessing which version you sent.",
+      "bad": [
+        "resume_final_v3_NEW.pdf",
+        "Which one did I send?"
+      ],
+      "good": [
+        "QuickFit CV",
+        "Named by the job, kept as sent"
+      ],
+      "say": "No more|version chaos.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Every resume",
+      "you tailored,",
+      "in one place."
+    ],
+    "scene": "list"
+  },
+  "captions": {
+    "ig_en": "resume_v2_final_NEW_use_this.pdf 😵 Sound familiar?\n\n→ every tailored resume, named by the job, in one place\n→ each is a snapshot of exactly what you sent\n→ duplicate one for a similar job\n\nTry it free → link in bio ✅\n💬 What's your worst resume filename? 👇",
+    "ig_hi": "resume_final_NEW.pdf wala chaos khatam. Har tailored resume ek jagah, job ke naam se.\n\nFree try karo → link in bio",
+    "linkedin": "Version chaos is a real job-search problem: which file went to which company?\n\n• every tailored resume, named by the job, in one place\n• each is a snapshot of exactly what you sent\n• duplicate one for a similar job\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Every resume you tailored, in one place, named by the job, exactly as you sent it.\n\nNo more resume_v2_final_NEW.pdf.\n\nhttps://quickfitcv.com",
+    "comment": "What's your worst resume filename? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

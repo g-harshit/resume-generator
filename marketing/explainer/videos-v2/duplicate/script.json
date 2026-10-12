@@ -1,0 +1,72 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "sim",
+      "type": "text",
+      "en": "[curious] Similar job? Duplicate a resume and tweak it.",
+      "text": "Similar job?",
+      "sub": "Duplicate a resume, tweak two lines."
+    },
+    {
+      "id": "steps",
+      "type": "steps",
+      "en": "No starting from scratch.",
+      "items": [
+        "**Duplicate** the Northwind resume",
+        "Tweak two lines",
+        "Download"
+      ],
+      "say": "No starting|from scratch."
+    },
+    {
+      "type": "rewrite",
+      "en": "Tweak the lines that differ for the new job.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "say": "Tweak the lines|that differ.",
+      "id": "x1"
+    },
+    {
+      "type": "text",
+      "en": "Both stay saved, each exactly as you sent it.",
+      "text": "Both resumes, **kept as sent**.",
+      "sub": "Each one a snapshot.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Similar job?",
+      "Duplicate and tweak."
+    ],
+    "scene": "steps"
+  },
+  "captions": {
+    "ig_en": "Applying for two similar roles? Don't start from scratch 📑\n\n→ duplicate a tailored resume\n→ tweak the two lines that differ\n→ download\n\nTry it free → link in bio ✅\n💬 Similar roles: do you reuse or rewrite? 👇",
+    "ig_hi": "Milti-julti job? Resume duplicate karo, do lines badlo, download.\n\nFree try karo → link in bio",
+    "linkedin": "Similar roles at different companies need only small changes.\n\n• duplicate a tailored resume\n• tweak the two lines that differ\n• download\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Similar job? Duplicate a tailored resume in QuickFit CV and tweak the two lines that differ.\n\nhttps://quickfitcv.com",
+    "comment": "Similar roles: do you reuse or rewrite? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

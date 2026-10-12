@@ -1,0 +1,113 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "ref",
+      "type": "text",
+      "en": "[curious] Got a referral? Nice. Your resume often still goes through the ATS.",
+      "text": "Got a **referral**?",
+      "sub": "Your resume often still goes through the ATS."
+    },
+    {
+      "id": "job",
+      "type": "job",
+      "en": "So tailor it anyway.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "score": true,
+      "say": "Tailor it|anyway."
+    },
+    {
+      "type": "rewrite",
+      "en": "Put your real work in the job's words, so it matches wherever it's read.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        7,
+        11
+      ],
+      "say": "In the job's|words.",
+      "id": "x1"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Got a referral?",
+      "Your resume still",
+      "goes through the ATS."
+    ],
+    "scene": "job"
+  },
+  "captions": {
+    "ig_en": "Got a referral? 🎉 Your resume often still goes through the ATS.\n\n→ referrals help, but many companies still log you in the ATS\n→ and the hiring manager still reads it against the job\n→ tailor it anyway\n\nTry it free → link in bio ✅\n💬 Have you ever been hired through a referral? 👇",
+    "ig_hi": "Referral mila? Badhiya. Par resume aksar phir bhi ATS se jaata hai. Tailor zaroor karo.\n\nFree try karo → link in bio",
+    "linkedin": "A referral gets attention, but in many companies the resume is still added to the ATS and read against the job description.\n\n• referrals help, but many companies still log you in the ATS\n• and the hiring manager still reads it against the job\n• tailor it anyway\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Got a referral? Your resume often still goes through the ATS, and gets read against the job.\n\nTailor it anyway.\n\nhttps://quickfitcv.com",
+    "comment": "Have you ever been hired through a referral? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

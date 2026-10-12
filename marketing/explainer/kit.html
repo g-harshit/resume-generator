@@ -396,13 +396,21 @@ $$(".copy").forEach((el) => {
     `<span class="${i ? "l2" : "l1"}">${line.split(" ").map((w) => `<span class="w">${w}</span>`).join(" ")}</span>`).join("");
 });
 const TIMING = window.__TIMING || SCRIPT.scenes.map((s) => ({ id: s.id, voice: 2.6, hold: s.hold || 0 }));
-const AIR = 0.3, HOLD = 1.4;
+const AIR = 0.3, HOLD = SCRIPT.endHold ?? 1.4;
 const starts = {};
 let t = 0;
 // Each type needs a minimum time on screen for its animation to read, however short the line.
 const MIN = { pages: 2.8, checklist: 2.8, rewrite: 2.9, paste: 2.5, ihave: 3.9, job: 3.0, atstext: 2.6, letter: 3.8, steps: 2.8, templates: 2.5, compare: 2.5, chat: 2.7, missing: 2.7, stat: 2.2, strike: 2.0, resume: 2.3, text: 1.9, end: 2.0 };
 const typeOf = (id) => (SCRIPT.scenes.find((s) => s.id === id) || {}).type;
+if (SCRIPT.endMin) MIN.end = SCRIPT.endMin;
 TIMING.forEach((x) => { x.hold = Math.max(x.hold || 0, (MIN[typeOf(x.id)] || 0) - x.voice - AIR); });
+// "minTotal": a floor on the video's length. Any shortfall is shared out as extra time on
+// the scenes before the end card, so nothing reads as dead air.
+if (SCRIPT.minTotal) {
+  const total = TIMING.reduce((a, x) => a + x.voice + AIR + x.hold, 0) + HOLD;
+  const body = TIMING.filter((x) => typeOf(x.id) !== "end");
+  if (total < SCRIPT.minTotal && body.length) body.forEach((x) => (x.hold += (SCRIPT.minTotal - total) / body.length));
+}
 TIMING.forEach((x) => { starts[x.id] = t; t += x.voice + AIR + (x.hold || 0) + (x === TIMING.at(-1) ? HOLD : 0); });
 const END = t;
 const ends = {};

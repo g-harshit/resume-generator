@@ -1,0 +1,85 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "q",
+      "type": "rewrite",
+      "en": "[incredulous] AI turned your twelve percent into fifteen? Not here.",
+      "label": "Brightcart Retail · line 2",
+      "before": "...a loyalty change that lifted repeat orders **15%**.",
+      "after": "...a loyalty change that lifted repeat orders **12%**.",
+      "done": "✓ Numbers checked against your profile",
+      "say": "AI changed 12%|to 15%?"
+    },
+    {
+      "id": "rule",
+      "type": "text",
+      "en": "Every number is checked against your profile.",
+      "text": "Every number **checked**.",
+      "sub": "Against your profile, after the AI writes."
+    },
+    {
+      "type": "checklist",
+      "en": "Skills, employers, dates and numbers. All checked.",
+      "title": "Checked against your profile",
+      "items": [
+        [
+          "Skills",
+          "pass"
+        ],
+        [
+          "Employers and dates",
+          "pass"
+        ],
+        [
+          "Numbers",
+          "pass"
+        ]
+      ],
+      "say": "Skills, dates,|numbers.",
+      "id": "x1"
+    },
+    {
+      "type": "text",
+      "en": "Your real numbers are already good. Twelve percent is real, and that's what counts.",
+      "text": "Your numbers are **already good**.",
+      "sub": "12% is real. That's what counts.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "AI changed",
+      "your 12% to 15%?",
+      "Not here."
+    ],
+    "scene": "q"
+  },
+  "captions": {
+    "ig_en": "AI \"improved\" your 12% to 15%? 😬 Not here.\n\n→ every number is checked against your profile after the AI writes\n→ a number that isn't yours doesn't make it onto the resume\n→ your facts, your numbers\n\nTry it free → link in bio ✅\n💬 Ever caught AI changing a number? 👇",
+    "ig_hi": "AI ne 12% ko 15% kar diya? Yahan nahi. Har number profile se check hota hai.\n\nFree try karo → link in bio",
+    "linkedin": "Language models like round, impressive numbers, and they sometimes \"improve\" yours.\n\n• every number is checked against your profile after the AI writes\n• a number that isn't yours doesn't make it onto the resume\n• your facts, your numbers\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "AI \"improved\" your 12% to 15%? Not in QuickFit CV: every number is checked against your profile after the AI writes.\n\nhttps://quickfitcv.com",
+    "comment": "Ever caught AI changing a number? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

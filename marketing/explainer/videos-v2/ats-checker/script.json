@@ -1,0 +1,144 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "reads",
+      "type": "atstext",
+      "say": "See what the ATS|actually reads.",
+      "file": "your-resume.pdf",
+      "lines": [
+        "PRIYA SHARMA",
+        "priya.sharma@example.com · +91 90000 00000",
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "Jun 2022 – Present",
+        "• Built weekly sales dashboards in Tableau…"
+      ],
+      "en": "[curious] Want to see what an ATS actually reads from your resume?"
+    },
+    {
+      "id": "checks",
+      "type": "checklist",
+      "say": "Columns, contacts,|headings, dates.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "Text an ATS can read",
+          "pass"
+        ],
+        [
+          "One column",
+          "fail"
+        ],
+        [
+          "Email and phone found",
+          "pass"
+        ],
+        [
+          "Standard headings",
+          "pass"
+        ],
+        [
+          "Dates readable",
+          "warn"
+        ]
+      ],
+      "en": "Columns, tables, contact details, headings and dates. All checked."
+    },
+    {
+      "id": "kw",
+      "type": "job",
+      "say": "Plus the job's|keywords.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "score": true,
+      "en": "Paste a job, and see which of its keywords you have."
+    },
+    {
+      "id": "free",
+      "type": "text",
+      "text": "Free. **No sign-up.**",
+      "sub": "And no made-up score out of 100.",
+      "en": "[excited] Free, no sign-up, and no made-up score."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Free ATS checker",
+      "line2": "at quickfitcv.com",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "What does the ATS",
+      "actually read?",
+      "Check free. No sign-up."
+    ],
+    "scene": "checks"
+  },
+  "captions": {
+    "ig_en": "Ever wondered what an ATS actually reads from your resume? 👀\n\nOur free ATS checker shows you:\n→ the exact text it gets\n→ columns, tables and headers that trip it up\n→ whether your email and phone are found\n→ headings and dates\n→ which of a job's keywords you have\n\nFree, no sign-up, and no made-up score out of 100 ✅\nLink in bio\n💬 Run it and tell me what it found 👇",
+    "ig_hi": "Kabhi socha ATS aapke resume se actually kya padhta hai? 👀\n\nFree ATS checker dikhata hai: exact text, columns/tables ki problem, email-phone mile ya nahi, headings, dates, aur job ke keywords.\n\nFree, no sign-up, koi fake score nahi ✅ Link in bio",
+    "linkedin": "Most \"ATS score\" tools give you a number out of 100. Real ATSs don't score you; Workday, Greenhouse, Lever and Naukri's RMS read your file into text and fields, and recruiters search that.\n\nSo our free ATS checker shows what actually matters: the exact text an ATS gets from your file, plus checks for columns, tables, contact details, headings and dates, and which of a job's keywords you have.\n\nFree, no sign-up: https://quickfitcv.com/ats-checker\n\n#ats #jobsearch #resume #recruiting",
+    "x": "Real ATSs don't give your resume a score out of 100. They read it into text, and recruiters search that.\n\nOur free checker shows that exact text, plus columns, contacts, headings, dates.\n\nNo sign-up.\n\nhttps://quickfitcv.com",
+    "comment": "Ran it? Tell me which check surprised you 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

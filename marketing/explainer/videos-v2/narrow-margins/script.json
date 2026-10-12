@@ -1,0 +1,96 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "cramped",
+      "type": "pages",
+      "en": "[curious] Two lines over a page? Try narrow margins first.",
+      "fromLabel": "1 page + 2 lines",
+      "toLabel": "1 page ✓",
+      "button": "Narrow (10 mm)",
+      "say": "2 lines over?|Narrow margins."
+    },
+    {
+      "id": "opts",
+      "type": "checklist",
+      "en": "Template margins, narrow, or custom.",
+      "items": [
+        [
+          "Template's own",
+          "pass"
+        ],
+        [
+          "Narrow (10 mm)",
+          "pass"
+        ],
+        [
+          "Custom",
+          "pass"
+        ]
+      ],
+      "say": "Margins,|your way."
+    },
+    {
+      "type": "pages",
+      "en": "Still over? Fit to one page tightens spacing, then merges lines from your own words.",
+      "fromLabel": "1 page + 4 lines",
+      "toLabel": "1 page ✓",
+      "say": "Still over?|Fit to 1 page.",
+      "id": "x1"
+    },
+    {
+      "type": "checklist",
+      "en": "Nothing new added, every number kept.",
+      "items": [
+        [
+          "Nothing new added",
+          "pass"
+        ],
+        [
+          "Every number kept",
+          "pass"
+        ],
+        [
+          "Undo any time",
+          "pass"
+        ]
+      ],
+      "say": "Your words.|Always.",
+      "id": "x2"
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "2 lines over",
+      "one page?"
+    ],
+    "scene": "cramped"
+  },
+  "captions": {
+    "ig_en": "Resume is ONE page plus 2 lines? 😩\n\n→ try narrow margins first (10 mm)\n→ or custom margins\n→ still too long? Fit to 1 page merges lines from your own words\n\nTry it free → link in bio ✅\n💬 Margins: normal or narrow? 👇",
+    "ig_hi": "Ek page + 2 line? Pehle narrow margins try karo. Phir bhi zyada? Fit to 1 page.\n\nFree try karo → link in bio",
+    "linkedin": "Spilling onto a second page by two lines is the most annoying resume problem.\n\n• try narrow margins first (10 mm)\n• or custom margins\n• still too long? Fit to 1 page merges lines from your own words\n\nOne rule throughout: QuickFit CV never adds a skill, employer, date or number that isn't yours.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers #ats",
+    "x": "Resume is one page plus 2 lines?\n\nTry narrow margins in QuickFit CV first. Still over? Fit to 1 page merges lines from your own words.\n\nhttps://quickfitcv.com",
+    "comment": "Margins: normal or narrow? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

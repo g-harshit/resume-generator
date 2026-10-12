@@ -3,7 +3,7 @@
 import fs from "fs";
 
 const [slug] = process.argv.slice(2);
-const video = new URL(`videos/${slug}/`, import.meta.url).pathname;
+const video = new URL(`${process.env.VIDEOS || "videos"}/${slug}/`, import.meta.url).pathname;
 const { captions: c, poster } = JSON.parse(fs.readFileSync(video + "script.json", "utf8"));
 if (!c) throw new Error(`${slug}: script.json has no "captions"`);
 const xLen = c.x.replace(/https?:\/\/\S+/g, "x".repeat(23)).length;

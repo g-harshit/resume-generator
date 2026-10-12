@@ -1,0 +1,70 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "blank",
+      "type": "atstext",
+      "say": "Scanned resume?|The ATS sees this.",
+      "file": "resume_scan.pdf",
+      "blank": true,
+      "en": "[incredulous] Scanned resume, or a design exported as an image? This is what an ATS sees."
+    },
+    {
+      "id": "nothing",
+      "type": "text",
+      "text": "**Nothing.**",
+      "sub": "Not your name. Not one skill.",
+      "en": "[frustrated] Nothing. Not even your name."
+    },
+    {
+      "id": "real",
+      "type": "atstext",
+      "say": "Real text,|every time.",
+      "title": "What an ATS reads",
+      "file": "priya-sharma.pdf",
+      "lines": [
+        "PRIYA SHARMA",
+        "Data Analyst · Bengaluru",
+        "EXPERIENCE",
+        "Data Analyst, Brightcart Retail",
+        "SKILLS: SQL, Python, pandas, Tableau"
+      ],
+      "en": "Every QuickFit CV PDF is real text, built to be read."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Check yours free:",
+      "line2": "quickfitcv.com",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Your resume is an image?",
+      "The ATS sees",
+      "nothing."
+    ],
+    "scene": "blank"
+  },
+  "captions": {
+    "ig_en": "If your resume is a scan, or a design exported as an image, an ATS can't read a word of it 😶\n\nNot your name. Not one skill.\n\n→ every QuickFit CV PDF is real, selectable text\n→ not sure about yours? Our free ATS checker shows exactly what an ATS reads\n\nLink in bio ✅\n💬 Ever made your resume in Canva? 👇",
+    "ig_hi": "Resume scan hai ya design image ki tarah export kiya? ATS ek shabd nahi padh sakta 😶\n\nQuickFit CV ka har PDF real text hai. Apna check karo free ATS checker se. Link in bio",
+    "linkedin": "A quiet resume problem: some PDFs contain no text at all. Scanned pages, and designs exported as images, look perfect to a person and blank to an applicant tracking system. No name, no skills, nothing for a recruiter's search to find.\n\nEvery QuickFit CV resume is real, selectable text. If you're unsure about yours, the free ATS checker shows exactly what an ATS reads from it.\n\nhttps://quickfitcv.com/ats-checker\n\n#ats #resume #jobsearch",
+    "x": "Resume exported as an image, or scanned?\n\nTo an ATS it's blank. No name, no skills.\n\nOur free checker shows exactly what an ATS reads from your file. No sign-up.\n\nhttps://quickfitcv.com",
+    "comment": "Check yours and tell me: text or blank? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

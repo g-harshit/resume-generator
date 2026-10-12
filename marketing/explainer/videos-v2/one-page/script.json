@@ -1,0 +1,83 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "fit",
+      "type": "pages",
+      "say": "Need your resume|on one page?",
+      "button": "Fit to 1 page",
+      "en": "[curious] Need your resume on one page? One click.",
+      "hold": 0.4
+    },
+    {
+      "id": "how",
+      "type": "checklist",
+      "say": "Spacing first.|Your words only.",
+      "title": "Fit to 1 page",
+      "items": [
+        [
+          "Tightens spacing and text size first",
+          "pass"
+        ],
+        [
+          "Then merges lines, **from your own words**",
+          "pass"
+        ],
+        [
+          "Never adds anything new",
+          "pass"
+        ]
+      ],
+      "en": "It tightens the spacing first, then merges lines, using only your own words."
+    },
+    {
+      "id": "vs",
+      "type": "compare",
+      "say": "No more|9-point font.",
+      "bad": [
+        "Doing it by hand",
+        "9-point font, zero margins"
+      ],
+      "good": [
+        "QuickFit CV",
+        "One page, still readable"
+      ],
+      "en": "[playful] No more nine-point font and zero margins."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Two pages?",
+      "line2": "Make it one.",
+      "en": "[warmly] That's QuickFit CV... Try it free. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Two pages?",
+      "Make it one.",
+      "One click."
+    ],
+    "scene": "fit"
+  },
+  "captions": {
+    "ig_en": "Your resume is 1.3 pages and you've been shrinking the font for an hour? 😅\n\nQuickFit CV fits it to one page in one click:\n→ tightens spacing and text size first\n→ then merges lines, from your own words only\n→ never adds anything new\n\nStill readable. Still yours ✅\nTry it free → link in bio\n💬 One page or two? What do you use? 👇",
+    "ig_hi": "Resume 1.3 page ka hai aur ek ghante se font chhota kar rahe ho? 😅\n\nQuickFit CV ek click mein one page pe fit karta hai:\n→ pehle spacing tight karta hai\n→ phir aapke hi shabdon se lines merge karta hai\n→ kuch naya add nahi karta\n\nFree try karo → link in bio",
+    "linkedin": "\"Can you keep it to one page?\" is still one of the most common resume asks, and getting there by hand usually means 9-point font and no margins.\n\nQuickFit CV's Fit to 1 page does it in one click, in a fixed order:\n• First it tightens spacing and text size\n• Then it merges lines within a role, using only your own words\n• It never adds anything new, and the result stays readable\n\nFree to try: https://quickfitcv.com\n\n#resume #jobsearch #careers",
+    "x": "Resume spilling onto page two?\n\nQuickFit CV fits it to one page in one click: spacing first, then it merges lines using only your own words. No 9-point font.\n\nhttps://quickfitcv.com",
+    "comment": "Team one-page or team two-page? 👇"
+  },
+  "minTotal": 21,
+  "endHold": 2.4,
+  "endMin": 5.0
+}

@@ -10,7 +10,7 @@ const [slug, lang = "en", f = "v"] = process.argv.slice(2).filter((a) => !a.star
 if (!slug) throw new Error("usage: node render.mjs <slug> en|hi v|h [--still]");
 const still = process.argv.includes("--still");
 const here = new URL(".", import.meta.url).pathname;
-const video = `${here}videos/${slug}/`;
+const video = `${here}${process.env.VIDEOS || "videos"}/${slug}/`;
 const out = `${video}output/${lang}/`;
 const timing = JSON.parse(fs.readFileSync(out + "timing.json", "utf8"));
 const { chromium } = createRequire(new URL("../../apps/extension/package.json", import.meta.url))("playwright");

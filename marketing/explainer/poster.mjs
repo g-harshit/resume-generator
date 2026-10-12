@@ -5,7 +5,7 @@ import { createRequire } from "module";
 
 const [slug] = process.argv.slice(2);
 if (!slug) throw new Error("usage: node poster.mjs <slug>");
-const video = new URL(`videos/${slug}/`, import.meta.url).pathname;
+const video = new URL(`${process.env.VIDEOS || "videos"}/${slug}/`, import.meta.url).pathname;
 const { chromium } = createRequire(new URL("../../apps/extension/package.json", import.meta.url))("playwright");
 fs.mkdirSync(video + "output", { recursive: true });
 

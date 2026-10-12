@@ -14,7 +14,7 @@ import { execFileSync } from "child_process";
 const [slug, lang = "en"] = process.argv.slice(2);
 if (!slug) throw new Error("usage: node voice.mjs <slug> en|hi");
 const here = new URL(".", import.meta.url).pathname;
-const video = `${here}videos/${slug}/`;
+const video = `${here}${process.env.VIDEOS || "videos"}/${slug}/`;
 const out = `${video}output/${lang}/`;
 fs.mkdirSync(out, { recursive: true });
 const script = JSON.parse(fs.readFileSync(video + "script.json", "utf8"));
