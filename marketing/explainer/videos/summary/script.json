@@ -1,0 +1,65 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "same",
+      "type": "resume",
+      "say": "Same summary|for every job?",
+      "who": "Priya Sharma · Data Analyst",
+      "heading": "Summary",
+      "lines": [
+        "Data analyst with 4 years of experience turning sales and customer data into reports."
+      ],
+      "en": "[curious] Same summary at the top of every application?"
+    },
+    {
+      "id": "fit",
+      "type": "rewrite",
+      "say": "Rewritten|for this job.",
+      "label": "Summary · for Senior Data Analyst, Northwind",
+      "before": "Data analyst with 4 years of experience turning sales and customer data into reports.",
+      "after": "Data analyst with 4 years in retail and e-commerce, focused on **customer retention** and **A/B testing**.",
+      "tall": true,
+      "done": "✓ Only from what's in this resume",
+      "en": "QuickFit CV rewrites it for each job, only from what's in your resume."
+    },
+    {
+      "id": "len",
+      "type": "text",
+      "text": "Shorter. Same. **Longer.**",
+      "sub": "You pick the length.",
+      "en": "Shorter, same, or longer. You pick."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "A summary for this job,",
+      "line2": "true to your resume.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Same summary",
+      "for every job?"
+    ],
+    "scene": "fit"
+  },
+  "captions": {
+    "ig_en": "The summary is the first thing a recruiter reads. Is yours the same for every job? 🤔\n\nQuickFit CV rewrites it for each job:\n→ leads with what that job cares about\n→ only from what's already in your resume\n→ shorter, same length or longer, you pick\n\nTry it free → link in bio\n💬 Do you even have a summary on your resume? 👇",
+    "ig_hi": "Summary recruiter sabse pehle padhta hai. Kya aapki har job ke liye same hai? 🤔\n\nQuickFit CV har job ke liye rewrite karta hai, sirf aapke resume mein jo hai usse. Free try karo → link in bio",
+    "linkedin": "The summary at the top of a resume is the most-read paragraph on it, and the one people most often leave unchanged between applications.\n\nQuickFit CV rewrites it for each job: same facts, ordered around what that role cares about. It works only from what's already in your resume, and you choose shorter, the same length or longer.\n\nFree to try: https://quickfitcv.com\n\n#resume #jobsearch #careers",
+    "x": "Your resume summary is the first thing a recruiter reads.\n\nQuickFit CV rewrites it for each job, only from what's already in your resume. Shorter or longer, you pick.\n\nhttps://quickfitcv.com",
+    "comment": "Summary on your resume: yes or no? 👇"
+  }
+}

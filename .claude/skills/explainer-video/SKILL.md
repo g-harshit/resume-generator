@@ -26,8 +26,27 @@ over the clip, and the clips are mixed in at each scene's start. A Hinglish vers
 `voice.mjs <slug> hi` then the same renders — no scene changes. A full render takes a few
 minutes per shape; run it in the background.
 
-`videos/ats-rejected/` is the first one (the ATS problem → QuickFit CV → never invents
-skills). Start every new video by copying it.
+### Kit-built videos (the default)
+
+Most videos need no HTML at all: `marketing/explainer/kit.html` builds scenes from
+`script.json`. Each scene names a `type` and its parameters, plus `say` (the headline,
+"line one|line two", each line ≤ 19 characters or it wraps), `en`/`hi` (the voice) and an
+optional `hold`. Types: `stat`, `resume`, `job`, `paste`, `rewrite`, `missing`, `ihave`,
+`compare`, `chat`, `strike`, `checklist`, `pages`, `templates`, `atstext`, `letter`,
+`steps`, `text`, `end` — read their parameters in the kit's `B` object, and copy a scene
+from any `videos/*/script.json` that uses the type. The script also carries `poster`
+(`head`: up to three lines, the third in red; `scene`: whose finished visual to show) and
+`captions` (`ig_en`, `ig_hi`, `linkedin`, `x`, `comment`). Each type has a minimum time on
+screen, so short lines still let the animation land.
+
+```bash
+marketing/explainer/batch.sh [slug …]          # voices (one at a time), stills, posters, captions.md
+marketing/explainer/batch.sh render [slug …]   # both MP4s, three videos in parallel
+```
+
+Without slugs, batch.sh does every kit-built video. Review every still and poster before
+`render`. A video with its own `scenes.html`/`poster.html` (`ats-rejected`, `fake-skills`)
+uses those instead — only for visuals the kit can't do; better to add a type to the kit.
 
 ## Making one
 
@@ -78,7 +97,8 @@ skills). Start every new video by copying it.
    - `captions.md`: Instagram in English and Hinglish (hook line first, the steps, "link
      in bio", a comment prompt, 8 hashtags), X (≤ 280 counting the link as 23; check it),
      LinkedIn (founder voice, the honesty rule stated plainly), and a first comment to pin.
-7. Commit `script.json`, `scenes.html`, `poster.html` and `captions.md` (never `output/`).
+7. Commit `script.json`, `captions.md` (and `scenes.html`/`poster.html` where a video has
+   them), never `output/`.
 
 ## Rules
 

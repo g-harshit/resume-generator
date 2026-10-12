@@ -1,0 +1,78 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "three",
+      "type": "steps",
+      "say": "3 things an ATS|needs from you.",
+      "items": [
+        "Email and phone **in the body**",
+        "**Standard headings**: Experience, Skills",
+        "**Dates** on every role"
+      ],
+      "en": "[confident] Three things an ATS needs from your resume. Contact details in the body, standard headings, and dates on every role."
+    },
+    {
+      "id": "checks",
+      "type": "checklist",
+      "say": "QuickFit CV checks|every resume.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "One column, real text, standard headings",
+          "pass"
+        ],
+        [
+          "Email and phone in the body",
+          "pass"
+        ],
+        [
+          "Every role has dates",
+          "pass"
+        ],
+        [
+          "Fits on one page",
+          "pass"
+        ]
+      ],
+      "en": "QuickFit CV checks all of them, on every resume."
+    },
+    {
+      "id": "tpl",
+      "type": "templates",
+      "say": "Every template|follows them.",
+      "en": "And every template follows them."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "ATS basics,",
+      "line2": "handled.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "3 things an ATS",
+      "needs from your resume"
+    ],
+    "scene": "three"
+  },
+  "captions": {
+    "ig_en": "3 things an ATS needs from your resume 📌 Save this.\n\n1️⃣ Email and phone in the body, not in a header (many ATSs skip headers)\n2️⃣ Standard headings: Experience, Education, Skills\n3️⃣ Dates on every role\n\nQuickFit CV checks all three on every resume, and every template follows them ✅\nLink in bio\n💬 Which one were you missing? 👇",
+    "ig_hi": "ATS ko aapke resume se 3 cheezein chahiye 📌 Save karo.\n\n1️⃣ Email aur phone body mein, header mein nahi\n2️⃣ Standard headings: Experience, Education, Skills\n3️⃣ Har role pe dates\n\nQuickFit CV har resume pe teeno check karta hai. Link in bio",
+    "linkedin": "Three resume basics that applicant tracking systems depend on, and that fancy templates often break:\n\n1. Contact details in the body. Many ATSs skip headers, footers and text boxes, and your email goes with them.\n2. Standard headings. \"Experience\", \"Education\", \"Skills\", not \"Where I've made an impact\".\n3. Dates on every role, in a readable format, so your experience sorts correctly.\n\nQuickFit CV checks all three on every resume, and every template is built around them.\n\nhttps://quickfitcv.com\n\n#ats #resume #jobsearch #careertips",
+    "x": "3 things an ATS needs from your resume:\n\n1. Email and phone in the body, not a header\n2. Standard headings\n3. Dates on every role\n\nQuickFit CV checks all three on every resume.\n\nhttps://quickfitcv.com",
+    "comment": "Save this and send it to a friend who's job hunting 🔖"
+  }
+}

@@ -21,8 +21,11 @@ const FPS = 30;
 const b = await chromium.launch();
 const p = await b.newPage({ viewport: { width: W, height: H } });
 p.on("pageerror", (e) => console.log("pageerror", e.message));
-await p.addInitScript((t) => (window.__TIMING = t), timing);
-await p.goto(`file://${video}scenes.html?f=${f}`);
+// A video with its own scenes.html uses it; otherwise the kit builds the scenes from the script.
+const script = JSON.parse(fs.readFileSync(video + "script.json", "utf8"));
+const page = fs.existsSync(video + "scenes.html") ? `${video}scenes.html` : `${here}kit.html`;
+await p.addInitScript(([t, s]) => { window.__TIMING = t; window.__SCRIPT = s; }, [timing, script]);
+await p.goto(`file://${page}?f=${f}`);
 await p.waitForFunction(() => window.READY, null, { timeout: 60000 });
 const { duration, starts } = await p.evaluate(() => ({ duration: window.DURATION, starts: window.STARTS }));
 const stage = p.locator("#stage");

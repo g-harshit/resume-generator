@@ -1,0 +1,133 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "job",
+      "type": "job",
+      "say": "5 of 11 skills.|Not enough.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "score": true,
+      "en": "[disappointed] Five of eleven skills. Not good enough."
+    },
+    {
+      "id": "line",
+      "type": "rewrite",
+      "say": "This line IS|retention analysis.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        6,
+        11
+      ],
+      "en": "But this line is retention analysis. Say it in the job's words."
+    },
+    {
+      "id": "cohort",
+      "type": "ihave",
+      "say": "Really did it?|Add it, your words.",
+      "skill": "cohort analysis",
+      "where": "Data Analyst at Brightcart Retail",
+      "words": "Built monthly cohort reports on repeat buyers for the loyalty team.",
+      "en": "Really did cohort analysis? Add it, in your own words.",
+      "hold": 0.6
+    },
+    {
+      "id": "rest",
+      "type": "missing",
+      "say": "7 of 11.|Zero lies.",
+      "rows": [
+        [
+          "Looker",
+          "must have"
+        ],
+        [
+          "dbt",
+          "nice to have"
+        ],
+        [
+          "BigQuery",
+          "nice to have"
+        ]
+      ],
+      "stamp": "7 OF 11 · TRUE",
+      "en": "[confident] Seven of eleven. Zero lies."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "More matches.",
+      "line2": "No made-up skills.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "5 of 11 → 7 of 11",
+      "without a single lie."
+    ],
+    "scene": "rest"
+  },
+  "captions": {
+    "ig_en": "My resume matched 5 of the job's 11 skills. Here's how it got to 7, without making anything up ✅\n\n→ one line already described retention analysis, so we said it in the job's words\n→ I really did cohort analysis, so I added it in my own words\n→ Looker, dbt, BigQuery? I don't have them. They stay missing.\n\n7 of 11 that I can defend in any interview.\nTry it free → link in bio\n💬 Would you rather have 7 true or 11 padded? 👇",
+    "ig_hi": "Resume job ki 11 mein se 5 skills match karta tha. Bina kuch fake kiye 7 kaise hua ✅\n\n→ ek line pehle se retention analysis thi, job ke shabdon mein likha\n→ cohort analysis sach mein kiya tha, apne shabdon mein add kiya\n→ Looker, dbt, BigQuery nahi aata, toh missing hi rahe\n\nFree try karo → link in bio",
+    "linkedin": "Here's a resume going from 5 of a job's 11 skills to 7 of 11, without a single invented line:\n\n1. One bullet already described retention analysis (\"found why repeat purchases dropped\"), so it now says so, in the job's words.\n2. The candidate really had done cohort analysis, so they added it themselves, in their own words, with where they did it.\n3. Looker, dbt and BigQuery stayed missing, because they don't have them.\n\n7 of 11 that hold up in an interview beats 11 of 11 that don't. That's the rule QuickFit CV is built on.\n\nhttps://quickfitcv.com\n\n#jobsearch #resume #ats #careers",
+    "x": "5 of 11 skills → 7 of 11, with zero invented lines:\n\n→ name what your lines already prove\n→ add what you really did, in your words\n→ leave the rest missing\n\nhttps://quickfitcv.com",
+    "comment": "7 true skills or 11 padded ones: which gets the offer? 👇"
+  }
+}

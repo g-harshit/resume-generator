@@ -1,0 +1,73 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "every",
+      "type": "text",
+      "text": "Every line on your resume is an **interview question**.",
+      "en": "[serious] Every line on your resume is an interview question."
+    },
+    {
+      "id": "real",
+      "type": "chat",
+      "say": "Real line?|Easy answer.",
+      "q": "Tell me about the 12% lift in repeat orders.",
+      "a": "We found why repeat purchases dropped, then changed the loyalty program.",
+      "en": "[confident] A real line? Easy answer."
+    },
+    {
+      "id": "padded",
+      "type": "chat",
+      "say": "Padded line?|Good luck.",
+      "q": "Walk me through your dbt models.",
+      "a": "… Uh…",
+      "stamp": "REJECTED",
+      "en": "[nervous] A padded line? Good luck."
+    },
+    {
+      "id": "vs",
+      "type": "compare",
+      "say": "Only what's true.|Every answer easy.",
+      "bad": [
+        "Padded resume",
+        "Questions you can't answer"
+      ],
+      "good": [
+        "QuickFit CV",
+        "Every line, yours to explain"
+      ],
+      "en": "QuickFit CV only uses what's true, so every answer is easy."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Every line,",
+      "line2": "yours to explain.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Every line on your resume",
+      "is an interview question."
+    ],
+    "scene": "real"
+  },
+  "captions": {
+    "ig_en": "Every line on your resume is an interview question 🎯\n\nReal line → easy answer.\nPadded line → \"so… walk me through your dbt models?\" 😬\n\nQuickFit CV tailors your resume to each job using only what's true, so every line is one you can explain.\n\nTry it free → link in bio\n💬 Hardest resume question you've been asked? 👇",
+    "ig_hi": "Resume ki har line ek interview question hai 🎯\n\nSach wali line → aasaan jawab. Fake line → \"toh… apne dbt models samjhao?\" 😬\n\nQuickFit CV sirf sach use karta hai. Free try karo → link in bio",
+    "linkedin": "A simple test before you send a resume: could you talk for two minutes about every line on it?\n\nInterviewers prepare by reading your resume, and every bullet is a potential question. Real work gives you easy, specific answers. Padded lines, often added by tools trying to match keywords, give you the awkward ones.\n\nQuickFit CV tailors resumes using only what's in your profile, so every line is one you can explain.\n\nhttps://quickfitcv.com\n\n#interviewtips #jobsearch #resume #hiring",
+    "x": "Every line on your resume is an interview question.\n\nReal line: easy answer. Padded line: \"walk me through your dbt models?\"\n\nQuickFit CV tailors with only what's true.\n\nhttps://quickfitcv.com",
+    "comment": "Hiring managers: which resume line do you always ask about? 👇"
+  }
+}

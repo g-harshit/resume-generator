@@ -1,0 +1,65 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "fluff",
+      "type": "resume",
+      "say": "Results-driven|team player?",
+      "who": "Priya Sharma · Data Analyst",
+      "heading": "Summary",
+      "lines": [
+        "**Results-driven** team player with **excellent communication skills**."
+      ],
+      "en": "[playful] Results-driven team player with excellent communication skills? Everyone says that."
+    },
+    {
+      "id": "nums",
+      "type": "text",
+      "text": "**40** store managers. **12%** more repeat orders. **2 days → 3 hours**.",
+      "sub": "Your numbers say it better.",
+      "en": "Your numbers say it better."
+    },
+    {
+      "id": "proof",
+      "type": "rewrite",
+      "say": "Same skill,|with proof.",
+      "label": "Summary",
+      "before": "Results-driven analyst with strong reporting skills.",
+      "after": "Data analyst who built dashboards for **40 store managers** and cut a monthly report from **2 days to 3 hours**.",
+      "tall": true,
+      "en": "QuickFit CV writes with your real numbers, never new ones."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Fewer buzzwords.",
+      "line2": "More proof.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Results-driven",
+      "team player?",
+      "Show the numbers."
+    ],
+    "scene": "proof"
+  },
+  "captions": {
+    "ig_en": "\"Results-driven team player with excellent communication skills\" 🥱\n\nEveryone writes it. Nobody believes it.\n\nYour real numbers say it better:\n→ 40 store managers used the dashboards\n→ repeat orders up 12%\n→ a report cut from 2 days to 3 hours\n\nQuickFit CV writes with your numbers, never new ones ✅\nTry it free → link in bio\n💬 Drop your most-used resume buzzword 👇",
+    "ig_hi": "\"Results-driven team player\" 🥱 sab likhte hain, koi believe nahi karta.\n\nAapke real numbers zyada bolte hain. QuickFit CV aapke hi numbers use karta hai, naye kabhi nahi. Free try karo → link in bio",
+    "linkedin": "\"Results-driven team player with excellent communication skills\" appears on a remarkable number of resumes, and it tells a reader nothing.\n\nCompare: \"built dashboards used by 40 store managers\" and \"cut a monthly report from 2 days to 3 hours\". Specific, checkable, memorable.\n\nWhen QuickFit CV rewrites a line or a summary, it works from the numbers already in your profile. It never introduces a number you didn't give it.\n\nhttps://quickfitcv.com\n\n#resume #jobsearch #careers #writing",
+    "x": "\"Results-driven team player\" says nothing.\n\n\"Dashboards for 40 store managers; a report cut from 2 days to 3 hours\" says everything.\n\nQuickFit CV writes with your real numbers, never new ones.\n\nhttps://quickfitcv.com",
+    "comment": "Most overused resume buzzword? 👇"
+  }
+}

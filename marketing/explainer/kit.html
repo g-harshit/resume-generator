@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>QuickFit CV video kit</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<!--
+  The scene kit. A video is only its script.json: each scene names a "type" from the
+  builders below and the parameters for it; this page builds the scenes, times them to the
+  voice (window.__TIMING) and exposes seek() for render.mjs. With ?poster=v|p|h it lays out
+  a poster instead: the script's poster headline beside one scene's finished visual.
+-->
+<style>
+  :root {
+    --ground: #f7f6f2; --surface: #fff; --sunken: #efede6; --line: #dedad0; --ink: #17181c; --muted: #8a8d93;
+    --accent: #2f5d50; --accent-soft: #e3ede8; --accent-ink: #1f463c; --warn: #c66a1e; --warn-soft: #fbebdd; --warn-ink: #7a3e0e;
+    --red: #d62828;
+    --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace; --serif: "Instrument Serif", Georgia, serif;
+  }
+  html, body { margin: 0; background: #222; }
+  #stage { position: relative; overflow: hidden; background: var(--ground); font-family: var(--sans); color: var(--ink); }
+  #stage.h { width: 1920px; height: 1080px; }
+  #stage.v { width: 1080px; height: 1920px; }
+  .scene { position: absolute; inset: 0; opacity: 0; }
+
+  .copy { position: absolute; font-weight: 500; letter-spacing: -1.5px; }
+  .h .copy { left: 120px; width: 780px; top: 50%; transform: translateY(-50%); font-size: 80px; line-height: 1.08; }
+  .v .copy { left: 84px; right: 84px; top: 250px; font-size: 86px; line-height: 1.08; }
+  .copy .l2 { color: var(--muted); display: block; }
+  .copy .w { display: inline-block; opacity: 0; }
+
+  .vis { position: absolute; width: 860px; height: 860px; }
+  .h .vis { left: 960px; top: 220px; }
+  .v .vis { left: 110px; top: 720px; transform-origin: 50% 0; scale: 1.12; }
+  .abs { position: absolute; }
+
+  .card { background: var(--surface); border-radius: 22px; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 24px 60px rgba(23,24,28,.12); box-sizing: border-box; }
+  .label { font: 600 20px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .bar { height: 12px; border-radius: 6px; background: #e4e1d8; margin: 12px 0; }
+  .bar.dark { background: var(--ink); height: 18px; width: 55%; margin-bottom: 20px; }
+  .doc { width: 230px; height: 300px; padding: 26px 24px; }
+  .doc .tag { position: absolute; left: 18px; right: 18px; bottom: 16px; font: 500 15px var(--mono); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 12px 22px; font: 600 26px/1 var(--sans); margin: 7px; background: var(--sunken); color: var(--ink); border: 3px solid var(--sunken); }
+  .chip .tick { display: inline-block; width: 0; opacity: 0; overflow: hidden; }
+  .chip.ok { background: #e3ede8; border-color: #e3ede8; color: #1f463c; }
+  .chip.miss { background: #fbebdd; border: 3px dashed #c66a1e; color: #7a3e0e; }
+  .chip.hl { background: #fff4c2; border-color: #e0b400; }
+  .stamp { font: 700 64px/1 var(--mono); letter-spacing: 6px; color: var(--red); border: 7px solid var(--red); border-radius: 14px; padding: 14px 26px; background: rgba(255,255,255,.88); white-space: nowrap; }
+  .stamp.good { color: var(--accent); border-color: var(--accent); }
+  .big { font: 600 200px/1 var(--mono); letter-spacing: -6px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: #fff; border-radius: 14px; font: 600 28px var(--sans); height: 72px; padding: 0 34px; }
+  .tap { position: absolute; width: 70px; height: 70px; margin: -35px 0 0 -35px; border-radius: 50%; background: rgba(47,93,80,.3); border: 4px solid var(--accent); opacity: 0; }
+  .bubble { border-radius: 30px; padding: 30px 36px; box-sizing: border-box; font: 400 36px/1.35 var(--sans); }
+  .who { font: 600 20px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+  mark { background: #ffe08a; color: inherit; border-radius: 6px; padding: 0 4px; }
+  .ico { width: 54px; height: 54px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font: 700 30px var(--sans); color: #fff; flex-shrink: 0; }
+
+  /* posters */
+  #poster { position: relative; overflow: hidden; background: var(--ground); font-family: var(--sans); color: var(--ink); box-sizing: border-box; display: none; }
+  #poster.v { width: 1080px; height: 1920px; flex-direction: column; justify-content: center; align-items: center; gap: 70px; padding: 0 80px; }
+  #poster.p { width: 1080px; height: 1350px; flex-direction: column; justify-content: center; align-items: center; gap: 60px; padding: 0 80px; }
+  #poster.h { width: 1920px; height: 1080px; flex-direction: row; align-items: center; gap: 60px; padding: 0 90px; }
+  #poster .head { font-weight: 600; letter-spacing: -3px; line-height: 1.04; }
+  #poster.v .head, #poster.p .head { font-size: 96px; text-align: center; }
+  #poster.h .head { font-size: 84px; flex: 0 0 820px; margin-bottom: 110px; }
+  #poster .head .l2 { color: var(--muted); display: block; }
+  #poster .head .red { color: var(--red); display: block; font-size: .62em; letter-spacing: -1px; margin-top: 16px; }
+  #poster .holder { position: relative; width: 860px; flex-shrink: 0; }
+  #poster .holder .vis { position: absolute; left: 0; top: 0; scale: 1; }
+  #poster .brand { display: flex; align-items: center; gap: 16px; font: 58px/1 var(--serif); }
+  #poster.h .brand { position: absolute; left: 90px; bottom: 70px; font-size: 52px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="poster"></div>
+<script>
+const params = new URLSearchParams(location.search);
+const SCRIPT = window.__SCRIPT || { scenes: [{ id: "end", type: "end", en: "" }] };
+const posterMode = params.get("poster");
+const stage = document.getElementById("stage");
+stage.className = (posterMode || params.get("f")) === "h" ? "h" : "v";
+const V = stage.className === "v";
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
+const LOGO = '<path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#2f5d50"/><path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/><path d="M21 24H37M21 31H43" stroke="#f7f6f2" stroke-width="3.2" stroke-linecap="round" fill="none"/><path d="M22 43L28.5 49.5L42 36" stroke="#f7f6f2" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>';
+const logo = (px) => `<svg width="${px}" height="${px}" viewBox="0 0 64 64">${LOGO}</svg>`;
+const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+// **word** in a parameter becomes a highlight.
+const md = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<mark>$1</mark>");
+const doc = (tag = "") => `<div class="card doc abs"><div class="bar dark"></div><div class="bar" style="width:90%"></div><div class="bar" style="width:75%"></div><div class="bar" style="width:85%"></div><div class="bar" style="width:60%"></div><div class="bar" style="width:80%"></div><div class="tag">${esc(tag)}</div></div>`;
+const chipHTML = ([k, state]) => `<span class="chip" data-state="${state ?? ""}"><span class="tick">✓&nbsp;</span>${esc(k)}</span>`;
+
+const tl = gsap.timeline({ paused: true });
+const counter = (el, from, to, at, d, fmt = (v) => Math.round(v)) => {
+  const o = { v: from };
+  tl.to(o, { v: to, duration: d, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v)) }, at);
+};
+const stampIn = (el, at) => tl.fromTo(el, { opacity: 0, scale: 2.4, rotation: -14 }, { opacity: 1, scale: 1, rotation: -6, duration: 0.25, ease: "power4.in" }, at);
+const tapAt = (s, x, y, at) => { const t = $(".tap", s); tl.set(t, { left: x, top: y }, at); tl.fromTo(t, { opacity: 1, scale: 0.4 }, { opacity: 0, scale: 1.6, duration: 0.4 }, at); };
+// A chip turns matched (green, ✓) or missing (dashed orange) at a moment.
+const chipState = (c, at, instant) => {
+  const st = c.dataset.state, d = instant ? 0 : 0.15, fn = instant ? "set" : "to";
+  if (st === "ok" || st === "1") {
+    tl[fn](c, { backgroundColor: "#e3ede8", borderColor: "#e3ede8", color: "#1f463c", ...(d ? { duration: d } : {}) }, at);
+    tl[fn]($(".tick", c), { width: "1.05em", opacity: 1, ...(d ? { duration: d } : {}) }, at);
+  } else if (st === "miss" || st === "0") {
+    tl.set(c, { borderStyle: "dashed" }, at);
+    tl[fn](c, { backgroundColor: "#fbebdd", borderColor: "#c66a1e", color: "#7a3e0e", ...(d ? { duration: d } : {}) }, at);
+  } else if (st === "hl") {
+    tl[fn](c, { backgroundColor: "#fff4c2", borderColor: "#e0b400", ...(d ? { duration: d } : {}) }, at);
+  }
+};
+
+// ---------------------------------------------------------------------------------------
+// Scene types. Each returns the visual's HTML and anim(s, at, d): its animations, placed at
+// the scene's start `at`, within its duration `d`.
+const B = {
+  // A counter, optionally over a pile of resumes. {n, from, label, docs, tag}
+  stat: (p) => ({
+    html: (p.docs ? Array.from({ length: 7 }, () => doc(p.tag || "resume.pdf")).join("") : "") +
+      `<div class="card abs counter" style="${p.docs ? "left:250px;top:600px;width:360px;padding:26px 34px" : "left:80px;top:180px;width:700px;padding:50px 40px"};text-align:center">
+        <div style="font:600 ${p.docs ? 110 : String(p.n).length + (p.suffix || "").length > 3 ? 150 : 220}px/1 var(--mono);letter-spacing:-4px;white-space:nowrap;color:${p.color || "var(--ink)"}"><span class="n">${p.from ?? 0}</span>${esc(p.suffix || "")}</div>
+        <div class="label" style="margin-top:14px;font-size:${p.docs ? 20 : 26}px">${esc(p.label || "")}</div></div>`,
+    anim(s, at, d) {
+      const docs = $$(".doc", s);
+      docs.forEach((el, i) => gsap.set(el, { left: 315 + (i % 2 ? 8 : -8) * i * 0.6, top: 150 - i * 6, rotation: (i % 2 ? 1 : -1) * (2 + i * 1.3) }));
+      if (docs.length) tl.fromTo(docs, { y: -500, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.in", stagger: 0.15 }, at);
+      counter($(".n", s), p.from ?? 0, p.n, at, Math.max(0.6, d - 0.5));
+    },
+  }),
+  // A resume card. {who, skills:[[k, ""|"hl"|"ok"|"miss"]], lines:[…], badge, reveal: 0–1}
+  resume: (p) => ({
+    html: `<div class="card abs" style="left:0;top:40px;width:860px;padding:40px 44px">
+      <div class="label">${esc(p.who || "Priya Sharma · Data Analyst")}</div>
+      ${p.skills ? `<div style="font:600 30px var(--sans);margin-top:24px">Skills</div><div style="margin:10px -7px 0">${p.skills.map(chipHTML).join("")}</div>` : ""}
+      ${p.lines ? `<div style="font:600 30px var(--sans);margin-top:24px">${esc(p.heading || "Experience")}</div>${p.lines.map((l) => `<div class="ln" style="font:400 31px/1.45 var(--sans);margin-top:10px">• ${md(l)}</div>`).join("")}` : ""}
+      ${p.badge ? `<div class="badge abs" style="right:30px;top:28px;background:var(--ink);color:#fff;border-radius:999px;padding:12px 20px;font:600 24px var(--sans)">${esc(p.badge)}</div>` : ""}
+      ${p.stamp ? `<div class="stamp abs" style="right:40px;bottom:-40px">${esc(p.stamp)}</div>` : ""}</div>`,
+    anim(s, at, d) {
+      const when = at + Math.max(0.6, d * (p.reveal ?? 0.5));
+      $$(".chip", s).forEach((c) => chipState(c, p.badge ? when : at + 0.2, false));
+      if (p.badge) tl.fromTo($(".badge", s), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, when);
+      tl.fromTo($$("mark", s), { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.25 }, p.badge ? when : at + 0.5);
+      tl.fromTo($$(".ln", s), { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.12 }, at);
+      if (p.stamp) stampIn($(".stamp", s), at + d * 0.65);
+    },
+  }),
+  // A job posting: skills scanned, matched or missing, a score, maybe a stamp.
+  // {title, company, chips:[[k, 1|0]], score:true, stamp}
+  job: (p) => ({
+    html: `<div class="card abs" style="left:0;top:40px;width:860px;padding:40px 42px">
+      <div class="label">job posting</div>
+      <div style="font:600 44px/1.15 var(--sans);margin-top:14px">${esc(p.title || "Senior Data Analyst")}</div>
+      <div style="font:400 28px var(--sans);color:var(--muted);margin-top:6px">${esc(p.company || "Northwind Commerce · Bengaluru")}</div>
+      <div style="margin:26px -7px 0">${(p.chips || []).map(chipHTML).join("")}</div>
+      <div class="scan abs" style="left:0;top:0;bottom:0;width:8px;background:linear-gradient(var(--accent),#7fb8a4);border-radius:4px;opacity:0;box-shadow:0 0 40px 10px rgba(47,93,80,.35)"></div>
+      ${p.stamp ? `<div class="stamp abs" style="right:36px;top:40px;font-size:46px">${esc(p.stamp)}</div>` : ""}</div>
+      ${p.score ? `<div class="card abs score" style="left:250px;top:610px;width:360px;padding:26px 0;text-align:center"><div style="font:600 110px/1 var(--mono);letter-spacing:-3px"><span class="n" style="color:var(--warn)">0</span><span style="color:var(--muted)">/${(p.chips || []).length}</span></div><div class="label" style="margin-top:12px">skills matched</div></div>` : ""}`,
+    anim(s, at, d) {
+      const cs = $$(".chip", s);
+      tl.fromTo(cs, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.2, stagger: 0.03, ease: "back.out(2)" }, at);
+      tl.fromTo($(".scan", s), { left: 0, opacity: 0 }, { left: 852, opacity: 1, duration: 0.9, ease: "power1.inOut" }, at + 0.35);
+      tl.to($(".scan", s), { opacity: 0, duration: 0.15 }, at + 1.25);
+      cs.forEach((c, i) => chipState(c, at + 0.45 + (i / cs.length) * 0.8));
+      if (p.score) {
+        tl.fromTo($(".score", s), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, at + 1.2);
+        counter($(".score .n", s), 0, cs.filter((c) => c.dataset.state === "1").length, at + 1.25, 0.6);
+      }
+      if (p.stamp) stampIn($(".stamp", s), at + Math.max(2.0, d * 0.62));
+    },
+  }),
+  // Paste the job, read it, the found skills pop in. {chips:[[k,1|0]]}
+  paste: (p) => ({
+    html: `<div class="card abs" style="left:0;top:0;width:860px;padding:36px 40px">
+        <div style="font:600 26px var(--sans)">Paste the job description</div>
+        <div style="margin-top:16px;border:2px solid var(--line);border-radius:14px;height:170px;padding:18px 22px;box-sizing:border-box;overflow:hidden">
+          <div class="bar dark tb" style="width:62%;height:14px"></div><div class="bar tb" style="width:92%"></div><div class="bar tb" style="width:84%"></div><div class="bar tb" style="width:88%"></div><div class="bar tb" style="width:58%"></div></div>
+        <div class="btn read" style="margin-top:22px">Read the job</div></div>
+      <div class="card abs found" style="left:0;top:410px;width:860px;padding:32px 33px"><div class="label" style="margin-left:7px">what we found</div><div style="margin-top:14px">${(p.chips || []).map(chipHTML).join("")}</div></div>
+      <div class="tap"></div>`,
+    anim(s, at, d) {
+      tl.fromTo($$(".tb", s), { scaleX: 0, transformOrigin: "left" }, { scaleX: 1, duration: 0.15, stagger: 0.06 }, at);
+      tapAt(s, 140, 302, at + 0.45);
+      tl.to($(".read", s), { scale: 0.95, duration: 0.06, yoyo: true, repeat: 1 }, at + 0.45);
+      tl.fromTo($(".found", s), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.3 }, at + 0.6);
+      $$(".chip", s).forEach((c, i) => {
+        const when = at + 0.7 + i * 0.06;
+        tl.fromTo(c, { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, when);
+        chipState(c, when, true);
+      });
+    },
+  }),
+  // One line, before and after. {label, before, after, done, ring:[from,to,total]}
+  rewrite: (p) => ({
+    html: `<div class="card abs" style="left:0;top:40px;width:860px;padding:38px 42px">
+        <div class="label">${esc(p.label || "Brightcart Retail · line 2")}</div>
+        <div style="position:relative;height:${p.tall ? 260 : 200}px;margin-top:22px;font:400 36px/1.4 var(--sans)">
+          <div class="before abs" style="inset:0">${md(p.before)}</div>
+          <div class="after abs" style="inset:0;opacity:0">${md(p.after)}</div></div>
+        <div class="done" style="font:600 26px var(--sans);color:var(--accent);opacity:0">${esc(p.done || "✓ Reworded for this job · same facts")}</div></div>
+      ${p.ring ? `<div class="card abs" style="left:160px;top:${p.tall ? 530 : 470}px;width:540px;height:230px;display:flex;align-items:center;gap:34px;padding:0 40px">
+        <svg width="160" height="160" viewBox="0 0 160 160" style="flex-shrink:0"><circle cx="80" cy="80" r="66" fill="none" stroke="var(--sunken)" stroke-width="16"></circle>
+        <circle class="ring" cx="80" cy="80" r="66" fill="none" stroke="var(--accent)" stroke-width="16" stroke-linecap="round" transform="rotate(-90 80 80)" stroke-dasharray="414.69" stroke-dashoffset="${414.69 * (1 - p.ring[0] / p.ring[2])}"></circle>
+        <text x="80" y="92" text-anchor="middle" style="font:600 36px var(--mono)"><tspan class="n">${p.ring[0]}</tspan>/${p.ring[2]}</text></svg>
+        <div style="font:600 32px/1.2 var(--sans)">Job keywords<br>covered</div></div>` : ""}`,
+    anim(s, at, d) {
+      const t0 = at + Math.min(0.9, d * 0.25);
+      tl.to($(".before", s), { opacity: 0, duration: 0.25 }, t0);
+      tl.fromTo($(".after", s), { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.35 }, t0 + 0.1);
+      tl.fromTo($$(".after mark", s), { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.35 }, t0 + 0.3);
+      tl.fromTo($(".done", s), { opacity: 0 }, { opacity: 1, duration: 0.3 }, t0 + 0.5);
+      if (p.ring) {
+        const C = 414.69;
+        tl.fromTo($(".ring", s), { strokeDashoffset: C * (1 - p.ring[0] / p.ring[2]) }, { strokeDashoffset: C * (1 - p.ring[1] / p.ring[2]), duration: 0.7, ease: "power2.out" }, t0 + 0.6);
+        counter($("tspan.n", s), p.ring[0], p.ring[1], t0 + 0.6, 0.7);
+      }
+    },
+  }),
+  // Skills the resume doesn't have. {title, rows:[[k, why]], note}
+  missing: (p) => ({
+    html: `<div class="card abs" style="left:0;top:60px;width:860px;padding:36px 40px;background:#fdf3ea">
+        <div style="font:600 32px var(--sans);color:var(--warn-ink)">${esc(p.title || "Not in this resume yet")}</div>
+        <div style="margin-top:14px">${(p.rows || []).map(([k, why]) => `<div class="row" style="display:flex;align-items:center;justify-content:space-between;padding:22px 0;border-top:2px solid #f3dcc6"><span style="font:600 38px var(--sans);color:var(--warn-ink)">${esc(k)} <span style="font-weight:400;font-size:28px">· ${esc(why)}</span></span><span style="border:3px dashed var(--warn);color:var(--warn-ink);border-radius:999px;padding:10px 22px;font:600 26px var(--sans)">missing</span></div>`).join("")}</div></div>
+      ${p.note ? `<div class="note abs" style="left:0;right:0;top:${120 + 110 * (p.rows || []).length + 70}px;text-align:center;font:600 34px var(--sans);color:var(--warn-ink)">${esc(p.note)}</div>` : ""}
+      ${p.stamp ? `<div class="stamp good abs" style="left:150px;top:${120 + 110 * (p.rows || []).length + 140}px">${esc(p.stamp)}</div>` : ""}`,
+    anim(s, at, d) {
+      tl.fromTo($$(".row", s), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.15 }, at + 0.1);
+      if ($(".note", s)) tl.fromTo($(".note", s), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35 }, at + 0.9);
+      if (p.stamp) stampIn($(".stamp", s), at + Math.max(0.8, d * 0.45));
+    },
+  }),
+  // "I have this": where, in your own words, added. {skill, where, words, added}
+  ihave: (p) => ({
+    html: `<div class="card abs" style="left:0;top:40px;width:860px;padding:36px 40px">
+        <div style="display:flex;align-items:center;justify-content:space-between"><span style="font:600 36px var(--sans)">${esc(p.skill)}</span>
+          <span style="border:3px solid var(--warn);color:var(--warn-ink);border-radius:12px;padding:10px 18px;font:600 26px var(--sans)">I have this</span></div>
+        <div class="form" style="margin-top:26px;opacity:0">
+          <div style="font:400 26px var(--sans);color:var(--muted)">Where did you use it?</div>
+          <div style="margin-top:10px;border:2px solid var(--line);border-radius:12px;padding:14px 18px;font:500 28px var(--sans)">${esc(p.where)} ▾</div>
+          <div style="font:400 26px var(--sans);color:var(--muted);margin-top:18px">In your own words, what did you do?</div>
+          <div class="said" style="margin-top:10px;border:2px solid var(--accent);border-radius:12px;padding:14px 18px;font:400 30px/1.4 var(--sans);min-height:90px">${[...p.words].map((c) => `<span class="c" style="opacity:0">${esc(c)}</span>`).join("")}</div></div></div>
+      <div class="added abs" style="left:0;right:0;top:650px;display:flex;justify-content:center;opacity:0"><span class="chip ok" style="font-size:32px;padding:16px 28px">${esc(p.added || `✓ ${p.skill} · added in your words`)}</span></div>
+      <div class="tap"></div>`,
+    anim(s, at, d) {
+      const cs = $$(".said .c", s);
+      tapAt(s, 760, 94, at + 0.2);
+      tl.fromTo($(".form", s), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.3 }, at + 0.35);
+      tl.to(cs, { opacity: 1, duration: 0.01, stagger: Math.min(0.03, Math.max(0.008, (d - 1.4) / cs.length)) }, at + 0.6);
+      tl.fromTo($(".added", s), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.35, ease: "back.out(2)" }, at + d - 0.75);
+    },
+  }),
+  // ✕ and ✓, one under the other. {bad:[who, text], good:[who, text]}
+  compare: (p) => ({
+    html: `<div class="card abs r1" style="left:0;top:120px;width:860px;padding:34px 40px;display:flex;align-items:center;justify-content:space-between">
+        <div><div class="who">${esc(p.bad[0])}</div><div style="font:600 40px var(--sans)">${esc(p.bad[1])}</div></div><div class="x" style="font:700 70px var(--sans);color:var(--red)">✕</div></div>
+      <div class="card abs r2" style="left:0;top:380px;width:860px;padding:34px 40px;display:flex;align-items:center;justify-content:space-between;outline:4px solid var(--accent)">
+        <div><div class="who" style="color:var(--accent);display:flex;align-items:center;gap:10px">${p.good[0] === "QuickFit CV" ? logo(30) : ""}${esc(p.good[0])}</div><div style="font:600 40px var(--sans)">${esc(p.good[1])}</div></div><div class="ok" style="font:700 70px var(--sans);color:var(--accent)">✓</div></div>`,
+    anim(s, at, d) {
+      tl.fromTo($(".r1", s), { opacity: 0, x: -40 }, { opacity: 1, x: 0, duration: 0.35 }, at);
+      tl.fromTo($(".x", s), { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, at + 0.4);
+      tl.fromTo($(".r2", s), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.35 }, at + Math.min(1.0, d * 0.35));
+      tl.fromTo($(".ok", s), { opacity: 0, scale: 2 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, at + Math.min(1.4, d * 0.5));
+    },
+  }),
+  // A question and an answer. {q, qWho, a, aWho, stamp}
+  chat: (p) => ({
+    html: `<div class="card bubble q abs" style="left:0;top:60px;width:740px;border-bottom-left-radius:8px"><div class="who">${esc(p.qWho || "Interviewer")}</div>${esc(p.q)}</div>
+      <div class="bubble a abs" style="left:300px;top:${p.q.length > 60 ? 400 : 360}px;width:560px;background:var(--accent-soft);color:var(--accent-ink);border-bottom-right-radius:8px"><div class="who" style="color:var(--accent)">${esc(p.aWho || "You")}</div>${esc(p.a || "… Uh…")}</div>
+      ${p.stamp ? `<div class="stamp abs" style="left:220px;top:640px">${esc(p.stamp)}</div>` : ""}`,
+    anim(s, at, d) {
+      tl.fromTo($(".q", s), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, at);
+      tl.fromTo($(".a", s), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out" }, at + Math.min(0.9, d * 0.3));
+      if (p.stamp) stampIn($(".stamp", s), at + Math.max(1.6, d - 1.0));
+    },
+  }),
+  // One number struck out, another in its place. {from, fromLabel, to, toLabel}
+  strike: (p) => ({
+    html: `<div style="position:absolute;left:40px;top:120px;right:0">
+        <div style="position:relative;display:inline-block"><div style="font:600 110px/1 var(--mono);letter-spacing:-3px;color:var(--muted)">${esc(p.from)}</div>
+          <div class="strike abs" style="left:-8px;right:-8px;top:52%;height:8px;background:var(--ink);border-radius:4px;transform-origin:left;transform:scaleX(0)"></div></div>
+        <div style="font:400 30px var(--sans);color:var(--muted);margin:14px 0 50px">${esc(p.fromLabel || "")}</div>
+        <div class="fast" style="font:600 170px/1 var(--mono);letter-spacing:-6px;color:var(--accent);white-space:nowrap;opacity:0">${esc(p.to)}</div>
+        <div class="with" style="display:flex;align-items:center;gap:14px;margin-top:18px;font:400 34px var(--sans);color:var(--muted);opacity:0">${esc(p.toLabel || "with")} ${p.brand === false ? "" : `${logo(44)}<span style="font-family:var(--serif);font-size:46px;color:var(--ink)">QuickFit CV</span>`}</div></div>`,
+    anim(s, at) {
+      tl.to($(".strike", s), { scaleX: 1, duration: 0.3, ease: "power2.inOut" }, at + 0.15);
+      tl.fromTo($(".fast", s), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }, at + 0.4);
+      tl.fromTo($(".with", s), { opacity: 0 }, { opacity: 1, duration: 0.4 }, at + 0.7);
+    },
+  }),
+  // Rows that tick (or fail) one by one. {title, items:[[text, "pass"|"fail"|"warn"]], footer}
+  checklist: (p) => ({
+    html: `<div class="card abs" style="left:0;top:20px;width:860px;padding:36px 40px">
+        ${p.title ? `<div class="label" style="margin-bottom:14px">${esc(p.title)}</div>` : ""}
+        ${p.items.map(([t, st]) => `<div class="it" style="display:flex;align-items:center;gap:24px;padding:18px 0;border-top:2px solid var(--sunken)"><span class="ico" style="background:${st === "fail" ? "var(--red)" : st === "warn" ? "var(--warn)" : "var(--accent)"}">${st === "fail" ? "✕" : st === "warn" ? "!" : "✓"}</span><span style="font:500 34px/1.25 var(--sans)">${md(t)}</span></div>`).join("")}
+        ${p.footer ? `<div class="foot" style="margin-top:22px;font:600 30px var(--sans);color:var(--accent)">${esc(p.footer)}</div>` : ""}</div>`,
+    anim(s, at, d) {
+      const its = $$(".it", s);
+      tl.fromTo(its, { opacity: 0, x: 30 }, { opacity: 1, x: 0, duration: 0.25, stagger: Math.min(0.45, (d * 0.6) / its.length) }, at + 0.1);
+      tl.fromTo($$(".ico", s), { scale: 0 }, { scale: 1, duration: 0.25, ease: "back.out(3)", stagger: Math.min(0.45, (d * 0.6) / its.length) }, at + 0.25);
+      if ($(".foot", s)) tl.fromTo($(".foot", s), { opacity: 0 }, { opacity: 1, duration: 0.3 }, at + d * 0.75);
+    },
+  }),
+  // Two pages become one. {fromLabel, toLabel}
+  pages: (p) => ({
+    html: `<div class="pa abs" style="left:110px;top:60px">${doc("page 1")}</div><div class="pb abs" style="left:465px;top:60px">${doc("page 2")}</div>
+      <div class="lb1 abs" style="left:0;right:0;top:470px;text-align:center;font:600 64px var(--mono);color:var(--warn)">${esc(p.fromLabel || "2 pages")}</div>
+      <div class="lb2 abs" style="left:0;right:0;top:470px;text-align:center;font:600 64px var(--mono);color:var(--accent);opacity:0">${esc(p.toLabel || "1 page ✓")}</div>
+      <div class="abs" style="left:0;right:0;top:620px;display:flex;justify-content:center"><div class="btn">${esc(p.button || "Fit to 1 page")}</div></div><div class="tap"></div>`,
+    anim(s, at, d) {
+      $$(".doc", s).forEach((el) => gsap.set(el, { left: 0, top: 0, scale: 1.25, transformOrigin: "0 0" }));
+      tl.fromTo([$(".pa", s), $(".pb", s)], { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.12 }, at);
+      const t = at + Math.max(0.9, d * 0.4);
+      tapAt(s, 430, 656, t - 0.3);
+      tl.to($(".pb", s), { x: -355, opacity: 0, duration: 0.45, ease: "power2.in" }, t);
+      tl.to($(".pa", s), { x: 178, duration: 0.45, ease: "power2.inOut" }, t);
+      tl.to($(".lb1", s), { opacity: 0, duration: 0.2 }, t + 0.2);
+      tl.fromTo($(".lb2", s), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, t + 0.35);
+    },
+  }),
+  // The four templates, one picked. {names, pick, badge}
+  templates: (p) => ({
+    html: `${(p.names || ["Classic", "Modern", "Compact", "Executive"]).map((n, i) => `<div class="tpl abs" style="left:${40 + (i % 2) * 420}px;top:${(Math.floor(i / 2)) * 340}px;width:360px"><div class="card" style="height:250px;padding:24px;outline:${i === (p.pick ?? 0) ? "5px solid var(--accent)" : "none"}"><div class="bar dark" style="width:${[50, 40, 60, 45][i]}%;margin-left:${i === 0 ? 25 : 0}%"></div><div class="bar" style="width:90%"></div><div class="bar" style="width:70%"></div><div class="bar" style="width:84%"></div><div class="bar" style="width:62%"></div></div><div style="font:600 30px var(--sans);margin-top:12px;text-align:center">${esc(n)}</div></div>`).join("")}
+      <div class="tb2 abs" style="left:0;right:0;top:700px;display:flex;justify-content:center"><span class="chip ok" style="font-size:26px">${esc(p.badge || "✓ One column · real text · standard headings")}</span></div>`,
+    anim(s, at, d) {
+      tl.fromTo($$(".tpl", s), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.12 }, at);
+      tl.fromTo($(".tb2", s), { opacity: 0 }, { opacity: 1, duration: 0.3 }, at + Math.max(0.8, d * 0.5));
+    },
+  }),
+  // What an ATS reads: lines of plain text, or nothing at all. {title, lines, blank, file}
+  atstext: (p) => ({
+    html: `<div class="card abs" style="left:0;top:20px;width:860px;padding:34px 38px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><span class="label">${esc(p.title || "What an ATS reads")}</span><span style="font:500 22px var(--mono);color:var(--muted)">${esc(p.file || "resume.pdf")}</span></div>
+        <div style="margin-top:20px;background:var(--ground);border-radius:14px;padding:22px 26px;min-height:360px;font:500 26px/1.6 var(--mono);white-space:pre-wrap">${p.blank ? `<div class="none" style="color:var(--red);opacity:0">(no text at all)</div>` : (p.lines || []).map((l) => `<div class="tl" style="opacity:0">${md(l)}</div>`).join("")}</div></div>`,
+    anim(s, at, d) {
+      const ls = $$(".tl", s);
+      if (ls.length) tl.to(ls, { opacity: 1, duration: 0.15, stagger: Math.min(0.3, (d * 0.6) / ls.length) }, at + 0.2);
+      if ($(".none", s)) tl.to($(".none", s), { opacity: 1, duration: 0.3 }, at + Math.max(0.8, d * 0.4));
+    },
+  }),
+  // A cover letter being written. {to, lines}
+  letter: (p) => ({
+    html: `<div class="card abs" style="left:0;top:20px;width:860px;padding:40px 44px">
+        <div class="label">cover letter · ${esc(p.job || "Senior Data Analyst, Northwind")}</div>
+        <div style="margin-top:22px;font:400 31px/1.5 var(--sans)">${esc(p.to || "Dear Hiring Manager,")}</div>
+        ${(p.lines || []).map((l) => `<div class="ll" style="margin-top:14px;font:400 31px/1.5 var(--sans);opacity:0">${md(l)}</div>`).join("")}</div>`,
+    anim(s, at, d) {
+      const ls = $$(".ll", s);
+      tl.fromTo(ls, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, stagger: Math.min(0.9, (d * 0.6) / ls.length) }, at + 0.3);
+      tl.fromTo($$(".ll mark", s), { backgroundColor: "rgba(255,224,138,0)" }, { backgroundColor: "rgba(255,224,138,1)", duration: 0.3, stagger: 0.3 }, at + d * 0.6);
+    },
+  }),
+  // Numbered steps. {items}
+  steps: (p) => ({
+    html: `<div class="abs" style="left:0;top:60px;width:860px">${p.items.map((t, i) => `<div class="card st" style="display:flex;align-items:center;gap:28px;padding:30px 36px;margin-bottom:26px"><span style="font:600 56px var(--mono);color:var(--accent);width:60px">${i + 1}</span><span style="font:600 40px/1.2 var(--sans)">${md(t)}</span></div>`).join("")}</div>`,
+    anim(s, at, d) {
+      tl.fromTo($$(".st", s), { opacity: 0, x: 40 }, { opacity: 1, x: 0, duration: 0.3, stagger: Math.min(0.7, (d * 0.6) / p.items.length) }, at + 0.1);
+    },
+  }),
+  // One big statement. {text, sub}
+  text: (p) => ({
+    html: `<div class="abs" style="left:20px;right:20px;top:120px"><div class="tt" style="font:600 76px/1.12 var(--sans);letter-spacing:-2px">${md(p.text)}</div>${p.sub ? `<div class="ts" style="font:500 38px/1.3 var(--sans);color:var(--muted);margin-top:30px">${md(p.sub)}</div>` : ""}</div>`,
+    anim(s, at, d) {
+      tl.fromTo($(".tt", s), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4 }, at + 0.1);
+      if ($(".ts", s)) tl.fromTo($(".ts", s), { opacity: 0 }, { opacity: 1, duration: 0.4 }, at + d * 0.5);
+    },
+  }),
+  // The end card. {line1, line2}
+  end: (p) => ({
+    full: `<div class="abs" style="inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:34px">
+      <div class="brand" style="display:flex;align-items:center;gap:26px">${logo(V ? 104 : 130)}<span style="font:${V ? 120 : 150}px/1 var(--serif);letter-spacing:-2px">QuickFit CV</span></div>
+      <div class="tag" style="font:500 ${V ? 52 : 56}px/1.2 var(--sans);letter-spacing:-1px"><span>${esc(p.line1 || "One resume per job,")}</span><br><span style="color:var(--muted)">${esc(p.line2 || "in your own words.")}</span></div>
+      <div class="url btn" style="height:86px;font-size:36px;padding:0 44px;border-radius:999px">quickfitcv.com</div></div>`,
+    anim(s, at) {
+      tl.fromTo($(".brand", s), { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }, at);
+      tl.fromTo($$(".tag span", s), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.35 }, at + 0.5);
+      tl.fromTo($(".url", s), { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" }, at + 1.2);
+    },
+  }),
+};
+
+// ---------------------------------------------------------------------------------------
+// Build the scenes, then time them: each lasts its voice plus a little air (and "hold");
+// the first is on screen from frame 0, because that frame is the thumbnail.
+const scenes = SCRIPT.scenes.map((sc) => {
+  const b = B[sc.type](sc);
+  const el = document.createElement("section");
+  el.className = "scene"; el.id = sc.id;
+  el.innerHTML = b.full || `${sc.say ? `<div class="copy" data-say="${esc(sc.say)}"></div>` : ""}<div class="vis">${b.html}</div>`;
+  stage.appendChild(el);
+  return { sc, b, el };
+});
+$$(".copy").forEach((el) => {
+  el.innerHTML = el.dataset.say.split("|").map((line, i) =>
+    `<span class="${i ? "l2" : "l1"}">${line.split(" ").map((w) => `<span class="w">${w}</span>`).join(" ")}</span>`).join("");
+});
+const TIMING = window.__TIMING || SCRIPT.scenes.map((s) => ({ id: s.id, voice: 2.6, hold: s.hold || 0 }));
+const AIR = 0.3, HOLD = 1.4;
+const starts = {};
+let t = 0;
+// Each type needs a minimum time on screen for its animation to read, however short the line.
+const MIN = { pages: 2.8, checklist: 2.8, rewrite: 2.9, paste: 2.5, ihave: 3.9, job: 3.0, atstext: 2.6, letter: 3.8, steps: 2.8, templates: 2.5, compare: 2.5, chat: 2.7, missing: 2.7, stat: 2.2, strike: 2.0, resume: 2.3, text: 1.9, end: 2.0 };
+const typeOf = (id) => (SCRIPT.scenes.find((s) => s.id === id) || {}).type;
+TIMING.forEach((x) => { x.hold = Math.max(x.hold || 0, (MIN[typeOf(x.id)] || 0) - x.voice - AIR); });
+TIMING.forEach((x) => { starts[x.id] = t; t += x.voice + AIR + (x.hold || 0) + (x === TIMING.at(-1) ? HOLD : 0); });
+const END = t;
+const ends = {};
+TIMING.forEach((x, i) => (ends[x.id] = i + 1 < TIMING.length ? starts[TIMING[i + 1].id] : END));
+scenes.forEach(({ sc, b, el }, i) => {
+  const at = starts[sc.id], d = ends[sc.id] - at - (i === scenes.length - 1 ? HOLD : 0);
+  if (i === 0) tl.set(el, { opacity: 1 }, 0);
+  else tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: "power1.out" }, at - 0.1);
+  if (i < scenes.length - 1) tl.to(el, { opacity: 0, duration: 0.2, ease: "power1.in" }, ends[sc.id] - 0.1);
+  const words = $$(".w", el);
+  if (words.length) {
+    if (i === 0) tl.set($$(".l1 .w", el), { opacity: 1 }, 0);
+    const later = i === 0 ? $$(".l2 .w", el) : words;
+    const span = Math.max(0.3, TIMING[i].voice * 0.55);
+    if (later.length) tl.fromTo(later, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", stagger: span / later.length }, at + (i === 0 ? 0.9 : 0.05));
+  }
+  const vis = $(".vis", el);
+  if (vis && i) tl.fromTo(vis, { y: 30 }, { y: 0, duration: 0.6, ease: "power3.out" }, at - 0.1);
+  b.anim(el, at, d);
+});
+
+window.DURATION = END;
+window.STARTS = starts;
+window.seek = (s) => { tl.seek(s, false); };
+
+// Poster: the headline, one scene's visual as it ends, the name.
+if (posterMode) {
+  const P = SCRIPT.poster || {};
+  const pick = scenes.find((x) => x.sc.id === P.scene) || scenes[0];
+  tl.seek(ends[pick.sc.id] - 0.35, false);
+  const poster = $("#poster");
+  poster.className = posterMode;
+  poster.style.display = "flex";
+  stage.style.display = "none";
+  const [h1, h2, red] = P.head || [];
+  poster.innerHTML = `<div class="head"><span>${esc(h1 || "")}</span>${h2 ? `<span class="l2">${esc(h2)}</span>` : ""}${red ? `<span class="red">${esc(red)}</span>` : ""}</div><div class="holder"></div><div class="brand">${logo(60)}QuickFit CV</div>`;
+  const vis = $(".vis", pick.el);
+  $(".holder", poster).appendChild(vis);
+  gsap.set(vis, { y: 0 });
+  // Fit the holder to what the visual actually covers.
+  requestAnimationFrame(() => {
+    const top = vis.getBoundingClientRect().top;
+    const bottom = Math.max(...$$("*", vis).filter((e) => getComputedStyle(e).opacity !== "0").map((e) => e.getBoundingClientRect().bottom));
+    $(".holder", poster).style.height = Math.max(200, bottom - top) + "px";
+  });
+}
+document.fonts.ready.then(() => { if (!posterMode) tl.seek(0, false); requestAnimationFrame(() => (window.READY = true)); });
+if (!window.__TIMING && !posterMode && !params.has("still")) tl.play();
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "vs",
+      "type": "compare",
+      "say": "AI rewrote|everything?",
+      "bad": [
+        "Most AI resume tools",
+        "Rewrite every line"
+      ],
+      "good": [
+        "QuickFit CV",
+        "Rewrites only what you pick"
+      ],
+      "en": "[frustrated] Hate it when AI rewrites your whole resume, and it stops sounding like you?"
+    },
+    {
+      "id": "pick",
+      "type": "rewrite",
+      "say": "You pick the lines.|The rest is yours.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "en": "In QuickFit CV, you pick the lines. Everything else stays in your words."
+    },
+    {
+      "id": "undo",
+      "type": "checklist",
+      "say": "Don't like it?|Use the original.",
+      "items": [
+        [
+          "Rewrite one line at a time",
+          "pass"
+        ],
+        [
+          "See the original",
+          "pass"
+        ],
+        [
+          "Use original, in one click",
+          "pass"
+        ]
+      ],
+      "en": "Don't like a rewrite? One click, back to the original."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Your resume.",
+      "line2": "Still sounds like you.",
+      "en": "[excited] QuickFit CV. Still sounds like you. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "AI rewrote",
+      "your whole resume?",
+      "Pick the lines instead."
+    ],
+    "scene": "pick"
+  },
+  "captions": {
+    "ig_en": "Asked AI to \"improve\" your resume and now it doesn't sound like you at all? 😐\n\nQuickFit CV only rewrites the lines you pick:\n→ everything else stays in your words\n→ see the original next to the rewrite\n→ don't like it? Use the original in one click\n\nTry it free → link in bio\n💬 What's the worst AI phrase you've seen on a resume? 👇",
+    "ig_hi": "AI se resume \"improve\" karwaya aur ab woh aap jaisa lagta hi nahi? 😐\n\nQuickFit CV sirf wahi lines rewrite karta hai jo aap chuno. Baaki aapke shabdon mein. Pasand nahi aaya? Ek click mein original. Free try karo → link in bio",
+    "linkedin": "Recruiters can usually tell when an entire resume was rewritten by AI: every line has the same rhythm and the same buzzwords.\n\nQuickFit CV works line by line instead. You choose which lines to rewrite for a job; everything else stays exactly as you wrote it. Each rewrite shows the original beside it, and you can go back in one click.\n\nYour resume should still sound like you.\n\nFree to try: https://quickfitcv.com\n\n#resume #jobsearch #ai #careers",
+    "x": "AI rewrote your whole resume and now it doesn't sound like you?\n\nQuickFit CV rewrites only the lines you pick. The rest stays in your words, and the original is one click away.\n\nhttps://quickfitcv.com",
+    "comment": "Worst AI resume phrase you've seen? I'll start: \"spearheaded synergies\" 👇"
+  }
+}

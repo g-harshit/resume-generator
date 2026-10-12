@@ -1,0 +1,134 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "late",
+      "type": "text",
+      "text": "Applications close at **midnight**.",
+      "sub": "It's 11:30 PM.",
+      "en": "[urgent] The application closes at midnight. It's eleven thirty."
+    },
+    {
+      "id": "paste",
+      "type": "paste",
+      "say": "Paste the job.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "en": "Paste the job."
+    },
+    {
+      "id": "rewrite",
+      "type": "rewrite",
+      "say": "Rewrite what|matters.",
+      "before": "Wrote SQL queries on a 200M-row orders table to find why repeat purchases dropped.",
+      "after": "Ran **retention analysis** in SQL on a 200M-row orders table to find why repeat purchases dropped.",
+      "ring": [
+        5,
+        7,
+        11
+      ],
+      "en": "Rewrite the lines that matter."
+    },
+    {
+      "id": "checks",
+      "type": "checklist",
+      "say": "Check. Download.|Apply.",
+      "title": "ATS checks",
+      "items": [
+        [
+          "One column, real text, standard headings",
+          "pass"
+        ],
+        [
+          "Email and phone in the body",
+          "pass"
+        ],
+        [
+          "Every role has dates",
+          "pass"
+        ],
+        [
+          "Fits on one page",
+          "pass"
+        ]
+      ],
+      "en": "[relieved] Check, download, apply. With time to spare."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Tailored before",
+      "line2": "the deadline.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Closes at midnight.",
+      "It's 11:30 PM.",
+      "Still time."
+    ],
+    "scene": "checks"
+  },
+  "captions": {
+    "ig_en": "Applications close at midnight. It's 11:30 PM. 😰\n\n→ paste the job\n→ see what's missing\n→ rewrite the lines that matter\n→ ATS checks, download, apply\n\nTailored, honest, and in before the deadline ✅\nQuickFit CV, link in bio\n💬 Latest you've ever submitted an application? 👇",
+    "ig_hi": "Application midnight ko band. Abhi 11:30 PM 😰\n\nJob paste karo, missing dekho, zaroori lines rewrite karo, download, apply. Deadline se pehle ✅ Link in bio",
+    "linkedin": "We've all been there: you find the perfect role, and it closes tonight.\n\nWith QuickFit CV the whole tailoring pass fits in a few minutes: paste the job, see which of its keywords you're missing, rewrite the lines that matter in its language, check it the way an ATS reads it, and download.\n\nFast doesn't mean made up: it only uses what's in your profile.\n\nhttps://quickfitcv.com\n\n#jobsearch #resume #careers",
+    "x": "Application closes at midnight. It's 11:30 PM.\n\nPaste the job, rewrite the lines that matter, check, download, apply.\n\nTailored before the deadline, with nothing invented.\n\nhttps://quickfitcv.com",
+    "comment": "Latest you've ever hit submit? 🕛👇"
+  }
+}

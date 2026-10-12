@@ -1,0 +1,73 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "four",
+      "type": "templates",
+      "say": "Four templates.|All ATS-safe.",
+      "en": "[excited] Four templates. Every one of them ATS-safe."
+    },
+    {
+      "id": "rules",
+      "type": "checklist",
+      "say": "Built for the ATS.|Made for people.",
+      "items": [
+        [
+          "One column",
+          "pass"
+        ],
+        [
+          "Real, selectable text",
+          "pass"
+        ],
+        [
+          "Standard headings",
+          "pass"
+        ],
+        [
+          "Contact details in the body",
+          "pass"
+        ]
+      ],
+      "en": "One column, real text, standard headings, contact details where an ATS finds them."
+    },
+    {
+      "id": "switch",
+      "type": "text",
+      "text": "Switch **any time**.",
+      "sub": "Your words don't change.",
+      "en": "Switch templates any time. Your words stay the same."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Four looks.",
+      "line2": "All readable.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Four templates.",
+      "All ATS-safe."
+    ],
+    "scene": "four"
+  },
+  "captions": {
+    "ig_en": "Pretty resume templates that an ATS can't read? Not here ✋\n\nQuickFit CV has four templates (Classic, Modern, Compact, Executive), and every one is:\n→ one column\n→ real, selectable text\n→ standard headings\n→ contact details in the body\n\nSwitch any time; your words don't change ✅\nTry it free → link in bio\n💬 Which one's your style? 👇",
+    "ig_hi": "Sundar template jo ATS padh hi na sake? Yahan nahi ✋\n\nQuickFit CV ke 4 templates: Classic, Modern, Compact, Executive. Sab one column, real text, standard headings. Kabhi bhi switch karo. Link in bio",
+    "linkedin": "Resume templates are usually chosen for how they look. Applicant tracking systems care about something else: whether they can read them.\n\nQuickFit CV has four templates (Classic, Modern, Compact and Executive), and every one is one column, real selectable text, standard headings and contact details in the body. We test each template by extracting its text the way an ATS would.\n\nSwitch between them any time; your content doesn't change.\n\nhttps://quickfitcv.com\n\n#resume #ats #design #jobsearch",
+    "x": "4 resume templates: Classic, Modern, Compact, Executive.\n\nEvery one: one column, real text, standard headings, contacts in the body. Switch any time; your words stay the same.\n\nhttps://quickfitcv.com",
+    "comment": "Classic, Modern, Compact or Executive? 👇"
+  }
+}

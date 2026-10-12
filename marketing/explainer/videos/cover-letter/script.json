@@ -1,0 +1,74 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "generic",
+      "type": "text",
+      "text": "\"I am writing to express my **interest**…\"",
+      "sub": "Sounds like every other cover letter.",
+      "en": "[sighs] I am writing to express my interest... Sounds like every other cover letter."
+    },
+    {
+      "id": "letter",
+      "type": "letter",
+      "say": "Your facts.|Their job.",
+      "lines": [
+        "At Brightcart Retail I found why **repeat purchases** dropped; a loyalty change then lifted repeat orders 12%.",
+        "That's the **retention** work your Growth team does, and I'd love to do it with you."
+      ],
+      "en": "QuickFit CV writes it from your real work, for that job."
+    },
+    {
+      "id": "rules",
+      "type": "checklist",
+      "say": "Nothing|made up.",
+      "items": [
+        [
+          "Only facts from your profile",
+          "pass"
+        ],
+        [
+          "Says what your resume can't",
+          "pass"
+        ],
+        [
+          "Edit it, then download",
+          "pass"
+        ]
+      ],
+      "en": "Nothing made up. Edit anything, then download."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "Cover letters",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "Your cover letter",
+      "sounds like",
+      "everyone else's."
+    ],
+    "scene": "letter"
+  },
+  "captions": {
+    "ig_en": "\"I am writing to express my interest in…\" 😴\n\nQuickFit CV writes your cover letter from your real work, for that specific job:\n→ only facts from your profile\n→ says what your resume can't\n→ edit anything, then download\n\nNo generic filler. Nothing invented ✅\nTry it free → link in bio\n💬 Do you still write cover letters? 👇",
+    "ig_hi": "\"I am writing to express my interest…\" 😴\n\nQuickFit CV aapka cover letter aapke real kaam se likhta hai, us job ke liye. Sirf aapke facts, edit karo, download karo. Free try karo → link in bio",
+    "linkedin": "Cover letters have a reputation problem: most of them open the same way and say nothing the resume doesn't.\n\nQuickFit CV writes one from the facts in your profile, for the specific job: the work that matches what the team does, in plain words, with nothing added that isn't true. You edit it, and what you see is exactly what downloads.\n\nFree to try: https://quickfitcv.com\n\nRecruiters: do you read cover letters? Honestly?\n\n#jobsearch #coverletter #careers",
+    "x": "\"I am writing to express my interest…\"\n\nQuickFit CV writes cover letters from your real work, for that specific job. Only facts from your profile; edit, then download.\n\nhttps://quickfitcv.com",
+    "comment": "Recruiters, settle it: do cover letters still get read? 👇"
+  }
+}

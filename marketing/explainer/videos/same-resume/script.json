@@ -1,0 +1,125 @@
+{
+  "provider": "elevenlabs",
+  "voice": "nova",
+  "speed": 1.08,
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  },
+  "instructions": {
+    "en": "Charismatic, energetic social-media creator narrating a punchy product video to a friend. Expressive, varied pitch, never an announcer. Indian English accent."
+  },
+  "scenes": [
+    {
+      "id": "pile",
+      "type": "stat",
+      "say": "50 jobs.|One resume.",
+      "n": 50,
+      "docs": true,
+      "tag": "resume_final_v3.pdf",
+      "label": "applications",
+      "en": "[incredulous] Fifty jobs. One resume. Same file, every time."
+    },
+    {
+      "id": "job",
+      "type": "job",
+      "say": "Each job wants|different skills.",
+      "chips": [
+        [
+          "SQL",
+          1
+        ],
+        [
+          "Python",
+          1
+        ],
+        [
+          "Tableau",
+          1
+        ],
+        [
+          "Looker",
+          0
+        ],
+        [
+          "statistics",
+          1
+        ],
+        [
+          "A/B testing",
+          1
+        ],
+        [
+          "dbt",
+          0
+        ],
+        [
+          "BigQuery",
+          0
+        ],
+        [
+          "cohort analysis",
+          0
+        ],
+        [
+          "retention analysis",
+          0
+        ],
+        [
+          "CLV",
+          0
+        ]
+      ],
+      "score": true,
+      "en": "But each job wants different skills."
+    },
+    {
+      "id": "steps",
+      "type": "steps",
+      "say": "Upload once.|Tailor every time.",
+      "items": [
+        "Upload your resume **once**",
+        "Paste each job",
+        "Get a resume **for that job**"
+      ],
+      "en": "Upload your resume once. Then every job gets its own version."
+    },
+    {
+      "id": "vs",
+      "type": "compare",
+      "say": "One resume|per job.",
+      "bad": [
+        "resume_final_v3.pdf",
+        "Same file for 50 jobs"
+      ],
+      "good": [
+        "QuickFit CV",
+        "A matching resume for each"
+      ],
+      "en": "[confident] Fifty jobs, fifty matching resumes."
+    },
+    {
+      "id": "end",
+      "type": "end",
+      "line1": "One resume per job,",
+      "line2": "in your own words.",
+      "en": "[excited] QuickFit CV. Link in bio!"
+    }
+  ],
+  "poster": {
+    "head": [
+      "50 jobs.",
+      "One resume.",
+      "That's the problem."
+    ],
+    "scene": "job"
+  },
+  "captions": {
+    "ig_en": "resume_final_v3.pdf, sent to 50 jobs 😬\n\nEvery job asks for different skills. One file can't match them all.\n\nQuickFit CV:\n→ upload your resume once\n→ paste each job\n→ get a resume tailored to that job, from your real experience\n\nTry it free → link in bio\n💬 Be honest: how many jobs has your current resume gone to? 👇",
+    "ig_hi": "resume_final_v3.pdf, 50 jobs pe bheja 😬\n\nHar job alag skills maangti hai. Ek file sab match nahi kar sakti.\n\nQuickFit CV: resume ek baar upload karo, har job paste karo, us job ke liye resume pao. Free try karo → link in bio",
+    "linkedin": "Most people tailor their first few applications and then fall back to sending the same file everywhere. It's understandable: tailoring by hand takes time.\n\nBut every job description asks for a different mix of skills, and one resume can only match some of them.\n\nWith QuickFit CV you upload your resume once. It becomes your profile. Then for each job you paste the description and get a version that leads with what that job asks for, built only from your real experience.\n\nFree to try: https://quickfitcv.com\n\n#jobsearch #resume #careers",
+    "x": "resume_final_v3.pdf → 50 jobs.\n\nEach job wants different skills; one file can't match them all.\n\nQuickFit CV: upload once, paste each job, get a resume for that job. Your facts only.\n\nhttps://quickfitcv.com",
+    "comment": "How many jobs has your current resume been sent to? 👇"
+  }
+}
