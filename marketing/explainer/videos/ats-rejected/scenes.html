@@ -237,10 +237,11 @@ const ids = TIMING.map((x) => x.id);
 const tl = gsap.timeline({ paused: true });
 const starts = {};
 let t = 0;
-TIMING.forEach((x) => { starts[x.id] = t; t += x.voice + AIR + (x.id === "end" ? HOLD : 0); });
+// "hold" (script.json): extra seconds on screen after the voice, for something to read.
+TIMING.forEach((x) => { starts[x.id] = t; t += x.voice + AIR + (x.hold || 0) + (x.id === "end" ? HOLD : 0); });
 const END = t;
 const voice = (id) => TIMING.find((x) => x.id === id).voice;
-const dur = (id) => voice(id) + AIR;
+const dur = (id) => voice(id) + AIR + (TIMING.find((x) => x.id === id).hold || 0);
 const counter = (el, from, to, at, d, fmt = (v) => Math.round(v)) => {
   const o = { v: from };
   tl.to(o, { v: to, duration: d, ease: "power2.out", onUpdate: () => (el.textContent = fmt(o.v)) }, at);

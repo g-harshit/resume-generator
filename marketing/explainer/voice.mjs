@@ -62,7 +62,7 @@ async function clip(s) {
   // so scenes are timed to the speech itself.
   const trim = "silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse";
   execFileSync(ffmpeg, ["-y", "-loglevel", "error", "-i", raw, "-filter:a", `${trim},atempo=${script.speed || 1}`, file]);
-  return { id: s.id, text: s[lang], voice: +seconds(file).toFixed(2) };
+  return { id: s.id, text: s[lang], voice: +seconds(file).toFixed(2), hold: s.hold || 0 };
 }
 
 // Two at a time: ElevenLabs' smaller plans refuse more parallel requests.

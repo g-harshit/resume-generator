@@ -1,0 +1,48 @@
+{
+  "voice": "nova",
+  "speed": 1.0,
+  "instructions": {
+    "en": "You are a charismatic, energetic social-media creator narrating a punchy product video to a friend. Be very expressive and human: disbelief, indignation, an exasperated sigh, relief and a satisfied smile where the words call for them. Vary pitch and pace a lot, lean on key words, take short dramatic pauses at the dots. Sound like a real person talking, never like an announcer or audiobook. Indian English accent.",
+    "hi": "You are a charismatic, energetic Indian social-media creator narrating a punchy product video in natural Hinglish to a friend. Very expressive and human: disbelief, indignation, a sigh, relief and a smile where the words call for them. Vary pitch and pace, short dramatic pauses. Never sound like an announcer."
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "en": "[incredulous] Your AI resume says you know Looker... Do you?",
+      "hi": "[incredulous] आपका AI रिज़्यूमे कहता है आपको Looker आता है... सच में?"
+    },
+    {
+      "id": "interview",
+      "en": "[nervous] Then the interviewer asks about it... [sighs] Awkward.",
+      "hi": "[nervous] फिर इंटरव्यूअर उसी के बारे में पूछता है... [sighs] गए काम से।"
+    },
+    {
+      "id": "other",
+      "en": "[confident] QuickFit CV works the other way round.",
+      "hi": "[confident] QuickFit CV बिल्कुल उल्टा काम करता है।",
+      "hold": 0.4
+    },
+    {
+      "id": "gaps",
+      "en": "Skills you don't have? They stay missing. Never added.",
+      "hi": "जो स्किल आपके पास नहीं, वो मिसिंग ही रहती है। कभी ऐड नहीं होती।"
+    },
+    {
+      "id": "ihave",
+      "en": "[warmly] Really have one? Add it, in your own words.",
+      "hi": "[warmly] सच में आती है? तो अपने शब्दों में ऐड करो।",
+      "hold": 1.3
+    },
+    {
+      "id": "end",
+      "en": "[excited] QuickFit CV. Every line, yours. Link in bio!",
+      "hi": "[excited] QuickFit CV. हर लाइन, आपकी। लिंक बायो में!"
+    }
+  ],
+  "provider": "elevenlabs",
+  "elevenlabs": {
+    "voice_id": "TX3LPaxmHKxFdv7VOQHJ",
+    "voice_name": "Liam - Energetic, Social Media Creator",
+    "model": "eleven_v3"
+  }
+}

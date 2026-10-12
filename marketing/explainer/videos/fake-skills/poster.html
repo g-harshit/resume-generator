@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>QuickFit CV poster: fake skills</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ground: #f7f6f2; --surface: #fff; --sunken: #efede6; --line: #dedad0; --ink: #17181c; --muted: #8a8d93;
+    --accent: #2f5d50; --red: #d62828;
+    --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace; --serif: "Instrument Serif", Georgia, serif;
+  }
+  html, body { margin: 0; }
+  #poster { position: relative; overflow: hidden; background: var(--ground); font-family: var(--sans); color: var(--ink); box-sizing: border-box; display: flex; }
+  /* v: Reel cover 1080x1920, everything inside the middle 1080x1350 the profile grid shows.
+     p: feed post 1080x1350. h: thumbnail 1920x1080. */
+  #poster.v { width: 1080px; height: 1920px; flex-direction: column; justify-content: center; align-items: center; gap: 110px; padding: 0 80px; }
+  #poster.p { width: 1080px; height: 1350px; flex-direction: column; justify-content: center; align-items: center; gap: 100px; padding: 0 80px; }
+  #poster.h { width: 1920px; height: 1080px; flex-direction: row; align-items: center; gap: 70px; padding: 0 90px; }
+  .head { font-weight: 600; letter-spacing: -3px; line-height: 1.02; }
+  .v .head, .p .head { font-size: 96px; text-align: center; }
+  .h .head { font-size: 80px; letter-spacing: -2.5px; }
+  .head .l2 { color: var(--muted); display: block; }
+  .head .red { color: var(--red); }
+  .card { background: var(--surface); border-radius: 26px; box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 30px 70px rgba(23,24,28,.14); padding: 40px 44px; box-sizing: border-box; position: relative; width: 860px; flex-shrink: 0; padding-bottom: 96px; }
+  .label { font: 600 22px/1 var(--mono); letter-spacing: 3px; text-transform: uppercase; color: var(--muted); }
+  .chip { display: inline-flex; align-items: center; border-radius: 999px; padding: 12px 22px; font: 600 27px/1 var(--sans); margin: 7px; }
+  .ok { background: #e3ede8; color: #1f463c; border: 3px solid #e3ede8; }
+  .miss { background: #fbebdd; color: #7a3e0e; border: 3px dashed #c66a1e; }
+  .stamp { position: absolute; right: 30px; top: 30px; font: 700 52px/1 var(--mono); letter-spacing: 5px; color: var(--red); border: 7px solid var(--red); border-radius: 14px; padding: 12px 22px; background: rgba(255,255,255,.88); transform: rotate(-7deg); }
+  .score { position: absolute; right: -30px; bottom: -70px; background: var(--surface); border-radius: 22px; box-shadow: 0 24px 60px rgba(23,24,28,.16); padding: 18px 30px 16px; text-align: center; }
+  .score .n { font: 600 92px/1 var(--mono); letter-spacing: -3px; }
+  .brand { display: flex; align-items: center; gap: 16px; font: 58px/1 var(--serif); }
+  .h .brand { position: absolute; left: 90px; bottom: 70px; font-size: 52px; }
+  .h .side { display: flex; flex-direction: column; gap: 40px; flex: 0 0 810px; }
+</style>
+</head>
+<body>
+<div id="poster">
+  <div class="side">
+    <div class="head"><span style="white-space: nowrap">Your AI resume says</span><span class="l2">you know Looker.</span><span class="red" style="display: block">Do you?</span></div>
+  </div>
+  <div class="card">
+    <div class="label">Priya Sharma · Data Analyst</div>
+    <div style="font: 600 32px var(--sans); margin-top: 24px">Skills</div>
+    <div style="margin: 10px -7px 0"><span class="chip" style="background: #efede6">SQL</span><span class="chip" style="background: #efede6">Python</span><span class="chip" style="background: #efede6">Tableau</span><span class="chip" style="background: #efede6">A/B testing</span><span class="chip" style="background: #fff4c2; border: 3px solid #e0b400">Looker</span></div>
+    <div style="font: 600 32px var(--sans); margin-top: 24px">Experience</div>
+    <div style="font: 400 33px/1.45 var(--sans); margin-top: 10px">Built sales dashboards in <span style="background: #ffe08a; border-radius: 6px; padding: 0 4px">Looker</span> and Tableau for 40 store managers.</div>
+    <div style="position: absolute; right: 30px; top: 28px; background: #17181c; color: #fff; border-radius: 999px; padding: 12px 20px; font: 600 24px var(--sans)">✨ Added by AI</div>
+    <div class="score" style="padding: 22px 30px"><div style="font: 600 32px/1.3 var(--sans); text-align: left"><span style="font: 600 20px var(--mono); letter-spacing: 3px; color: var(--muted)">INTERVIEWER</span><br>Walk me through a<br>Looker model you built.</div></div>
+  </div>
+  <div class="brand"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M18 6H40L50 16V54A4 4 0 0 1 46 58H18A4 4 0 0 1 14 54V10A4 4 0 0 1 18 6Z" fill="#2f5d50"/><path d="M40 6V12A4 4 0 0 0 44 16H50Z" fill="#9fc2b5"/><path d="M21 24H37M21 31H43" stroke="#f7f6f2" stroke-width="3.2" stroke-linecap="round" fill="none"/><path d="M22 43L28.5 49.5L42 36" stroke="#f7f6f2" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>QuickFit CV</div>
+</div>
+<script>
+const f = new URLSearchParams(location.search).get("f") || "v";
+const poster = document.getElementById("poster");
+poster.className = f;
+// Portrait layouts stack headline, card and name in one column; the thumbnail keeps the
+// headline beside the card.
+if (f !== "h") { const side = document.querySelector(".side"); side.replaceWith(...side.childNodes); }
+if (f === "h") document.querySelector(".head").style.marginBottom = "120px";
+document.fonts.ready.then(() => (window.READY = true));
+</script>
+</body>
+</html>
