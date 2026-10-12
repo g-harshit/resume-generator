@@ -191,6 +191,11 @@ const FAQ = [
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
+      {/* JSON-LD for search engines, added by Signal. Edit or delete it here. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: "{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"WebPage\",\n  \"name\": \"QuickFit CV \u2014 a resume for every job, in your own words\",\n  \"url\": \"https://quickfitcv.com/\",\n  \"description\": \"QuickFit CV offers a service to create ATS-friendly resumes tailored for specific job applications, allowing users to upload their resumes and optimize them with relevant keywords.\"\n}" }}
+      />
       <header className="sticky top-0 z-10 border-b border-line bg-ground/90 backdrop-blur">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
           <span className="flex items-center gap-2.5 font-display text-3xl">
