@@ -8,7 +8,7 @@ import { LogoMark } from "@/components/logo-mark";
 export const metadata: Metadata = {
   title: { absolute: `${APP_NAME} — a resume for every job, in your own words` },
   description:
-    "Upload your resume once. For each job, see which of its keywords you cover, add them to the lines they fit, rewrite only the lines you pick, and download an ATS-friendly PDF that fills the page.",
+    "Create a job description based resume effortlessly with QuickFit CV. Tailor your resume for every job, ensuring ATS compatibility while using your own words.",
 };
 
 // Every claim on this page is something the product does today. The examples in
