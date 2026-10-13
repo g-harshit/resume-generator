@@ -50,7 +50,13 @@ uses those instead — only for visuals the kit can't do; better to add a type t
 
 ## Making one
 
-1. **The story. 20–25 s in total, never more** — the user rejected a 46 s cut: "people
+1. **The story. 20–25 s in total: at least 20, never more than 25.** The user asked for
+   every video to be at least 20 s, and for a slow end card: set `"minTotal": 21,
+   "endHold": 2.4, "endMin": 5.0` in kit scripts, and end on
+   `"[warmly] That's QuickFit CV... Try it free. Link in bio!"` (voiced once, cached).
+   The current set lives in `videos-v2/` (run the tools with `VIDEOS=videos-v2`); `videos/`
+   holds the first versions, kept as they were.
+   Too short? — the user rejected a 46 s cut: "people
    will leave". About 7 scenes, 1.5–5 s of voice each. The shape that works: a hook that
    is on screen in the very first frame (the pain, with a number: "50 applications. Zero
    callbacks?") → why it happens → the product fixing it → what makes it trustworthy →

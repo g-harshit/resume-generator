@@ -104,6 +104,8 @@ What matters on Instagram:
 
 ## Content calendar — 70 explainer videos
 
+**Use v2:** `marketing/explainer/export-v2/` (every video 21–25 s, slower end card, Instagram + LinkedIn covers, captions). The first versions stay in `export/`.
+
 All in `marketing/explainer/videos/<slug>/`: `captions.md` (Instagram EN + Hinglish, LinkedIn,
 X, pinned comment), and in `output/` the 9:16 MP4 (Reels), 16:9 MP4 (LinkedIn, X) and three
 posters. Five a week for 14 weeks: Instagram every day listed, LinkedIn on Tue and Thu
